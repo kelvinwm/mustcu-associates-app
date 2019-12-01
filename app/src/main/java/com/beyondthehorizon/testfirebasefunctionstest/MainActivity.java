@@ -2,13 +2,19 @@ package com.beyondthehorizon.testfirebasefunctionstest;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
@@ -16,20 +22,26 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 100;
     private FirebaseAuth mAuth;
-    private Button sendData;
-    private EditText sampleMessage;
+    private RecyclerView recyclerView;
     public static final String TAG = "MAINACTIVITY";
+    private String token;
+    private AllUsersAdapter allUsersAdapter;
+    private List<UserProfile> userChat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,9 +49,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
-        sampleMessage = findViewById(R.id.sampleMessage);
-        sendData = findViewById(R.id.sendData);
 
+        recyclerView = findViewById(R.id.recyclerViewUsers);
+        recyclerView.setHasFixedSize(true);
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+
+
+        final FirebaseUser currentUser = mAuth.getCurrentUser();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference myRef = database.getReference();
         FirebaseInstanceId.getInstance().getInstanceId()
@@ -47,29 +67,65 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<InstanceIdResult> task) {
                         if (!task.isSuccessful()) {
-                            //To do//
+                            //To do
                             return;
                         }
-                        FirebaseUser currentUser = mAuth.getCurrentUser();
                         // Get the Instance ID token//
-                        String token = task.getResult().getToken();
+                        token = task.getResult().getToken();
                         Log.d(TAG, token);
-                        myRef.child("UserTokens").child(currentUser.getUid()).setValue(token);
+                        myRef.child("Users").child("UserProfile").child(currentUser.getUid())
+                                .child("userToken").setValue(token);
 
                     }
                 });
-        // Write a message to the database
 
-
-        sendData.setOnClickListener(new View.OnClickListener() {
+        myRef.child("Users").child("UserProfile").child(currentUser.getUid())
+                .child("userName").addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                String message = sampleMessage.getText().toString().trim();
-                if (message.isEmpty()) {
-                    return;
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if (!(dataSnapshot.exists())) {
+                    startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
                 }
-                myRef.child("UserChats").setValue(message);
-                sampleMessage.setText("");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+//        // Create a group
+//        sendGroup.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String groupName = createGroup.getText().toString().trim();
+//                if (groupName.isEmpty()) {
+//                    return;
+//                }
+//                myRef.child("Rooms").child(groupName).child("UserTokens").child(currentUser.getUid()).setValue(token);
+//                createGroup.setText("");
+//            }
+//        });
+
+        userChat = new ArrayList<>();
+
+        myRef.child("Users").child("UserProfile").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+
+                    UserProfile userProfile = postSnapshot.getValue(UserProfile.class);
+                    userChat.add(userProfile);
+                }
+                allUsersAdapter = new AllUsersAdapter(MainActivity.this,
+                        (ArrayList<UserProfile>) userChat);
+                recyclerView.setAdapter(allUsersAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
             }
         });
     }
@@ -109,8 +165,24 @@ public class MainActivity extends AppCompatActivity {
 
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                finish();
+                final FirebaseUser currentUser = mAuth.getCurrentUser();
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                final DatabaseReference myRef = database.getReference();
+                myRef.child("Users").child("UserProfile").child(currentUser.getUid())
+                        .child("userName").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                        if (!(dataSnapshot.exists())) {
+                            startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
                 // ...
             } else {
                 // Sign in failed. If response is null the user canceled the
@@ -119,5 +191,30 @@ public class MainActivity extends AppCompatActivity {
                 // ...
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.menu_main_setting:
+//                addSomething();
+                return true;
+            case R.id.menu_main_add_group:
+                addGroup();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void addGroup() {
     }
 }
