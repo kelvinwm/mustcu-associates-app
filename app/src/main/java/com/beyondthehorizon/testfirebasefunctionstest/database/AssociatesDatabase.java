@@ -8,13 +8,14 @@ import androidx.room.RoomDatabase;
 
 import com.beyondthehorizon.testfirebasefunctionstest.ChatModel;
 
-@Database(entities = {ChatModel.class}, exportSchema = false, version = 4)
+@Database(entities = {ChatModel.class, RecentChatModel.class}, exportSchema = false, version = 6)
 public abstract class AssociatesDatabase extends RoomDatabase {
 
     private static final String DB_NAME = "chats_db";
     private static AssociatesDatabase instance;
 
     public abstract ChatsDao chatsDao();
+    public abstract LatestChatsDao latestChatsDao();
 
     public static synchronized AssociatesDatabase getInstance(Context context) {
         if (instance == null) {

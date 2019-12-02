@@ -13,9 +13,6 @@ import java.util.List;
 @Dao
 public interface ChatsDao {
 
-//    //GET ALL Chats
-    @Query("SELECT * FROM chats_table")
-    LiveData<List<ChatModel>> allChats();
 
     //GET Specific chats by senderUID
     @Query("SELECT * FROM chats_table WHERE senderUID=:senderUID")
@@ -27,6 +24,7 @@ public interface ChatsDao {
 //
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertChat(ChatModel... chatModels);
+
 //
 //    //GET ALL Specific VISITOR BY ID
 //    @Query("DELETE FROM chats_table WHERE visitorId=:visitorId")

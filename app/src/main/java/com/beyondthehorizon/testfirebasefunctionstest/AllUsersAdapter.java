@@ -14,18 +14,20 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.beyondthehorizon.testfirebasefunctionstest.database.RecentChatModel;
+
 import java.util.ArrayList;
 
 public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyViewHolder>
         implements Filterable {
 
     private LayoutInflater inflater;
-    private ArrayList<UserProfile> providerModelArrayList;
+    private ArrayList<RecentChatModel> providerModelArrayList;
     private Context ctx;
-    private ArrayList<UserProfile> providersListFiltered;
+    private ArrayList<RecentChatModel> providersListFiltered;
     private static final String TAG = "PAPA";
 
-    public AllUsersAdapter(Context ctx, ArrayList<UserProfile> providerModelArrayList) {
+    public AllUsersAdapter(Context ctx, ArrayList<RecentChatModel> providerModelArrayList) {
         inflater = LayoutInflater.from(ctx);
         this.providerModelArrayList = providerModelArrayList;
         this.providersListFiltered = providerModelArrayList;
@@ -43,16 +45,17 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyView
 
     @Override
     public void onBindViewHolder(AllUsersAdapter.MyViewHolder holder, int position) {
-        final UserProfile provider = providerModelArrayList.get(position);
+        final RecentChatModel provider = providerModelArrayList.get(position);
 //        holder.providePhoto.setImageResource(provider.getImage_drawable());
-        holder.providerName.setText(provider.getUserName());
+        holder.providerName.setText(provider.getUsername());
+        holder.userMessage.setText(provider.getMessage());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 Intent providerDetails = new Intent(ctx, ChatActivity.class);
-                providerDetails.putExtra("myFriend", provider.getUserName());
-                providerDetails.putExtra("friendUID", provider.getUserUid());
+                providerDetails.putExtra("myFriend", provider.getUsername());
+                providerDetails.putExtra("friendUID", provider.getSenderUID());
 //                providerDetails.putExtra("Name", provider.getName());
                 ctx.startActivity(providerDetails);
             }
@@ -67,12 +70,13 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyView
     class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView providerName;
-        TextView phone_number;
+        TextView userMessage;
         TextView numberOfComments;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             providerName = (TextView) itemView.findViewById(R.id.userNAme);
+            userMessage = (TextView) itemView.findViewById(R.id.userMessage);
         }
 
     }
@@ -86,13 +90,13 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyView
 
         @Override
         protected FilterResults performFiltering(CharSequence charSequence) {
-            ArrayList<UserProfile> filteredList = new ArrayList<>();
+            ArrayList<RecentChatModel> filteredList = new ArrayList<>();
             if (charSequence == null || charSequence.length() == 0) {
                 filteredList = providersListFiltered;
             } else {
                 String filterPattern = charSequence.toString().toLowerCase().trim();
-                for (UserProfile item : providersListFiltered) {
-                    if (item.getUserName().toLowerCase().contains(filterPattern)) {
+                for (RecentChatModel item : providersListFiltered) {
+                    if (item.getUsername().toLowerCase().contains(filterPattern)) {
                         filteredList.add(item);
                     }
                 }
@@ -104,7 +108,7 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyView
 
         @Override
         protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-            providerModelArrayList = (ArrayList<UserProfile>) filterResults.values;
+            providerModelArrayList = (ArrayList<RecentChatModel>) filterResults.values;
             notifyDataSetChanged();
         }
     };

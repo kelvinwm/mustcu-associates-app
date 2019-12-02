@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData;
 
 import com.beyondthehorizon.testfirebasefunctionstest.ChatModel;
 import com.beyondthehorizon.testfirebasefunctionstest.Repositories.ChatsRepository;
+import com.beyondthehorizon.testfirebasefunctionstest.database.RecentChatModel;
 
 import java.util.List;
 
@@ -20,8 +21,8 @@ public class ChatsViewModel extends AndroidViewModel {
         chatsRepository = new ChatsRepository(application);
     }
 
-    public LiveData<List<ChatModel>> getAllChats() {
-        return chatsRepository.getAllChats();
+    public LiveData<List<RecentChatModel>> getAllLatestChats() {
+        return chatsRepository.getAllLatestChats();
     }
 //
 //    public LiveData<List<Resident>> getAllResidents() {
@@ -42,6 +43,10 @@ public class ChatsViewModel extends AndroidViewModel {
 
     public void insertChat(ChatModel chatModel) {
         chatsRepository.insertChat(chatModel);
+    }
+
+    public void insertLatestChat(RecentChatModel recentChatModel) {
+        chatsRepository.insertLatestChat(recentChatModel);
     }
 
 //    public void insertResident(Resident resident) {

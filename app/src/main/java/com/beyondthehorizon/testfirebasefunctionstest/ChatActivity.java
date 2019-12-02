@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.beyondthehorizon.testfirebasefunctionstest.ViewModels.ChatsViewModel;
+import com.beyondthehorizon.testfirebasefunctionstest.database.RecentChatModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -111,6 +112,13 @@ public class ChatActivity extends AppCompatActivity {
                         intent.getStringExtra("friendUID"),
                         timestamp,
                         currentUser.getUid()));
+
+                //Save locally to view on latest chats
+                chatsViewModel.insertLatestChat(new RecentChatModel(
+                        intent.getStringExtra("friendUID"),
+                        intent.getStringExtra("myFriend"),
+                        message,
+                        timestamp));
                 sampleMessage.setText("");
             }
         });

@@ -9,22 +9,29 @@ import androidx.lifecycle.LiveData;
 import com.beyondthehorizon.testfirebasefunctionstest.ChatModel;
 import com.beyondthehorizon.testfirebasefunctionstest.database.AssociatesDatabase;
 import com.beyondthehorizon.testfirebasefunctionstest.database.ChatsDao;
+import com.beyondthehorizon.testfirebasefunctionstest.database.LatestChatsDao;
+import com.beyondthehorizon.testfirebasefunctionstest.database.RecentChatModel;
 
 import java.util.List;
 
 public class ChatsRepository {
-    LiveData<List<ChatModel>> allChats;
+    LiveData<List<RecentChatModel>> allLatestChats;
     private ChatsDao chatsDao;
+    private LatestChatsDao latestChatsDao;
     private static final String TAG = "Repository";
 
     public ChatsRepository(Application application) {
         AssociatesDatabase residenceDatabase = AssociatesDatabase.getInstance(application);
         chatsDao = residenceDatabase.chatsDao();
-        allChats = chatsDao.allChats();
+        latestChatsDao = residenceDatabase.latestChatsDao();
+        allLatestChats = latestChatsDao.allLatestChats();
     }
 
     public void insertChat(ChatModel chatModel) {
         new InsertChatAsyncTask(chatsDao).execute(chatModel);
+    }
+    public void insertLatestChat(RecentChatModel recentChatModel) {
+        new InsertLatestChat(latestChatsDao).execute(recentChatModel);
     }
 
 //    public void insertResident(Resident resident) {
@@ -36,9 +43,9 @@ public class ChatsRepository {
         return chatsDao.allChatsFromFriend(friendUID);
     }
 
-    //Get all Residents
-    public LiveData<List<ChatModel>> getAllChats() {
-        return allChats;
+    //Get all latest chats
+    public LiveData<List<RecentChatModel>> getAllLatestChats() {
+        return allLatestChats;
     }
 
 //    //Get Specific visitors
@@ -82,8 +89,23 @@ public class ChatsRepository {
 
         @Override
         protected Void doInBackground(ChatModel... chatModels) {
-            Log.d(TAG, "doInBackground: "+chatModels[0].receiverUID);
+            Log.d(TAG, "doInBackground: " + chatModels[0].receiverUID);
             chatsDao.insertChat(chatModels[0]);
+            return null;
+        }
+    }
+    // INSERT Latest CHAT
+    private static class InsertLatestChat extends AsyncTask<RecentChatModel, Void, Void> {
+        private LatestChatsDao latestChatsDao;
+
+        private InsertLatestChat(LatestChatsDao latestChatsDao) {
+            this.latestChatsDao = latestChatsDao;
+        }
+
+        @Override
+        protected Void doInBackground(RecentChatModel... recentChatModels) {
+            Log.d(TAG, "doInBackground: " + recentChatModels[0].getUsername());
+            latestChatsDao.insertLatestChat(recentChatModels[0]);
             return null;
         }
     }

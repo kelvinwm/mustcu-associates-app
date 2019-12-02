@@ -2,6 +2,8 @@ package com.beyondthehorizon.testfirebasefunctionstest;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +18,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import com.beyondthehorizon.testfirebasefunctionstest.ViewModels.ChatsViewModel;
+import com.beyondthehorizon.testfirebasefunctionstest.database.RecentChatModel;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -42,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private String token;
     private AllUsersAdapter allUsersAdapter;
     private List<UserProfile> userChat;
+    private ChatsViewModel chatsViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerViewUsers);
         recyclerView.setHasFixedSize(true);
+        chatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
@@ -110,22 +116,39 @@ public class MainActivity extends AppCompatActivity {
 
         userChat = new ArrayList<>();
 
-        myRef.child("Users").child("UserProfile").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+//        myRef.child("Users").child("UserProfile").addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+//
+//                    UserProfile userProfile = postSnapshot.getValue(UserProfile.class);
+//                    userChat.add(userProfile);
+//                }
+//                allUsersAdapter = new AllUsersAdapter(MainActivity.this,
+//                        (ArrayList<UserProfile>) userChat);
+//                recyclerView.setAdapter(allUsersAdapter);
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
 
-                    UserProfile userProfile = postSnapshot.getValue(UserProfile.class);
-                    userChat.add(userProfile);
+        getAllLatestChats();
+    }
+
+    private void getAllLatestChats() {
+        chatsViewModel.getAllLatestChats().observe(this, new Observer<List<RecentChatModel>>() {
+            @Override
+            public void onChanged(List<RecentChatModel> recentChatModels) {
+                Log.d(TAG, "onChanged: " + recentChatModels.size());
+                if (recentChatModels.size() > 0) {
+
+                    allUsersAdapter = new AllUsersAdapter(MainActivity.this,
+                            (ArrayList<RecentChatModel>) recentChatModels);
+                    recyclerView.setAdapter(allUsersAdapter);
                 }
-                allUsersAdapter = new AllUsersAdapter(MainActivity.this,
-                        (ArrayList<UserProfile>) userChat);
-                recyclerView.setAdapter(allUsersAdapter);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
     }

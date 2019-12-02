@@ -18,6 +18,7 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import com.beyondthehorizon.testfirebasefunctionstest.Repositories.ChatsRepository;
+import com.beyondthehorizon.testfirebasefunctionstest.database.RecentChatModel;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -72,6 +73,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     receiverUID
             ));
 
+            chatsRepository.insertLatestChat(new RecentChatModel(
+                    senderUID,
+                    dataTitle,
+                    dataMessage,
+                    timestamp
+            ));
             Log.d(TAG, "onMessageReceived: " + AppController.getInstance().appStatus);
             if (AppController.getInstance().appStatus) {
                 // Also if you intend on generating your own notifications as a result of a received FCM
