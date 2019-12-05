@@ -133,6 +133,7 @@ public class ChatActivity extends AppCompatActivity {
                 Log.d(TAG, "onChanged: " + chatModels.size());
                 if (chatModels.size() > 0) {
                     chatsAdapter.setProMemberArrayList((ArrayList<ChatModel>) chatModels);
+                    recyclerView.smoothScrollToPosition(chatModels.size() - 1);
                 }
             }
         });

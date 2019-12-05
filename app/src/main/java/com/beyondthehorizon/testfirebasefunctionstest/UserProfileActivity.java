@@ -17,6 +17,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 public class UserProfileActivity extends AppCompatActivity {
 
@@ -24,6 +26,7 @@ public class UserProfileActivity extends AppCompatActivity {
     Button updateName;
     EditText userName;
     private FirebaseAuth mAuth;
+    String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +50,20 @@ public class UserProfileActivity extends AppCompatActivity {
                         .setDisplayName(username)
                         .setPhotoUri(Uri.parse("https://example.com/jane-q-user/profile.jpg"))
                         .build();
+                FirebaseInstanceId.getInstance().getInstanceId()
+                        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                if (!task.isSuccessful()) {
+                                    //To do
+                                    return;
+                                }
+                                // Get the Instance ID token//
+                                token = task.getResult().getToken();
+                                Log.d(TAG, token);
 
+                            }
+                        });
                 currentUser.updateProfile(profileUpdates)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
@@ -56,7 +72,8 @@ public class UserProfileActivity extends AppCompatActivity {
                                     Log.d(TAG, "User profile updated.");
                                     FirebaseDatabase database = FirebaseDatabase.getInstance();
                                     final DatabaseReference myRef = database.getReference();
-                                    UserProfile userProfile = new UserProfile("", currentUser.getUid(), username);
+                                    UserProfile userProfile = new UserProfile(token, currentUser.getUid(),
+                                            username, currentUser.getPhoneNumber());
                                     myRef.child("Users").child("UserProfile").child(currentUser.getUid())
                                             .setValue(userProfile);
                                     finish();

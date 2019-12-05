@@ -24,6 +24,7 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private String token;
     private AllUsersAdapter allUsersAdapter;
     private List<UserProfile> userChat;
+    private List<RecentChatModel> userChat2;
     private ChatsViewModel chatsViewModel;
 
     @Override
@@ -60,10 +62,10 @@ public class MainActivity extends AppCompatActivity {
         chatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setReverseLayout(true);
         linearLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
-
 
         final FirebaseUser currentUser = mAuth.getCurrentUser();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -101,20 +103,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        // Create a group
-//        sendGroup.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                String groupName = createGroup.getText().toString().trim();
-//                if (groupName.isEmpty()) {
-//                    return;
-//                }
-//                myRef.child("Rooms").child(groupName).child("UserTokens").child(currentUser.getUid()).setValue(token);
-//                createGroup.setText("");
-//            }
-//        });
-
         userChat = new ArrayList<>();
+        userChat2 = new ArrayList<>();
 
 //        myRef.child("Users").child("UserProfile").addValueEventListener(new ValueEventListener() {
 //            @Override
@@ -123,9 +113,18 @@ public class MainActivity extends AppCompatActivity {
 //
 //                    UserProfile userProfile = postSnapshot.getValue(UserProfile.class);
 //                    userChat.add(userProfile);
+//                    userChat2.add(new RecentChatModel(
+//                            userProfile.getUserUid(),
+//                            userProfile.getUserName(),
+//                            userProfile.getUserToken(),//shoould be messge
+//                            userProfile.userUid
+//                    ));
 //                }
+////                allUsersAdapter = new AllUsersAdapter(MainActivity.this,
+////                        (ArrayList<UserProfile>) userChat);
+//
 //                allUsersAdapter = new AllUsersAdapter(MainActivity.this,
-//                        (ArrayList<UserProfile>) userChat);
+//                        (ArrayList<RecentChatModel>) userChat2);
 //                recyclerView.setAdapter(allUsersAdapter);
 //            }
 //
@@ -135,6 +134,14 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
+
+        FloatingActionButton fab = findViewById(R.id.findFriendFab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, FindFriendActivity.class));
+            }
+        });
         getAllLatestChats();
     }
 
@@ -151,32 +158,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
-    }
-
-    private void updateUI(FirebaseUser currentUser) {
-        if (currentUser == null) {
-            // Choose authentication providers
-            List<AuthUI.IdpConfig> providers = Arrays.asList(
-                    new AuthUI.IdpConfig.EmailBuilder().build(),
-                    new AuthUI.IdpConfig.PhoneBuilder().build(),
-                    new AuthUI.IdpConfig.GoogleBuilder().build());
-
-            // Create and launch sign-in intent
-            startActivityForResult(
-                    AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .setAvailableProviders(providers)
-                            .build(),
-                    RC_SIGN_IN);
-        }
     }
 
     @Override
@@ -211,7 +192,6 @@ public class MainActivity extends AppCompatActivity {
                 // Sign in failed. If response is null the user canceled the
                 // sign-in flow using the back button. Otherwise check
                 // response.getError().getErrorCode() and handle the error.
-                // ...
             }
         }
     }
@@ -239,5 +219,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addGroup() {
+        startActivity(new Intent(MainActivity.this, AddGroupActivity.class));
     }
 }
