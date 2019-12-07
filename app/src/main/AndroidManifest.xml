@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.beyondthehorizon.associates">
+
+    <application
+        android:name=".AppController"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".chats.CommentsChatActivity"
+            android:parentActivityName=".chats.ChatActivity"></activity>
+        <activity android:name=".chats.AddGroupActivity" />
+        <activity
+            android:name=".contacts.FindFriendActivity"
+            android:label="Find friend"
+            android:parentActivityName=".MainActivity" />
+        <activity android:name=".contacts.ContactsActivity" />
+        <activity
+            android:name=".SplashActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".users.UserProfileActivity" />
+        <activity
+            android:name=".chats.ChatActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <receiver android:name=".util.ActionReceiver" />
+
+        <service android:name=".util.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>

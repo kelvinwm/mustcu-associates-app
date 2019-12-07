@@ -1,0 +1,159 @@
+{
+  "project_info": {
+    "project_number": "131826912635",
+    "firebase_url": "https://groupchat-14b1a.firebaseio.com",
+    "project_id": "groupchat-14b1a",
+    "storage_bucket": "groupchat-14b1a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:131826912635:android:8513eb34686db2450901de",
+        "android_client_info": {
+          "package_name": "com.beyondthehorizon.associates"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "131826912635-80dkrkn2n15c03aoctjdcrauc5uehdas.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.beyondthehorizon.associates",
+            "certificate_hash": "33f56cb4482d99c21145e1524355b5a26393d6ee"
+          }
+        },
+        {
+          "client_id": "131826912635-i7si73jqb88sphgfvgsgus90d0h3satg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkVW7Vx3CGTqFPB7obO7n4bBYgEEUf-48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "131826912635-i7si73jqb88sphgfvgsgus90d0h3satg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:131826912635:android:bd791389c01810860901de",
+        "android_client_info": {
+          "package_name": "com.beyondthehorizon.testfirebasefunctionstest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "131826912635-4i8ms0id1bqeb76uqdjl4ubvi6us0n4h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.beyondthehorizon.testfirebasefunctionstest",
+            "certificate_hash": "0ab2e7b75ace267223b6c5ffe8cec8ca72b78765"
+          }
+        },
+        {
+          "client_id": "131826912635-i7si73jqb88sphgfvgsgus90d0h3satg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkVW7Vx3CGTqFPB7obO7n4bBYgEEUf-48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "131826912635-i7si73jqb88sphgfvgsgus90d0h3satg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:131826912635:android:09b2003be76336830901de",
+        "android_client_info": {
+          "package_name": "com.example.cuassociates"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "131826912635-jfnqa0tvopfg0k8mfenc9uhn3c8v5eeh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.cuassociates",
+            "certificate_hash": "33f56cb4482d99c21145e1524355b5a26393d6ee"
+          }
+        },
+        {
+          "client_id": "131826912635-i7si73jqb88sphgfvgsgus90d0h3satg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkVW7Vx3CGTqFPB7obO7n4bBYgEEUf-48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "131826912635-i7si73jqb88sphgfvgsgus90d0h3satg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:131826912635:android:38916c52e0ea5919",
+        "android_client_info": {
+          "package_name": "com.example.prince.contactsbackup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "131826912635-khmqkmm97cdcq64ejj50li1nvvi82kd7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.prince.contactsbackup",
+            "certificate_hash": "ee70018560ebeb3f9b0ff168b761512ca2b5c0af"
+          }
+        },
+        {
+          "client_id": "131826912635-i7si73jqb88sphgfvgsgus90d0h3satg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkVW7Vx3CGTqFPB7obO7n4bBYgEEUf-48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "131826912635-i7si73jqb88sphgfvgsgus90d0h3satg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

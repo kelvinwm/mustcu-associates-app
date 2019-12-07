@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="2dp"
+    android:elevation="2dp">
+
+    <!--    Their message layout-->
+    <LinearLayout
+        android:id="@+id/their_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/feedbackSenderName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="17sp"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/theFeedBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="message"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/feedBackTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="time"
+                android:textSize="15sp"
+                android:textStyle="italic" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!--    Their message layout-->
+    <LinearLayout
+        android:id="@+id/my_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#5FC92A"
+        android:gravity="end"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/the_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="message"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/messageTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="time"
+            android:textSize="15sp"
+            android:textStyle="italic" />
+    </LinearLayout>
+</FrameLayout>
