@@ -10,50 +10,81 @@ admin.initializeApp(functions.config().firebase);
 
 exports.createNewGroupAndSubscribeUsers = functions.database.ref('/Rooms/{roomId}/{roomName}/UserTokens/{userUID}')
 .onWrite((change, context) => {
-    const groupTokens= change.after.val();
+    const groupTokens= change.after.val().userToken;
     const groupName = context.params.roomName;
 
-			// These registration tokens come from the client FCM SDKs.
-			// var registrationTokens = [groupTokens];
+			return admin.messaging().subscribeToTopic(groupTokens, groupName.replace(/\s+/g, '')).then((response)=> {
+			    const payload = {
+					 	data: {
+				         	message: change.after.val().userPhone,
+				         	groupname:groupName,
+				         	newGroup:"NewGroup",
+						    sender: groupName,
+						    phoneNumber: "000",
+						    senderUID: context.params.roomId,
+						    timestamp: new Date().toLocaleString(),
+						    receiverUID:context.params.roomId,
+						    type:"Room",
+						    imageUrl:"post.imageUrl"
+				         },
+		  				token: groupTokens
 
-			// Subscribe the devices corresponding to the registration tokens to the
-			// topic.
-			return admin.messaging().subscribeToTopic(groupTokens, groupName).then(function(response) {
-			    // See the MessagingTopicManagementResponse reference documentation
-			    // for the contents of response.
-			    // console.log('Successfully subscribed to topic:', response);
-			     return null;
-			  }).catch(function(error) {
+	    			 };
+
+					return admin.messaging().send(payload);
+
+			  }).catch((error)=> {
 			    console.log('Error subscribing to topic:', error);
 			     return null;
 			  });
 
 });
 
-exports.sendUserNotification = functions.database.ref('/Rooms/{roomName}/UserChats/{messageId}')
+exports.sendNotificationToGroup = functions.database.ref('/Rooms/{roomId}/{roomName}/UserChats/{messageId}')
 .onWrite((change, context) => {
 	const groupName = context.params.roomName;
 	const newMessage= change.after.val();
 	 const payload = {
-	 	notification: {
-            title: 'Associates',
-            body: `${groupName}: ${newMessage.message}`
-        },
 	 	data: {
-         title: `${groupName}`,
-         body: `${newMessage.message}`
+         	message: newMessage.message,
+         	groupname:groupName,
+		    sender: newMessage.senderName,
+		    phoneNumber: newMessage.phoneNumber,
+		    senderUID: newMessage.senderUID,
+		    timestamp: newMessage.timestamp,
+		    receiverUID:context.params.roomId, //should be the unique id--- senderId kwa android
+		    type:newMessage.type,
+		    newGroup:"Nop",
+			imageUrl:"post.imageUrl",
+			message_key: newMessage.message_key
          }
      };
-		return admin.messaging().sendToTopic(groupName,payload)
-		    .then(function(response){
-		         console.log('Notification sent successfully:',response);
-		         return null;
-		    }) 
-		    .catch(function(error){
-		         console.log('Notification sent failed:',error);
-		         return null;
-		    });
+		return admin.messaging().sendToTopic(groupName.replace(/\s+/g, ''),payload);
 });
+
+//SEND COMMENT TO GROUP
+exports.sendNotifCommentToGroup = functions.database.ref('/Rooms/{roomId}/{roomName}/UserComments/{parentMessageId}/{commentId}')
+.onWrite((change, context) => {
+	const groupName = context.params.roomName;
+	const newMessage= change.after.val();
+	 const payload = {
+	 	data: {
+         	message: newMessage.message,
+         	groupname:groupName,
+		    sender: newMessage.senderName,
+		    phoneNumber: newMessage.phoneNumber,
+		    senderUID: newMessage.senderUID,
+		    timestamp: newMessage.timestamp,
+		    receiverUID:context.params.roomId, //should be the unique id--- senderId kwa android
+		    type:newMessage.type,
+		    newGroup:"Nop",
+			imageUrl:"post.imageUrl",
+			message_key: newMessage.message_key
+         }
+     };
+		return admin.messaging().sendToTopic(groupName.replace(/\s+/g, ''),payload);
+});
+
 exports.sendOneToOneChat = functions.database.ref('/Users/UserChats/{messageId}')
 .onCreate((snap, context) => {
 	var newMessage = snap.val();
@@ -69,20 +100,15 @@ exports.sendOneToOneChat = functions.database.ref('/Users/UserChats/{messageId}'
 		    phoneNumber: newMessage.phoneNumber,
 		    senderUID: newMessage.senderUID,
 		    timestamp: newMessage.timestamp,
-		    receiverUID:newMessage.receiverUID
+		    receiverUID:newMessage.receiverUID,
+		    type:newMessage.type,
+		    imageUrl:"post.imageUrl",
+		    message_key: newMessage.message_key
+
 		  },
 		  token: post.userToken
 		};
-		return admin.messaging().send(messagePayload)
-			  .then((response) => {
-			    // Response is a message ID string.
-			    console.log('Successfully sent message:', response);
-			    return null;
-			  })
-			  .catch((error) => {
-			    console.log('Error sending message:', error);
-			     return null;
-			  });
+		return admin.messaging().send(messagePayload);
 		    });
   });
 
