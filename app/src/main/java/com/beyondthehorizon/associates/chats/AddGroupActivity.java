@@ -104,6 +104,7 @@ public class AddGroupActivity extends AppCompatActivity {
         createGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                createGroup.setEnabled(false);
                 final String groupName = group_name.getText().toString().trim();
                 if (groupName.isEmpty()) {
                     group_name.setError("Enter a group name");

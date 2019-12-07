@@ -96,9 +96,6 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
                 if (proMember.getType().contains("Single") || proMember.getSenderName().isEmpty()) {
                     return;
                 }
-
-                Toast.makeText(context, "You clicked here " + proMember.getMessage_key(), Toast.LENGTH_SHORT).show();
-//                String messageTime = details + " @ " + provider.getTimeSend();
                 Intent providerDetails = new Intent(context, CommentsChatActivity.class);
                 providerDetails.putExtra("MainQuestionKey", proMember.getMessage_key());
                 providerDetails.putExtra("RoomId", proMember.getSenderUID());

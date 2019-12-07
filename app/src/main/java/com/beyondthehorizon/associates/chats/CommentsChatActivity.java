@@ -138,7 +138,6 @@ public class CommentsChatActivity extends AppCompatActivity {
                 sampleMessage.setText("");
             }
         });
-        Log.d(TAG, "onCreate: " + intent.getStringExtra("MainQuestionKey"));
         getComments(intent.getStringExtra("MainQuestionKey"));
     }
 

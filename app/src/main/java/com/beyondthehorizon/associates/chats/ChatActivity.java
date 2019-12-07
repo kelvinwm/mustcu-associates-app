@@ -18,6 +18,7 @@ import android.widget.ImageButton;
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.adapters.ChatsAdapter;
 import com.beyondthehorizon.associates.database.ChatModel;
+import com.beyondthehorizon.associates.database.CommentsModel;
 import com.beyondthehorizon.associates.database.RecentChatModel;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
@@ -133,6 +134,17 @@ public class ChatActivity extends AppCompatActivity {
                     myRef.child("Rooms").child(intent.getStringExtra("friendUID"))
                             .child(intent.getStringExtra("myFriendName")).child("UserChats")
                             .child(msg_key).setValue(chatModel);
+
+
+                    chatsViewModel.insertCommentt(new CommentsModel(
+                            msg_key,
+                            currentUser.getDisplayName(),
+                            message,
+                            currentUser.getPhoneNumber(),
+                            currentUser.getUid(),
+                            dateToStr,
+                            "Comment"
+                    ));
                 }
 
                 //Save locally
