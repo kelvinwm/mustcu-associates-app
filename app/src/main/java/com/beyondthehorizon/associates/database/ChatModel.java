@@ -16,6 +16,7 @@ public class ChatModel {
     public String senderUID;
     public String timestamp;
     public String receiverUID;
+    public String imageUrl;
     public String type;
 
     @Ignore
@@ -23,7 +24,8 @@ public class ChatModel {
     }
 
     public ChatModel(String message_key, String senderName, String message, String comments,
-                     String phoneNumber, String senderUID, String timestamp, String receiverUID, String type) {
+                     String phoneNumber, String senderUID, String timestamp, String receiverUID,
+                     String imageUrl, String type) {
         this.message_key = message_key;
         this.senderName = senderName;
         this.message = message;
@@ -32,6 +34,7 @@ public class ChatModel {
         this.senderUID = senderUID;
         this.timestamp = timestamp;
         this.receiverUID = receiverUID;
+        this.imageUrl = imageUrl;
         this.type = type;
     }
 
@@ -69,6 +72,10 @@ public class ChatModel {
 
     public String getReceiverUID() {
         return receiverUID;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     public String getType() {

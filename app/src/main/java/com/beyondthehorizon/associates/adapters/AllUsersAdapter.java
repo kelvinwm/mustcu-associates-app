@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.chats.ChatActivity;
 import com.beyondthehorizon.associates.database.RecentChatModel;
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -56,9 +57,10 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyView
         holder.userMessageTime.setText(provider.getTime());
         if (provider.getType().contains("Room")) {
             String imageUrl = "https://previews.123rf.com/images/rawpixel/rawpixel1510/rawpixel151023528/46950216-large-group-of-people-community-teamwork-concept.jpg";
-            Picasso.get().load(imageUrl).fit().placeholder(R.drawable.groupicon).into(holder.imgProfile);
+            Picasso.get().load(imageUrl).fit().placeholder(R.drawable.giconn).into(holder.imgProfile);
         } else {
-            Picasso.get().load("none").fit().placeholder(R.drawable.account).into(holder.imgProfile);
+            Picasso.get().load(provider.getImageUrl()).fit().placeholder(R.drawable.account)
+                    .into(holder.imgProfile);
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

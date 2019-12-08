@@ -48,6 +48,7 @@ public class ChatActivity extends AppCompatActivity {
     private ChatsAdapter chatsAdapter;
     public static final String MY_SHARED_PREF = "shared_prefs";
     SharedPreferences pref;
+    String imageUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +98,21 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
+        myRef.child("Users").child("UserProfile").child(currentUser.getUid())
+                .child("imageUrl").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if ((dataSnapshot.exists())) {
+                    imageUrl = dataSnapshot.getValue().toString();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         // Write a message to the database
         sendData.setOnClickListener(new View.OnClickListener() {
@@ -123,6 +139,7 @@ public class ChatActivity extends AppCompatActivity {
                         currentUser.getUid(),
                         dateToStr,
                         intent.getStringExtra("friendUID"),
+                        imageUrl,
                         intent.getStringExtra("chatTypeFromChatsFragment"));
 
                 if (intent.getStringExtra("chatTypeFromChatsFragment").contains("Single")) {
@@ -157,6 +174,7 @@ public class ChatActivity extends AppCompatActivity {
                         intent.getStringExtra("friendUID"),
                         dateToStr,
                         currentUser.getUid(),
+                        imageUrl,
                         intent.getStringExtra("chatTypeFromChatsFragment")));
 
                 //Save locally to view on latest chats

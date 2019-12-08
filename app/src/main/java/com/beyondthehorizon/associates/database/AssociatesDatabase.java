@@ -6,7 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {ChatModel.class, RecentChatModel.class, CommentsModel.class}, exportSchema = false, version = 3)
+@Database(entities = {ChatModel.class, RecentChatModel.class, CommentsModel.class}, exportSchema = false, version = 4)
 public abstract class AssociatesDatabase extends RoomDatabase {
 
     private static final String DB_NAME = "chats_db";

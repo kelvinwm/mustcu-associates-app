@@ -13,10 +13,12 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.beyondthehorizon.associates.chats.AddGroupActivity;
 import com.beyondthehorizon.associates.chats.AddNewPost;
+import com.beyondthehorizon.associates.database.UserProfile;
 import com.beyondthehorizon.associates.main.ChatsFragment;
 import com.beyondthehorizon.associates.main.DiscussionsFragment;
 import com.beyondthehorizon.associates.main.EventsFragment;
 import com.beyondthehorizon.associates.main.SectionsPagerAdapter;
+import com.beyondthehorizon.associates.users.UserProfileActivity;
 import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity implements AddNewPost.AddNewPostListener {
@@ -59,15 +61,19 @@ public class MainActivity extends AppCompatActivity implements AddNewPost.AddNew
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.menu_main_setting:
-//                addSomething();
-                return true;
             case R.id.menu_main_add_group:
                 addGroup();
+                return true;
+            case R.id.menu_main_setting:
+                viewProfile();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void viewProfile() {
+        startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
     }
 
     private void addGroup() {

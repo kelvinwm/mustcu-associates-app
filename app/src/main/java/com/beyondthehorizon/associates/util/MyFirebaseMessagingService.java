@@ -106,6 +106,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                             receiverUID, //Chats are found using this senderUID(this is senderUID field)
                             timestamp,
                             receiverUID,
+                            imageUrl,
                             type
                     ));
 
@@ -138,6 +139,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         senderUID,
                         timestamp,
                         receiverUID,
+                        imageUrl,
                         type
                 ));
             } else if (type.contains("Comment")) {

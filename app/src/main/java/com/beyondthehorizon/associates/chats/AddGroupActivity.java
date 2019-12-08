@@ -130,6 +130,7 @@ public class AddGroupActivity extends AppCompatActivity {
                         });
                 final ProgressDialog progressDialog = new ProgressDialog(AddGroupActivity.this);
                 progressDialog.setTitle("Creating Group...");
+                progressDialog.setMessage("Please wait....");
                 progressDialog.show();
                 final StorageReference ref = storageReference.child("images/" + UUID.randomUUID().toString());
                 final String myKey = myRef.child("Rooms").push().getKey();
