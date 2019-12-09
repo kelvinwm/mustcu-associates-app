@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements AddNewPost.AddNew
         DatabaseReference userStatus =
                 FirebaseDatabase.getInstance().getReference("Users/UserProfile/" + currentUser.getUid() + "/onlineStatus");
         userStatus.onDisconnect().setValue(ServerValue.TIMESTAMP);
-        userStatus.setValue("Online");
+        userStatus.setValue("online");
     }
 
     @Override

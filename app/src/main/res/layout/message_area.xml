@@ -20,24 +20,24 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-
         <EditText
             android:id="@+id/sampleMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:padding="10dp"
-            android:drawableLeft="@drawable/ic_account"
             android:background="@drawable/sms_texts"
+            android:drawableLeft="@drawable/ic_account"
             android:hint="Type Message"
             android:inputType="textCapSentences|textMultiLine"
-            android:maxHeight="200dp" />
+            android:maxHeight="200dp"
+            android:padding="10dp" />
 
         <ImageButton
             android:id="@+id/sendData"
             android:layout_width="40dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
+            android:layout_height="35dp"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="3dp"
             android:background="@null"
             android:scaleType="fitXY"
             android:src="@drawable/ic_send" />

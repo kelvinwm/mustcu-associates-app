@@ -118,7 +118,7 @@ public class ChatActivity extends AppCompatActivity {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             if (dataSnapshot.exists()) {
-                                if (!(dataSnapshot.getValue().toString().contains("Online") ||
+                                if (!(dataSnapshot.getValue().toString().contains("online") ||
                                         dataSnapshot.getValue().toString().contains("Paused"))) {
 
                                     Date date = new Date(Long.parseLong(dataSnapshot.getValue().toString()));
