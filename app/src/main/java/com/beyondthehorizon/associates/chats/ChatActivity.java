@@ -2,6 +2,7 @@ package com.beyondthehorizon.associates.chats;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -10,10 +11,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.adapters.ChatsAdapter;
@@ -28,13 +32,18 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -49,19 +58,39 @@ public class ChatActivity extends AppCompatActivity {
     public static final String MY_SHARED_PREF = "shared_prefs";
     SharedPreferences pref;
     String imageUrl;
+    private Toolbar contactsToolbar;
+    private TextView userTitle, userOnlineStatus, typingTextView;
+    private CircleImageView profile_img;
+    private FirebaseUser currentUser;
+    private FirebaseDatabase database;
+    private DatabaseReference myRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        contactsToolbar = findViewById(R.id.ctsToolbar);
+        setSupportActionBar(contactsToolbar);
+
         final Intent intent = getIntent();
         assert getSupportActionBar() != null;
-        getSupportActionBar().setTitle(intent.getStringExtra("myFriendName"));
+//        getSupportActionBar().setTitle(intent.getStringExtra("myFriendName"));
+//        getSupportActionBar().setSubtitle("online");
         mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference();
         pref = getApplicationContext().getSharedPreferences(MY_SHARED_PREF, 0); // 0 - for private mode
         SharedPreferences.Editor editor = pref.edit();
         editor.putString("friend_name", intent.getStringExtra("myFriendName"));
         editor.apply();
+
+        typingTextView = findViewById(R.id.typingTextView);
+        userTitle = findViewById(R.id.userTitle);
+        userOnlineStatus = findViewById(R.id.userOnlineStatus);
+        profile_img = findViewById(R.id.imgProfile);
+        userTitle.setText(intent.getStringExtra("myFriendName"));
+
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
@@ -78,9 +107,88 @@ public class ChatActivity extends AppCompatActivity {
 //        sendGroup = findViewById(R.id.sendGroup);
         sendData = findViewById(R.id.sendData);
 
-        final FirebaseUser currentUser = mAuth.getCurrentUser();
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        final DatabaseReference myRef = database.getReference();
+        /**SINGLE CHAT */
+        if (intent.getStringExtra("chatTypeFromChatsFragment").contains("Single")) {
+            Picasso.get().load(intent.getStringExtra("imageUrlFromChatsFragment")).fit().placeholder(R.drawable.account)
+                    .into(profile_img);
+
+            /**GET USER ONLINE STATUS*/
+            myRef.child("Users").child("UserProfile").child(intent.getStringExtra("friendUID")).child("onlineStatus")
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                if (!(dataSnapshot.getValue().toString().contains("Online") ||
+                                        dataSnapshot.getValue().toString().contains("Paused"))) {
+
+                                    Date date = new Date(Long.parseLong(dataSnapshot.getValue().toString()));
+                                    SimpleDateFormat sfd = new SimpleDateFormat("HH:mm a  dd-MM-yyyy");
+                                    userOnlineStatus.setText("Last seen " + sfd.format(date));
+                                    typingTextView.setVisibility(View.GONE);
+                                    return;
+                                }
+                                userOnlineStatus.setText(dataSnapshot.getValue().toString());
+                            } else {
+                                userOnlineStatus.setText("Offline");
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+            /** UPDATE MY TYPING.. STATUS*/
+            sampleMessage.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (s.toString().trim().length() == 0) {
+                        myRef.child("Users").child("UserProfile").child(currentUser.getUid()).child("isTyping").setValue(false);
+                    } else {
+                        myRef.child("Users").child("UserProfile").child(currentUser.getUid()).child("isTyping").setValue(true);
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
+
+            /**GET THEIR TYPING STATUS*/
+            myRef.child("Users").child("UserProfile").child(intent.getStringExtra("friendUID"))
+                    .child("isTyping").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                    if (!dataSnapshot.exists()) {
+                        return;
+                    }
+                    Log.d(TAG, "onDataChange: " + dataSnapshot.getValue().toString());
+                    if (dataSnapshot.getValue().toString().contains("true")) {
+                        typingTextView.setVisibility(View.VISIBLE);
+                    } else {
+                        typingTextView.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+        } else {
+            /**GROUP CHAT*/
+            userOnlineStatus.setText("tap to view group info");
+            Picasso.get().load(imageUrl).fit().placeholder(R.drawable.giconn).into(profile_img);
+        }
 
 
         myRef.child("Users").child("UserProfile").child(currentUser.getUid())
@@ -118,6 +226,7 @@ public class ChatActivity extends AppCompatActivity {
         sendData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 String message = sampleMessage.getText().toString().trim();
                 if (message.isEmpty()) {
                     return;
@@ -125,7 +234,11 @@ public class ChatActivity extends AppCompatActivity {
                 Date today = new Date();
                 SimpleDateFormat format = new SimpleDateFormat("HH:mm a      yyyy-MM-dd");
                 String dateToStr = format.format(today);
-//                long tsLong = System.currentTimeMillis() / 1000;
+
+//                Map<String, String> now = ServerValue.TIMESTAMP;
+//                newCalendar.setTime((Date) now);
+//                String dateToStr = format.format((Date) now);
+//                long tsLong = System.currentTimeMillis() / 1000; 1575906820049
 //                String timestamp = Long.toString(tsLong);
 //                myRef.child("Rooms").child("Family").child("UserChats").push().setValue(new ChatModel(message));
 
@@ -203,5 +316,21 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public void backPressed(View v) {
+        onBackPressed();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        typingTextView.setVisibility(View.GONE);
+        myRef.child("Users").child("UserProfile").child(currentUser.getUid()).child("isTyping").setValue(false);
     }
 }

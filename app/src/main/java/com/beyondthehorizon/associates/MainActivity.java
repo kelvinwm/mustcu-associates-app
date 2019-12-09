@@ -20,9 +20,16 @@ import com.beyondthehorizon.associates.main.EventsFragment;
 import com.beyondthehorizon.associates.main.SectionsPagerAdapter;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 
 public class MainActivity extends AppCompatActivity implements AddNewPost.AddNewPostListener {
     private static final String TAG = "MAIN";
+    private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements AddNewPost.AddNew
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
 
         ViewPager viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(sectionsPagerAdapter);
@@ -42,8 +51,21 @@ public class MainActivity extends AppCompatActivity implements AddNewPost.AddNew
         sectionsPagerAdapter.addFragment(new EventsFragment(), "Events");
         viewPager.setAdapter(sectionsPagerAdapter);
         tabs.setupWithViewPager(viewPager);
+        userOnlineStatus();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        userOnlineStatus();
+    }
+
+    private void userOnlineStatus() {
+        DatabaseReference userStatus =
+                FirebaseDatabase.getInstance().getReference("Users/UserProfile/" + currentUser.getUid() + "/onlineStatus");
+        userStatus.onDisconnect().setValue(ServerValue.TIMESTAMP);
+        userStatus.setValue("Online");
+    }
 
     @Override
     public void addNewPostMessage(String message) {

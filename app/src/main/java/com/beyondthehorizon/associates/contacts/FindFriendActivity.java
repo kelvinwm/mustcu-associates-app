@@ -43,6 +43,7 @@ public class FindFriendActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
         userChat = new ArrayList<>();
+        myRef.keepSynced(true);
         myRef.child("Users").child("UserProfile").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

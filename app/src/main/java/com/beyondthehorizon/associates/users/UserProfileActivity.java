@@ -209,6 +209,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
                                     UserProfile userProfile = new UserProfile(token, currentUser.getUid(),
                                             username, currentUser.getPhoneNumber(), currentUser.getPhotoUrl().toString(),
+                                            "Online",
                                             tagLine.getText().toString());
                                     myRef.child("Users").child("UserProfile").child(currentUser.getUid())
                                             .setValue(userProfile);
