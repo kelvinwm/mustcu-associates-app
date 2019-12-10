@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -18,19 +19,34 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/sms_texts"
         android:orientation="horizontal">
 
-        <EditText
+        <ImageView
+            android:id="@+id/emojiButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:padding="2dp"
+            android:src="@drawable/emoji_people" />
+
+        <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
             android:id="@+id/sampleMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/sms_texts"
-            android:drawableLeft="@drawable/ic_account"
             android:hint="Type Message"
             android:inputType="textCapSentences|textMultiLine"
             android:maxHeight="200dp"
-            android:padding="10dp" />
+            android:padding="10dp"
+            emojicon:emojiconSize="28sp" />
+
+        <!--        <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText-->
+        <!--            android:id="@+id/sampleMessage"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_alignParentBottom="true"-->
+        <!--            emojicon:emojiconSize="28sp" />-->
 
         <ImageButton
             android:id="@+id/sendData"

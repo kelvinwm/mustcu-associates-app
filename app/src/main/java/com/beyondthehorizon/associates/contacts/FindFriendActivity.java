@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.database.UserProfile;
@@ -27,6 +28,7 @@ public class FindFriendActivity extends AppCompatActivity {
     private List<UserProfile> userChat;
     private RecyclerView recyclerView;
     private FindFriendAdapter findFriendAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,10 +49,17 @@ public class FindFriendActivity extends AppCompatActivity {
         myRef.child("Users").child("UserProfile").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                userChat.clear();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-
-                    UserProfile userProfile = postSnapshot.getValue(UserProfile.class);
-                    if(!userProfile.getUserUid().contains(currentUser.getUid())){
+                    UserProfile userProfile = new UserProfile(
+                            postSnapshot.child("userToken").getValue().toString(),
+                            postSnapshot.child("userUid").getValue().toString(),
+                            postSnapshot.child("userName").getValue().toString(),
+                            postSnapshot.child("phoneNumber").getValue().toString(),
+                            postSnapshot.child("imageUrl").getValue().toString(),
+                            postSnapshot.child("tagLine").getValue().toString()
+                    );
+                    if (!userProfile.getUserUid().contains(currentUser.getUid())) {
                         userChat.add(userProfile);
                     }
                 }

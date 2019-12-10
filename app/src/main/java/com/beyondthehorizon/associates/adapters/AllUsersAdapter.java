@@ -12,16 +12,15 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.chats.ChatActivity;
 import com.beyondthehorizon.associates.database.RecentChatModel;
-import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 
 public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyViewHolder>
         implements Filterable {
@@ -85,14 +84,14 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyView
     class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView providerName;
-        TextView userMessage;
+        EmojiconTextView userMessage;
         TextView userMessageTime;
         CircleImageView imgProfile;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             providerName = (TextView) itemView.findViewById(R.id.userNAme);
-            userMessage = (TextView) itemView.findViewById(R.id.userMessage);
+            userMessage = (EmojiconTextView) itemView.findViewById(R.id.userMessage);
             userMessageTime = (TextView) itemView.findViewById(R.id.userMessageTime);
             imgProfile = (CircleImageView) itemView.findViewById(R.id.imgProfile);
         }

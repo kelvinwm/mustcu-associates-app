@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.beyondthehorizon.associates.R;
@@ -44,6 +45,8 @@ import java.util.List;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
+import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -51,7 +54,7 @@ public class ChatActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     //    private Button sendData, sendGroup;
     private ImageButton sendData;
-    private EditText sampleMessage, createGroup;
+    private EmojiconEditText sampleMessage;
     public static final String TAG = "CHATACTIVITY";
     private ChatsViewModel chatsViewModel;
     private ChatsAdapter chatsAdapter;
@@ -64,6 +67,9 @@ public class ChatActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
     private FirebaseDatabase database;
     private DatabaseReference myRef;
+    ImageView emojiImageView;
+    View rootView;
+    EmojIconActions emojIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +97,8 @@ public class ChatActivity extends AppCompatActivity {
         profile_img = findViewById(R.id.imgProfile);
         userTitle.setText(intent.getStringExtra("myFriendName"));
 
+        emojiImageView = (ImageView) findViewById(R.id.emojiButton);
+        rootView = findViewById(R.id.root_view);
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
@@ -102,10 +110,23 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(chatsAdapter);
         sampleMessage = findViewById(R.id.sampleMessage);
-//        createGroup = findViewById(R.id.createGroup);
-//        sampleMessage = findViewById(R.id.sampleMessage);
-//        sendGroup = findViewById(R.id.sendGroup);
         sendData = findViewById(R.id.sendData);
+
+
+        emojIcon = new EmojIconActions(this, rootView, sampleMessage, emojiImageView);
+        emojIcon.ShowEmojIcon();
+        emojIcon.setIconsIds(R.drawable.ic_action_keyboard, R.drawable.smiley);
+        emojIcon.setKeyboardListener(new EmojIconActions.KeyboardListener() {
+            @Override
+            public void onKeyboardOpen() {
+                Log.e(TAG, "Keyboard opened!");
+            }
+
+            @Override
+            public void onKeyboardClose() {
+                Log.e(TAG, "Keyboard closed");
+            }
+        });
 
         /**SINGLE CHAT */
         if (intent.getStringExtra("chatTypeFromChatsFragment").contains("Single")) {

@@ -27,6 +27,8 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 
+import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
+
 public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberViewHolder>
         implements Filterable {
     private ArrayList<ChatModel> proMemberArrayList;
@@ -129,7 +131,8 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
 
     public static class ProMemberViewHolder extends RecyclerView.ViewHolder {
         TextView providerName, numberOfComments;
-        TextView providerMessage, message_time, newGroup;
+        TextView message_time, newGroup;
+        EmojiconTextView providerMessage;
         View mView;
         LinearLayout commentLayout, r2;
 
@@ -137,7 +140,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
             super(itemView);
             mView = itemView;
             providerName = (TextView) itemView.findViewById(R.id.name);
-            providerMessage = (TextView) itemView.findViewById(R.id.message_body);
+            providerMessage = (EmojiconTextView) itemView.findViewById(R.id.message_body);
             message_time = (TextView) itemView.findViewById(R.id.message_time);
             numberOfComments = (TextView) itemView.findViewById(R.id.numberOfComments);
             commentLayout = itemView.findViewById(R.id.commentLayout);

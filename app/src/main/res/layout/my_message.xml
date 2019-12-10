@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:clipToPadding="false"
     android:paddingVertical="10dp"
     android:paddingStart="60dp"
@@ -39,12 +40,12 @@
         android:paddingTop="10dp"
         android:paddingEnd="10dp">
 
-        <TextView
+        <hani.momanii.supernova_emoji_library.Helper.EmojiconTextView
             android:id="@+id/message_body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
-            android:paddingBottom="5dp"
+            emojicon:emojiconSize="28sp"
+            android:padding="5dp"
             android:text="Placeholder message"
             android:textColor="#fff" />
 

@@ -1,25 +1,19 @@
 package com.beyondthehorizon.associates.database;
 
 public class GroupInfo {
-    String userToken;
-    String userRole;
-    String userPhone;
+    String imageUrl;
+    String numberOfMembers;
 
-    public GroupInfo(String userToken, String userRole, String userPhone) {
-        this.userToken = userToken;
-        this.userRole = userRole;
-        this.userPhone = userPhone;
+    public GroupInfo(String imageUrl, String numberOfMembers) {
+        this.imageUrl = imageUrl;
+        this.numberOfMembers = numberOfMembers;
     }
 
-    public String getUserToken() {
-        return userToken;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public String getUserRole() {
-        return userRole;
-    }
-
-    public String getUserPhone() {
-        return userPhone;
+    public String getNumberOfMembers() {
+        return numberOfMembers;
     }
 }

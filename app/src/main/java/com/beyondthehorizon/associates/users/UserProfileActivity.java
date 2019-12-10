@@ -12,7 +12,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -94,9 +97,8 @@ public class UserProfileActivity extends AppCompatActivity {
         changeProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent getGallary = new Intent();
-                getGallary.setAction(Intent.ACTION_GET_CONTENT);
-                getGallary.setType("image/*");
+                Intent getGallary = new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(getGallary, GALLARY_PICK);
             }
         });
@@ -146,7 +148,7 @@ public class UserProfileActivity extends AppCompatActivity {
                                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                                     R2.setBackground(new BitmapDrawable(bitmap));
                                     Picasso.get().load(currentUser.getPhotoUrl().toString())
-                                            .fit().placeholder(R.drawable.ic_account).into(profile_image);
+                                            .fit().placeholder(R.drawable.ic_account).error(R.drawable.ic_broken_image).into(profile_image);
                                 }
 
                                 @Override
@@ -205,11 +207,8 @@ public class UserProfileActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    Log.d(TAG, "User profile updated." + token);
-
                                     UserProfile userProfile = new UserProfile(token, currentUser.getUid(),
                                             username, currentUser.getPhoneNumber(), currentUser.getPhotoUrl().toString(),
-                                            "Online",
                                             tagLine.getText().toString());
                                     myRef.child("Users").child("UserProfile").child(currentUser.getUid())
                                             .setValue(userProfile);
@@ -218,6 +217,25 @@ public class UserProfileActivity extends AppCompatActivity {
                                 }
                             }
                         });
+            }
+        });
+
+
+        userName.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                updateName.setEnabled(true);
+                userName.requestFocus();
+                return true;
+            }
+
+        });
+        tagLine.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                updateName.setEnabled(true);
+                tagLine.requestFocus();
+                return true;
             }
         });
     }

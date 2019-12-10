@@ -6,20 +6,18 @@ public class UserProfile {
     String userName;
     String phoneNumber;
     String imageUrl;
-    String onlineStatus;
     String tagLine;
 
     public UserProfile() {
     }
 
     public UserProfile(String userToken, String userUid, String userName, String phoneNumber,
-                       String imageUrl, String onlineStatus, String tagLine) {
+                       String imageUrl, String tagLine) {
         this.userToken = userToken;
         this.userUid = userUid;
         this.userName = userName;
         this.phoneNumber = phoneNumber;
         this.imageUrl = imageUrl;
-        this.onlineStatus = onlineStatus;
         this.tagLine = tagLine;
     }
 
@@ -41,10 +39,6 @@ public class UserProfile {
 
     public String getImageUrl() {
         return imageUrl;
-    }
-
-    public String getOnlineStatus() {
-        return onlineStatus;
     }
 
     public String getTagLine() {

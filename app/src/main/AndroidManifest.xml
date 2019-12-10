@@ -21,11 +21,14 @@
         <activity
             android:name=".chats.CommentsChatActivity"
             android:parentActivityName=".chats.ChatActivity" />
-        <activity android:name=".chats.AddGroupActivity" />
+        <activity
+            android:name=".chats.AddGroupActivity"
+            android:label="New Group"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".contacts.FindFriendActivity"
             android:label="My contacts"
-            android:parentActivityName=".MainActivity"/>
+            android:parentActivityName=".MainActivity" />
         <activity android:name=".contacts.ContactsActivity" />
         <activity
             android:name=".SplashActivity"
