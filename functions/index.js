@@ -9,14 +9,13 @@ admin.initializeApp(functions.config().firebase);
 // });
 
 exports.createNewGroupAndSubscribeUsers = functions.database.ref('/Rooms/{roomId}/{roomName}/UserTokens/{userUID}')
-.onWrite((change, context) => {
-    const groupTokens= change.after.val().userToken;
+.onCreate((snap, context) => {
+    const groupTokens= snap.val().userToken;
     const groupName = context.params.roomName;
-
 			return admin.messaging().subscribeToTopic(groupTokens, groupName.replace(/\s+/g, '')).then((response)=> {
 			    const payload = {
 					 	data: {
-				         	message: change.after.val().userPhone,
+				         	message: snap.val().userPhone,
 				         	groupname:groupName,
 				         	newGroup:"NewGroup",
 						    sender: groupName,
@@ -25,7 +24,7 @@ exports.createNewGroupAndSubscribeUsers = functions.database.ref('/Rooms/{roomId
 						    timestamp: new Date().toLocaleString(),
 						    receiverUID:context.params.roomId,
 						    type:"Room",
-						    imageUrl:"post.imageUrl"
+						    imageUrl:snap.val().imageUrl
 				         },
 		  				token: groupTokens
 
@@ -36,14 +35,18 @@ exports.createNewGroupAndSubscribeUsers = functions.database.ref('/Rooms/{roomId
 			  }).catch((error)=> {
 			    console.log('Error subscribing to topic:', error);
 			     return null;
-			  });
+		    });
 
 });
 
 exports.sendNotificationToGroup = functions.database.ref('/Rooms/{roomId}/{roomName}/UserChats/{messageId}')
-.onWrite((change, context) => {
+.onCreate((snap, context)  => {
 	const groupName = context.params.roomName;
-	const newMessage= change.after.val();
+	const newMessage= snap.val();
+return snap.ref.parent.parent.child("GroupInfo")
+    .once("value").then(snapp => {
+      const post = snapp.val();
+
 	 const payload = {
 	 	data: {
          	message: newMessage.message,
@@ -55,18 +58,19 @@ exports.sendNotificationToGroup = functions.database.ref('/Rooms/{roomId}/{roomN
 		    receiverUID:context.params.roomId, //should be the unique id--- senderId kwa android
 		    type:newMessage.type,
 		    newGroup:"Nop",
-			imageUrl:"post.imageUrl",
+			imageUrl:post.imageUrl,
 			message_key: newMessage.message_key
          }
      };
 		return admin.messaging().sendToTopic(groupName.replace(/\s+/g, ''),payload);
+	});
 });
 
 //SEND COMMENT TO GROUP
 exports.sendNotifCommentToGroup = functions.database.ref('/Rooms/{roomId}/{roomName}/UserComments/{parentMessageId}/{commentId}')
-.onWrite((change, context) => {
+.onCreate((snap, context) => {
 	const groupName = context.params.roomName;
-	const newMessage= change.after.val();
+	const newMessage= snap.val();
 	 const payload = {
 	 	data: {
          	message: newMessage.message,
@@ -102,7 +106,7 @@ exports.sendOneToOneChat = functions.database.ref('/Users/UserChats/{messageId}'
 		    timestamp: newMessage.timestamp,
 		    receiverUID:newMessage.receiverUID,
 		    type:newMessage.type,
-		    imageUrl:"post.imageUrl",
+		    imageUrl:newMessage.imageUrl,
 		    message_key: newMessage.message_key
 
 		  },
