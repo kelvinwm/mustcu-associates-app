@@ -57,7 +57,7 @@
                 android:orientation="vertical">
 
                 <RelativeLayout
-                    android:id="@+id/R2"
+                    android:id="@+id/R3"
                     android:layout_width="match_parent"
                     android:layout_height="230dp"
                     android:background="@drawable/bible">

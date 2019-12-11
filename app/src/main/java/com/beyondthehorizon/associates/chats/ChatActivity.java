@@ -142,7 +142,6 @@ public class ChatActivity extends AppCompatActivity {
                             if (dataSnapshot.exists()) {
                                 if (!(dataSnapshot.getValue().toString().contains("online") ||
                                         dataSnapshot.getValue().toString().contains("Paused"))) {
-
                                     Date date = new Date(Long.parseLong(dataSnapshot.getValue().toString()));
                                     SimpleDateFormat sfd = new SimpleDateFormat("HH:mm a  dd-MM-yyyy");
                                     userOnlineStatus.setText("last seen " + sfd.format(date));
@@ -210,7 +209,10 @@ public class ChatActivity extends AppCompatActivity {
             contactsToolbar.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startActivity(new Intent(ChatActivity.this, FriendProfileActivity.class));
+                    Intent intent1 = new Intent(ChatActivity.this, FriendProfileActivity.class);
+                    intent1.putExtra("userUid", intent.getStringExtra("friendUID"));
+                    intent1.putExtra("userName", intent.getStringExtra("myFriendName"));
+                    startActivity(intent1);
                 }
             });
 

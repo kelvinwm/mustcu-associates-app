@@ -225,7 +225,6 @@ public class UserProfileActivity extends AppCompatActivity {
         userName.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                updateName.setEnabled(true);
                 userName.requestFocus();
                 return true;
             }
@@ -234,7 +233,6 @@ public class UserProfileActivity extends AppCompatActivity {
         tagLine.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                updateName.setEnabled(true);
                 tagLine.requestFocus();
                 return true;
             }
