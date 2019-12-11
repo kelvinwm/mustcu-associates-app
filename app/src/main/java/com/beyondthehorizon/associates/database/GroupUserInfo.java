@@ -4,11 +4,13 @@ public class GroupUserInfo {
     String userToken;
     String userRole;
     String userPhone;
+    String imageUrl;
 
-    public GroupUserInfo(String userToken, String userRole, String userPhone) {
+    public GroupUserInfo(String userToken, String userRole, String userPhone, String imageUrl) {
         this.userToken = userToken;
         this.userRole = userRole;
         this.userPhone = userPhone;
+        this.imageUrl = imageUrl;
     }
 
     public String getUserToken() {
@@ -21,5 +23,9 @@ public class GroupUserInfo {
 
     public String getUserPhone() {
         return userPhone;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 }

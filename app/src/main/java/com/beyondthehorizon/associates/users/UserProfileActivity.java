@@ -29,6 +29,7 @@ import com.beyondthehorizon.associates.MainActivity;
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.SplashActivity;
 import com.beyondthehorizon.associates.database.UserProfile;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -121,7 +122,7 @@ public class UserProfileActivity extends AppCompatActivity {
             }
         });
         phoneNumber.setText(currentUser.getPhoneNumber());
-        if (!currentUser.getDisplayName().isEmpty()) {
+        if (!(currentUser.getDisplayName() == null)) {
             userName.setText(currentUser.getDisplayName());
         }
         myRef.child("Users").child("UserProfile").child(currentUser.getUid()).child("tagLine")
@@ -148,7 +149,7 @@ public class UserProfileActivity extends AppCompatActivity {
                                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                                     R2.setBackground(new BitmapDrawable(bitmap));
                                     Picasso.get().load(currentUser.getPhotoUrl().toString())
-                                            .fit().placeholder(R.drawable.ic_account).error(R.drawable.ic_broken_image).into(profile_image);
+                                            .fit().placeholder(R.drawable.loader).error(R.drawable.profile_mask).into(profile_image);
                                 }
 
                                 @Override
@@ -271,24 +272,22 @@ public class UserProfileActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    Log.d(TAG, "User profile updated.");
+
                                     filePath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                                         @Override
                                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                                            //  //
                                             filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                                 @Override
                                                 public void onSuccess(Uri uri) {
+                                                    Log.d(TAG, "onSuccess: " + uri.toString());
                                                     myRef.child("Users").child("UserProfile").child(currentUser.getUid())
                                                             .child("imageUrl").setValue(uri.toString());
                                                     profile_image.setImageURI(resultUri);
                                                     progressDialog.dismiss();
                                                 }
                                             });
-
                                         }
                                     });
-
                                 }
                             }
                         });

@@ -25,6 +25,7 @@ import com.beyondthehorizon.associates.adapters.ChatsAdapter;
 import com.beyondthehorizon.associates.database.ChatModel;
 import com.beyondthehorizon.associates.database.CommentsModel;
 import com.beyondthehorizon.associates.database.RecentChatModel;
+import com.beyondthehorizon.associates.users.FriendProfileActivity;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
 import com.google.firebase.auth.FirebaseAuth;
@@ -144,7 +145,7 @@ public class ChatActivity extends AppCompatActivity {
 
                                     Date date = new Date(Long.parseLong(dataSnapshot.getValue().toString()));
                                     SimpleDateFormat sfd = new SimpleDateFormat("HH:mm a  dd-MM-yyyy");
-                                    userOnlineStatus.setText("Last seen " + sfd.format(date));
+                                    userOnlineStatus.setText("last seen " + sfd.format(date));
                                     typingTextView.setVisibility(View.GONE);
                                     return;
                                 }
@@ -202,6 +203,14 @@ public class ChatActivity extends AppCompatActivity {
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
 
+                }
+            });
+
+            /**VIEW FRIEND PROFILE*/
+            contactsToolbar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(ChatActivity.this, FriendProfileActivity.class));
                 }
             });
 

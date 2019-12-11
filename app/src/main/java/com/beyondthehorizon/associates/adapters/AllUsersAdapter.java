@@ -55,8 +55,11 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyView
         holder.userMessage.setText(provider.getMessage());
         holder.userMessageTime.setText(provider.getTime());
         if (provider.getType().contains("Room")) {
-            String imageUrl = "https://previews.123rf.com/images/rawpixel/rawpixel1510/rawpixel151023528/46950216-large-group-of-people-community-teamwork-concept.jpg";
-            Picasso.get().load(imageUrl).fit().placeholder(R.drawable.giconn).into(holder.imgProfile);
+            if (provider.getImageUrl().isEmpty()) {
+                Picasso.get().load("none").fit().placeholder(R.drawable.giconn).into(holder.imgProfile);
+            } else {
+                Picasso.get().load(provider.getImageUrl()).fit().placeholder(R.drawable.giconn).into(holder.imgProfile);
+            }
         } else {
             Picasso.get().load(provider.getImageUrl()).fit().placeholder(R.drawable.account)
                     .into(holder.imgProfile);
@@ -64,7 +67,6 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyView
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 Intent providerDetails = new Intent(ctx, ChatActivity.class);
                 providerDetails.putExtra("myFriendName", provider.getUsername());
                 providerDetails.putExtra("friendUID", provider.getSenderUID());

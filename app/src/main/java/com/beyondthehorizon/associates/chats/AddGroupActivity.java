@@ -25,6 +25,7 @@ import com.beyondthehorizon.associates.database.GroupUserInfo;
 import com.beyondthehorizon.associates.database.RecentChatModel;
 import com.beyondthehorizon.associates.database.UserProfile;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -63,21 +64,23 @@ public class AddGroupActivity extends AppCompatActivity {
     private CircleImageView choose_group_image;
     private EditText group_name;
     private ChatsViewModel chatsViewModel;
-    private Uri filePath;
     private final int PICK_IMAGE_REQUEST = 71;
     private StorageReference storageReference;
-    private Uri resultUri;
+    private Uri resultUri = null;
+    private DatabaseReference myRef;
+    private FirebaseUser currentUser;
+    private  ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_group);
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        final DatabaseReference myRef = database.getReference();
+        myRef = database.getReference();
         storageReference = FirebaseStorage.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         chatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
-        final FirebaseUser currentUser = mAuth.getCurrentUser();
+        currentUser = mAuth.getCurrentUser();
         group_name = findViewById(R.id.group_name);
         recyclerView = findViewById(R.id.myContacts);
         choose_group_image = findViewById(R.id.choose_group_image);
@@ -87,7 +90,9 @@ public class AddGroupActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
 
-        resultUri = Uri.parse(getResources().getResourcePackageName(R.drawable.groupicon));
+        progressDialog = new ProgressDialog(AddGroupActivity.this);
+        progressDialog.setTitle("Creating Group...");
+        progressDialog.setMessage("Please wait....");
 
         userChat = new ArrayList<>();
         myRef.child("Users").child("UserProfile").addValueEventListener(new ValueEventListener() {
@@ -154,67 +159,82 @@ public class AddGroupActivity extends AppCompatActivity {
 
                             }
                         });
-                final ProgressDialog progressDialog = new ProgressDialog(AddGroupActivity.this);
-                progressDialog.setTitle("Creating Group...");
-                progressDialog.setMessage("Please wait....");
+
                 progressDialog.show();
 
-                final StorageReference filePath = storageReference.child("Group Profile Images").child(currentUser.getUid() + ".jpg");
-                Log.d(TAG, "Group profile updated.");
-                filePath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                final String numOfUsers = String.valueOf(userContactsAdapter.allTokens.size() + 1);
+                final String myKey = myRef.child("Rooms").push().getKey();
+                final StorageReference filePath1 = storageReference.child("Group Profile Images").child(myKey + ".jpg");
+
+                myRef.child("Rooms").child(myKey).setValue(groupName).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        //  //
-                        progressDialog.dismiss();
-//                        filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                            @Override
-//                            public void onSuccess(final Uri uri) {
-//
-//                                final String myKey = myRef.child("Rooms").push().getKey();
-//                                myRef.child("Rooms").child(myKey).setValue(groupName).addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                    @Override
-//                                    public void onComplete(@NonNull Task<Void> task) {
-//
-//                                        /**SET ADMIN INFO*/
-//                                        myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
-//                                                .child(currentUser.getUid()).setValue(new GroupUserInfo(token[0],
-//                                                "Admin", currentUser.getPhoneNumber()));
-//
-//                                        /**SET ALL USERS INFO*/
-//                                        for (UserProfile profile : userContactsAdapter.allTokens) {
-//                                            myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
-//                                                    .child(profile.getUserUid()).setValue(new GroupUserInfo(profile.getUserToken(),
-//                                                    "Member", currentUser.getPhoneNumber()));
-//                                        }
-//
-//                                        /**SET GROUP INFO*/
-//                                        myRef.child("Rooms").child(myKey).child(groupName).child("GroupInfo").setValue(new GroupInfo(
-//                                                uri.toString(),
-//                                                userContactsAdapter.allTokens.toString()
-//                                        ));
-//
-//                                        Date today = new Date();
-//                                        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss a      yyyy-MM-dd");
-//                                        String dateToStr = format.format(today);
-//
-//                                        //Save Group locally to view on latest chats
-//                                        chatsViewModel.insertLatestChat(new RecentChatModel(
-//                                                myKey, groupName,
-//                                                "You created a new group " + groupName + " " + dateToStr,
-//                                                dateToStr, "Room", ""));
-//                                        group_name.setText("");
-//                                        finish();
-//                                    }
-//                                });
-//                                progressDialog.dismiss();
-//                            }
-//                        });
+                    public void onComplete(@NonNull Task<Void> task) {
+
+
+                        if (!(resultUri == null)) {
+                            filePath1.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                    filePath1.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Log.d(TAG, "onSuccess: " + uri.toString());
+                                            /**SET ADMIN INFO*/
+                                            myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
+                                                    .child(currentUser.getUid()).setValue(new GroupUserInfo(token[0],
+                                                    "Admin", currentUser.getPhoneNumber(), uri.toString()));
+                                            /**SET ALL USERS INFO*/
+                                            for (UserProfile profile : userContactsAdapter.allTokens) {
+                                                myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
+                                                        .child(profile.getUserUid()).setValue(new GroupUserInfo(profile.getUserToken(),
+                                                        "Member", currentUser.getPhoneNumber(), uri.toString()));
+                                            }
+                                            setGroupInfo(uri.toString(), myKey, groupName, numOfUsers);
+                                        }
+                                    });
+                                }
+                            });
+                        } else {
+                            /**SET GROUP INFO*/
+                            /**SET ADMIN INFO*/
+                            myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
+                                    .child(currentUser.getUid()).setValue(new GroupUserInfo(token[0],
+                                    "Admin", currentUser.getPhoneNumber(), "none"));
+
+                            /**SET ALL USERS INFO*/
+                            for (UserProfile profile : userContactsAdapter.allTokens) {
+                                myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
+                                        .child(profile.getUserUid()).setValue(new GroupUserInfo(profile.getUserToken(),
+                                        "Member", currentUser.getPhoneNumber(), "none"));
+                            }
+
+                            setGroupInfo("None", myKey, groupName, numOfUsers);
+                        }
 
                     }
                 });
 
             }
         });
+    }
+
+    private void setGroupInfo(String imageUri, String myKey, String groupName, String numberOfMembers) {
+
+        /**SET GROUP INFO*/
+        myRef.child("Rooms").child(myKey).child(groupName).child("GroupInfo").setValue(new GroupInfo(
+                imageUri, numberOfMembers));
+        Date today = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss a      yyyy-MM-dd");
+        String dateToStr = format.format(today);
+
+        //Save Group locally to view on latest chats
+        chatsViewModel.insertLatestChat(new RecentChatModel(
+                myKey, groupName,
+                "Created new group " + groupName,
+                dateToStr, "Room", ""));
+        group_name.setText("");
+        progressDialog.dismiss();
+        finish();
     }
 
 
