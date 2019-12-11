@@ -16,6 +16,9 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".users.GroupInfoActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".users.FriendProfileActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

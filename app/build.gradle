@@ -35,6 +35,10 @@ dependencies {
 
     //Emojis
     implementation 'com.github.hani-momanii:SuperNova-Emoji:1.1'
+
+    //shimmer RecyclerView
+    implementation 'com.facebook.shimmer:shimmer:0.4.0'
+    implementation 'com.todkars:shimmer-recyclerview:0.4.0'
     //room
     implementation "androidx.room:room-runtime:$room_version"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'

@@ -26,6 +26,7 @@ import com.beyondthehorizon.associates.database.ChatModel;
 import com.beyondthehorizon.associates.database.CommentsModel;
 import com.beyondthehorizon.associates.database.RecentChatModel;
 import com.beyondthehorizon.associates.users.FriendProfileActivity;
+import com.beyondthehorizon.associates.users.GroupInfoActivity;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
 import com.google.firebase.auth.FirebaseAuth;
@@ -212,6 +213,7 @@ public class ChatActivity extends AppCompatActivity {
                     Intent intent1 = new Intent(ChatActivity.this, FriendProfileActivity.class);
                     intent1.putExtra("userUid", intent.getStringExtra("friendUID"));
                     intent1.putExtra("userName", intent.getStringExtra("myFriendName"));
+                    intent1.putExtra("userImage", intent.getStringExtra("imageUrlFromChatsFragment"));
                     startActivity(intent1);
                 }
             });
@@ -219,7 +221,20 @@ public class ChatActivity extends AppCompatActivity {
         } else {
             /**GROUP CHAT*/
             userOnlineStatus.setText("tap to view group info");
-            Picasso.get().load(imageUrl).fit().placeholder(R.drawable.giconn).into(profile_img);
+            Picasso.get().load(intent.getStringExtra("imageUrlFromChatsFragment"))
+                    .fit().placeholder(R.drawable.giconn).into(profile_img);
+
+            /**VIEW GROUP DETAILS*/
+            contactsToolbar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent1 = new Intent(ChatActivity.this, GroupInfoActivity.class);
+                    intent1.putExtra("groupUid", intent.getStringExtra("friendUID"));
+                    intent1.putExtra("groupName", intent.getStringExtra("myFriendName"));
+                    intent1.putExtra("groupImage", intent.getStringExtra("imageUrlFromChatsFragment"));
+                    startActivity(intent1);
+                }
+            });
         }
 
 

@@ -183,10 +183,8 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
     public int getItemViewType(int position) {
         fuser = FirebaseAuth.getInstance().getCurrentUser();
         if (proMemberArrayList.get(position).getPhoneNumber().equals(fuser.getPhoneNumber())) {
-            Log.d(TAG, "getItemViewType: MINE");
             return 0;
         } else {
-            Log.d(TAG, "getItemViewType: THEIRS");
             return 1;
         }
     }
