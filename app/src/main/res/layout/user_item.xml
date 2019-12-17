@@ -31,6 +31,7 @@
                 android:id="@+id/userNAme"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:hint="user name"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -41,6 +42,7 @@
                 android:ellipsize="end"
                 android:lines="1"
                 android:paddingTop="3dp"
+                android:hint="message"
                 android:paddingEnd="3dp"
                 android:textSize="15sp"
                 emojicon:emojiconSize="28sp" />
@@ -53,7 +55,6 @@
                 android:lines="1"
                 android:paddingTop="3dp"
                 android:paddingEnd="3dp"
-                android:text="00/00/0000 00:00AM"
                 android:textSize="11sp"
                 android:textStyle="italic" />
         </LinearLayout>

@@ -6,7 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".main.ChatsFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
+    <!--    <androidx.recyclerview.widget.RecyclerView-->
+    <!--        android:id="@+id/recyclerViewUsers"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content" />-->
+
+    <com.cooltechworks.views.shimmer.ShimmerRecyclerView
         android:id="@+id/recyclerViewUsers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

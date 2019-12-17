@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.adapters.ChatsAdapter;
@@ -29,6 +30,10 @@ import com.beyondthehorizon.associates.users.FriendProfileActivity;
 import com.beyondthehorizon.associates.users.GroupInfoActivity;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -282,14 +287,7 @@ public class ChatActivity extends AppCompatActivity {
                 SimpleDateFormat format = new SimpleDateFormat("HH:mm a      yyyy-MM-dd");
                 String dateToStr = format.format(today);
 
-//                Map<String, String> now = ServerValue.TIMESTAMP;
-//                newCalendar.setTime((Date) now);
-//                String dateToStr = format.format((Date) now);
-//                long tsLong = System.currentTimeMillis() / 1000; 1575906820049
-//                String timestamp = Long.toString(tsLong);
-//                myRef.child("Rooms").child("Family").child("UserChats").push().setValue(new ChatModel(message));
-
-                String msg_key = myRef.child("Users").child("UserChats").push().getKey();
+                final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
                 ChatModel chatModel = new ChatModel(
                         msg_key,
                         currentUser.getDisplayName(),
@@ -300,17 +298,38 @@ public class ChatActivity extends AppCompatActivity {
                         dateToStr,
                         intent.getStringExtra("friendUID"),
                         imageUrl,
-                        intent.getStringExtra("chatTypeFromChatsFragment"));
+                        intent.getStringExtra("chatTypeFromChatsFragment"),
+                        "sent");
 
                 if (intent.getStringExtra("chatTypeFromChatsFragment").contains("Single")) {
                     /**SEND TO SINGLE CHAT FIRE BASE*/
                     myRef.child("Users").child("UserChats").child(msg_key)
-                            .setValue(chatModel);
+                            .setValue(chatModel).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
+                            } else {
+                                chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                            }
+                        }
+                    });
+
                 } else {
                     /**SEND TO FIRE BASE ROOM CHAT*/
                     myRef.child("Rooms").child(intent.getStringExtra("friendUID"))
                             .child(intent.getStringExtra("myFriendName")).child("UserChats")
-                            .child(msg_key).setValue(chatModel);
+                            .child(msg_key).setValue(chatModel)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
+                                    } else {
+                                        chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                                    }
+                                }
+                            });
 
 
                     chatsViewModel.insertCommentt(new CommentsModel(
@@ -329,13 +348,14 @@ public class ChatActivity extends AppCompatActivity {
                         msg_key,
                         currentUser.getDisplayName(),
                         message,
-                        "Comments",
+                        "0",
                         currentUser.getPhoneNumber(),
                         intent.getStringExtra("friendUID"),
                         dateToStr,
                         currentUser.getUid(),
                         imageUrl,
-                        intent.getStringExtra("chatTypeFromChatsFragment")));
+                        intent.getStringExtra("chatTypeFromChatsFragment"),
+                        "sending..."));
 
                 //Save locally to view on latest chats
                 chatsViewModel.insertLatestChat(new RecentChatModel(

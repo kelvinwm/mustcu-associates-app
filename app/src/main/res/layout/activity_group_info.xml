@@ -52,9 +52,11 @@
             android:scaleType="fitXY"
             android:src="@drawable/biblebg" />
 
-        <androidx.recyclerview.widget.RecyclerView
+        <com.cooltechworks.views.shimmer.ShimmerRecyclerView
             android:id="@+id/groupMemberRecycler"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/cat_l11" />
+
     </LinearLayout>
 </ScrollView>

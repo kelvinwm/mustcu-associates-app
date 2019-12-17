@@ -1,23 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:clipToPadding="false"
-    android:paddingVertical="10dp"
     android:paddingStart="60dp"
     android:paddingEnd="15dp">
-
-    <TextView
-        android:id="@+id/newGroup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#900C0C0C"
-        android:gravity="center"
-        android:hint="New group"
-        android:textColor="#fff"
-        android:textStyle="bold"
-        android:visibility="gone" />
 
     <TextView
         android:id="@+id/name"
@@ -44,10 +32,10 @@
             android:id="@+id/message_body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            emojicon:emojiconSize="28sp"
             android:padding="5dp"
             android:text="Placeholder message"
-            android:textColor="#fff" />
+            android:textColor="#fff"
+            emojicon:emojiconSize="28sp" />
 
         <TextView
             android:id="@+id/message_time"
@@ -88,4 +76,14 @@
                 android:textStyle="italic" />
         </LinearLayout>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/del_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/r2"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="15dp"
+        android:textSize="12sp"
+        android:textStyle="italic" />
 </RelativeLayout>

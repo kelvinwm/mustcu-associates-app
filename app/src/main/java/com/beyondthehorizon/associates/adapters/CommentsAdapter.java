@@ -61,7 +61,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ProMem
         final int numberOfComments;
 
         holder.commentLayout.setVisibility(View.GONE);
-
+        holder.divider.setVisibility(View.GONE);
         holder.message_time.setText(proMember.getTimestamp());
         holder.providerMessage.setText(proMember.getMessage());
 //        }
@@ -97,8 +97,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ProMem
 
     public static class ProMemberViewHolder extends RecyclerView.ViewHolder {
         TextView providerName, numberOfComments;
-        TextView providerMessage, message_time, newGroup;
-        View mView;
+        TextView providerMessage, message_time;
+        View mView, divider;
         LinearLayout commentLayout, r2;
 
         public ProMemberViewHolder(View itemView) {
@@ -109,7 +109,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ProMem
             message_time = (TextView) itemView.findViewById(R.id.message_time);
             numberOfComments = (TextView) itemView.findViewById(R.id.numberOfComments);
             commentLayout = itemView.findViewById(R.id.commentLayout);
-            newGroup = itemView.findViewById(R.id.newGroup);
+            divider = itemView.findViewById(R.id.divider);
             r2 = itemView.findViewById(R.id.r2);
         }
     }

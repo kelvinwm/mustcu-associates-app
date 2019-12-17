@@ -23,6 +23,7 @@ import com.beyondthehorizon.associates.database.RecentChatModel;
 import com.beyondthehorizon.associates.database.UserProfile;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
+import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -45,7 +46,7 @@ import java.util.List;
  */
 public class ChatsFragment extends Fragment {
     private FirebaseAuth mAuth;
-    private RecyclerView recyclerView;
+    private ShimmerRecyclerView recyclerView;
     public static final String TAG = "MAINACTIVITY";
     private String token;
     private AllUsersAdapter allUsersAdapter;
@@ -73,6 +74,7 @@ public class ChatsFragment extends Fragment {
         linearLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+        recyclerView.showShimmerAdapter();
 
 
         final FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -162,10 +164,12 @@ public class ChatsFragment extends Fragment {
             public void onChanged(List<RecentChatModel> recentChatModels) {
                 Log.d(TAG, "onChanged: " + recentChatModels.size());
                 if (recentChatModels.size() > 0) {
-
                     allUsersAdapter = new AllUsersAdapter(getActivity(),
                             (ArrayList<RecentChatModel>) recentChatModels);
                     recyclerView.setAdapter(allUsersAdapter);
+                    recyclerView.hideShimmerAdapter();
+                } else {
+                    recyclerView.hideShimmerAdapter();
                 }
             }
         });

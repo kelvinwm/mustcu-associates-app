@@ -11,9 +11,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.adapters.ChatsAdapter;
@@ -36,6 +38,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
+import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
+
 import static com.beyondthehorizon.associates.chats.ChatActivity.MY_SHARED_PREF;
 
 public class CommentsChatActivity extends AppCompatActivity {
@@ -43,10 +48,13 @@ public class CommentsChatActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     //    private Button sendData, sendGroup;
     private ImageButton sendData;
-    private EditText sampleMessage, createGroup;
+    private EmojiconEditText sampleMessage;
     public static final String TAG = "COMMENTSACTIVITY";
     private ChatsViewModel chatsViewModel;
     private CommentsAdapter commentsAdapter;
+    ImageView emojiImageView;
+    View rootView;
+    EmojIconActions emojIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +62,13 @@ public class CommentsChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_comments_chat);
         assert getSupportActionBar() != null;
         getSupportActionBar().setTitle("Comments");
+
+        // add back arrow to toolbar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
         mAuth = FirebaseAuth.getInstance();
         final Intent intent = getIntent();
         final SharedPreferences pref = getApplicationContext().getSharedPreferences(MY_SHARED_PREF, 0);
@@ -68,15 +83,28 @@ public class CommentsChatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(commentsAdapter);
         sampleMessage = findViewById(R.id.sampleMessage);
-//        createGroup = findViewById(R.id.createGroup);
-//        sampleMessage = findViewById(R.id.sampleMessage);
-//        sendGroup = findViewById(R.id.sendGroup);
         sendData = findViewById(R.id.sendData);
 
         final FirebaseUser currentUser = mAuth.getCurrentUser();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference myRef = database.getReference();
 
+        emojiImageView = (ImageView) findViewById(R.id.emojiButton);
+        rootView = findViewById(R.id.root_view);
+        emojIcon = new EmojIconActions(this, rootView, sampleMessage, emojiImageView);
+        emojIcon.ShowEmojIcon();
+        emojIcon.setIconsIds(R.drawable.ic_action_keyboard, R.drawable.smiley);
+        emojIcon.setKeyboardListener(new EmojIconActions.KeyboardListener() {
+            @Override
+            public void onKeyboardOpen() {
+                Log.e(TAG, "Keyboard opened!");
+            }
+
+            @Override
+            public void onKeyboardClose() {
+                Log.e(TAG, "Keyboard closed");
+            }
+        });
 
         myRef.child("Users").child("UserProfile").child(currentUser.getUid())
                 .child("userName").addValueEventListener(new ValueEventListener() {
@@ -105,9 +133,6 @@ public class CommentsChatActivity extends AppCompatActivity {
                 Date today = new Date();
                 SimpleDateFormat format = new SimpleDateFormat("HH:mm a      yyyy-MM-dd");
                 String dateToStr = format.format(today);
-//                long tsLong = System.currentTimeMillis() / 1000;
-//                String timestamp = Long.toString(tsLong);
-//                myRef.child("Rooms").child("Family").child("UserChats").push().setValue(new ChatModel(message));
 
                 String msg_key = myRef.child("Users").child("UserComments").push().getKey();
                 CommentsModel commentsModel = new CommentsModel(
@@ -134,7 +159,6 @@ public class CommentsChatActivity extends AppCompatActivity {
                         currentUser.getUid(),
                         dateToStr,
                         "Comment"));
-
                 sampleMessage.setText("");
             }
         });
@@ -149,5 +173,14 @@ public class CommentsChatActivity extends AppCompatActivity {
                 recyclerView.smoothScrollToPosition(commentsModels.size() - 1);
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // handle arrow click here
+        if (item.getItemId() == android.R.id.home) {
+            finish(); // close this activity
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -8,22 +8,10 @@
     android:paddingStart="5dp"
     android:paddingEnd="60dp">
 
-    <TextView
-        android:id="@+id/newGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:background="#900C0C0C"
-        android:hint="New group"
-        android:textColor="#fff"
-        android:textStyle="bold"
-        android:visibility="gone" />
-
     <LinearLayout
         android:id="@+id/r2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/newGroup"
         android:layout_marginTop="5dp"
         android:background="@drawable/their_message"
         android:elevation="2dp"
@@ -91,4 +79,13 @@
                 android:textStyle="italic" />
         </LinearLayout>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/del_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/r2"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="5dp"
+        android:visibility="gone" />
 </RelativeLayout>

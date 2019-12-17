@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:background="@drawable/their_message"
-        android:padding="15dp"
+        android:padding="3dp"
         android:text="typing..."
         android:textColor="#000"
         android:visibility="gone" />
@@ -24,10 +24,10 @@
 
         <ImageView
             android:id="@+id/emojiButton"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:padding="2dp"
+            android:padding="5dp"
             android:src="@drawable/emoji_people" />
 
         <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
@@ -41,19 +41,26 @@
             android:padding="10dp"
             emojicon:emojiconSize="28sp" />
 
-        <!--        <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText-->
-        <!--            android:id="@+id/sampleMessage"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:layout_alignParentBottom="true"-->
-        <!--            emojicon:emojiconSize="28sp" />-->
+        <ImageView
+            android:id="@+id/attachButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginStart="-10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@null"
+            android:rotation="20"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_attach_file" />
 
         <ImageButton
             android:id="@+id/sendData"
-            android:layout_width="40dp"
-            android:layout_height="35dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_marginBottom="3dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="10dp"
             android:background="@null"
             android:scaleType="fitXY"
             android:src="@drawable/ic_send" />

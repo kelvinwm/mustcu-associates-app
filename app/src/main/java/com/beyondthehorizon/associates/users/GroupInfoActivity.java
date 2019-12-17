@@ -1,8 +1,11 @@
 package com.beyondthehorizon.associates.users;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -15,6 +18,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.beyondthehorizon.associates.R;
+import com.beyondthehorizon.associates.adapters.GroupInfoAdapter;
+import com.beyondthehorizon.associates.database.GroupDetailsModel;
+import com.beyondthehorizon.associates.database.UserProfile;
+import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -23,12 +31,18 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GroupInfoActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TextView userTitle, numberOfUsers;
     private ImageView group_image;
     private FirebaseDatabase database;
     private DatabaseReference myRef;
+    private ShimmerRecyclerView recyclerView;
+    private List<GroupDetailsModel> userChat;
+    GroupInfoAdapter groupInfoAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +70,16 @@ public class GroupInfoActivity extends AppCompatActivity {
                 .fit().placeholder(R.drawable.ic_image)
                 .error(R.drawable.ic_broken_image)
                 .into(group_image);
-        /**GET USER PROFILE STATUS*/
+        userChat = new ArrayList<>();
+
+        recyclerView = findViewById(R.id.groupMemberRecycler);
+//        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+        recyclerView.showShimmerAdapter();
+
+        /**GET GROUP PROFILE STATUS*/
         myRef.child("Rooms").child(intent.getStringExtra("groupUid")).child(intent.getStringExtra("groupName"))
                 .child("GroupInfo")
                 .addValueEventListener(new ValueEventListener() {
@@ -77,6 +100,66 @@ public class GroupInfoActivity extends AppCompatActivity {
 
                     }
                 });
+
+        /**GET MEMBERS*/
+        myRef.child("Rooms").child(intent.getStringExtra("groupUid")).child(intent.getStringExtra("groupName"))
+                .child("UserTokens")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            userChat.clear();
+                            for (final DataSnapshot snap : dataSnapshot.getChildren()) {
+
+                                myRef.child("Users").child("UserProfile").child(snap.getKey()).addChildEventListener(new ChildEventListener() {
+                                    @Override
+                                    public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                                        Log.d("TAG", "onChildAdded: "+dataSnapshot.getValue());
+//                                        GroupDetailsModel userProfile = new GroupDetailsModel(
+//                                                dataSnap.child("userName").getValue().toString(),
+//                                                snap.child("userRole").getValue().toString(),
+//                                                dataSnap.child("phoneNumber").getValue().toString(),
+//                                                dataSnap.child("imageUrl").getValue().toString(),
+//                                                dataSnap.child("tagLine").getValue().toString()
+//                                        );
+//                                        userChat.add(userProfile);
+//                                        Log.d("TAG", "onDataChange: "+userChat.size());
+//                                        groupInfoAdapter = new GroupInfoAdapter(GroupInfoActivity.this, (ArrayList<GroupDetailsModel>) userChat);
+//                                        recyclerView.setAdapter(groupInfoAdapter);
+                                    }
+
+                                    @Override
+                                    public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                                    }
+
+                                    @Override
+                                    public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                                    }
+
+                                    @Override
+                                    public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
+
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
     }
 
     @Override

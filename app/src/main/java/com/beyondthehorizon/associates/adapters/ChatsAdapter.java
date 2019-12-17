@@ -1,5 +1,7 @@
 package com.beyondthehorizon.associates.adapters;
 
+import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -17,13 +19,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.chats.CommentsChatActivity;
 import com.beyondthehorizon.associates.database.ChatModel;
+import com.beyondthehorizon.associates.repositories.ChatsRepository;
+import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
@@ -35,7 +43,10 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
     private ArrayList<ChatModel> filteredProMemberArrayList = new ArrayList<>();
     private static final String TAG = "PROMEMBER";
     private Context context;
+    private DatabaseReference myRef;
+    private FirebaseDatabase database;
     private FirebaseUser fuser;
+    private ChatsViewModel chatsViewModel;
 
 
     public ChatsAdapter(Context context) {
@@ -59,8 +70,9 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
 
     @Override
     public void onBindViewHolder(@NonNull final ProMemberViewHolder holder, int position) {
-//        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-//        FirebaseUser currentUser = mAuth.getCurrentUser();
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference();
+        chatsViewModel = ViewModelProviders.of((FragmentActivity) context).get(ChatsViewModel.class);
         final ChatModel proMember = proMemberArrayList.get(position);
         fuser = FirebaseAuth.getInstance().getCurrentUser();
         final String details;
@@ -68,22 +80,24 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
 
         if (proMember.getType().contains("Single")) {
             holder.commentLayout.setVisibility(View.GONE);
+            holder.divider.setVisibility(View.GONE);
         }
-        //Show you have been added to new group
-//        if (TextUtils.isEmpty(proMember.getSenderName())) {
-////            holder.r2.setVisibility(View.GONE);
-////            holder.r2.setBackgroundColor(Color.TRANSPARENT);
-////            holder.providerMessage.setText(proMember.getMessage());
-////            holder.providerMessage.setBackgroundColor(0x900C0C0C);
-////            holder.providerMessage.setGravity(Gravity.CENTER);
-////            holder.message_time.setVisibility(View.GONE);
-//            holder.commentLayout.setVisibility(View.GONE);
-////            holder.providerName.setVisibility(View.GONE);
-//        }
-//        else {
+
         holder.message_time.setText(proMember.getTimestamp());
         holder.providerMessage.setText(proMember.getMessage());
-//        }
+        holder.numberOfComments.setText(proMember.getComments());
+        holder.del_status.setTextColor(Color.parseColor("#000000"));
+        if (proMember.delivery_status.contains("sent")) {
+            myRef.child("Users").child("UserChats").child(proMember.getMessage_key()).child("delivery_status").setValue("Seen");
+            chatsViewModel.updateDeliveryStatus(proMember.message_key, "Delivered");
+        }
+        if (proMember.delivery_status.contains("Seen")) {
+            holder.del_status.setTextColor(Color.parseColor("#0398fc"));
+            holder.del_status.setText(proMember.getDelivery_status());
+        } else {
+            holder.del_status.setText(proMember.getDelivery_status());
+        }
+
         if (proMemberArrayList.get(position).getPhoneNumber().equals(fuser.getPhoneNumber())) {
             holder.providerName.setText("");
         } else {
@@ -101,8 +115,6 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
                 Intent providerDetails = new Intent(context, CommentsChatActivity.class);
                 providerDetails.putExtra("MainQuestionKey", proMember.getMessage_key());
                 providerDetails.putExtra("RoomId", proMember.getSenderUID());
-//                providerDetails.putExtra("Job", provider.getJob());
-//                providerDetails.putExtra("Name", provider.getName()); Get rating
                 context.startActivity(providerDetails);
             }
         });
@@ -130,10 +142,10 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
     }
 
     public static class ProMemberViewHolder extends RecyclerView.ViewHolder {
-        TextView providerName, numberOfComments;
-        TextView message_time, newGroup;
+        TextView providerName, numberOfComments, del_status;
+        TextView message_time;
         EmojiconTextView providerMessage;
-        View mView;
+        View mView, divider;
         LinearLayout commentLayout, r2;
 
         public ProMemberViewHolder(View itemView) {
@@ -144,7 +156,8 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
             message_time = (TextView) itemView.findViewById(R.id.message_time);
             numberOfComments = (TextView) itemView.findViewById(R.id.numberOfComments);
             commentLayout = itemView.findViewById(R.id.commentLayout);
-            newGroup = itemView.findViewById(R.id.newGroup);
+            divider = itemView.findViewById(R.id.divider);
+            del_status = itemView.findViewById(R.id.del_status);
             r2 = itemView.findViewById(R.id.r2);
         }
     }

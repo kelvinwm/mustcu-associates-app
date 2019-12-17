@@ -59,6 +59,16 @@ public class ChatsRepository {
         return allLatestChats;
     }
 
+
+    //Update number of comments
+    public void updateNumberOfComments(String message_key, String numComments) {
+        new UpdateNumberOfComment(chatsDao).execute(message_key, numComments);
+    }
+
+    //Update delivery statue
+    public void updateDeliveryStatus(String message_key, String status) {
+        new UpdateDeliveryStatus(chatsDao).execute(message_key, status);
+    }
 //    //Get Specific visitors
 //    public LiveData<List<Chat>> getSpecificVisitors(String status) {
 //        return chatsDao.allSpecificVisitors(status);
@@ -134,6 +144,42 @@ public class ChatsRepository {
         protected Void doInBackground(CommentsModel... commentsModels) {
             Log.d(TAG, "doInBackground: " + commentsModels[0].getMessage());
             commentsDao.insertComment(commentsModels[0]);
+            return null;
+        }
+    }
+
+    // UPDATE Number of Comment
+    private static class UpdateNumberOfComment extends AsyncTask<String, Void, Void> {
+        private ChatsDao chatsDao;
+
+        private UpdateNumberOfComment(ChatsDao chatsDao) {
+            this.chatsDao = chatsDao;
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            Log.d(TAG, "doInBackground: ");
+            String message_key = params[0];
+            String numOfComments = params[1];
+            chatsDao.updateComments(message_key, numOfComments);
+            return null;
+        }
+    }
+
+    // UPDATE Number of Comment
+    private static class UpdateDeliveryStatus extends AsyncTask<String, Void, Void> {
+        private ChatsDao chatsDao;
+
+        private UpdateDeliveryStatus(ChatsDao chatsDao) {
+            this.chatsDao = chatsDao;
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            Log.d(TAG, "doInBackground: ");
+            String message_key = params[0];
+            String numOfComments = params[1];
+            chatsDao.updateDeliveryState(message_key, numOfComments);
             return null;
         }
     }

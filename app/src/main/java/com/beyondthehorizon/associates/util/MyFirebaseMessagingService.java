@@ -62,6 +62,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData().get("message"));
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
+            if (remoteMessage.getData().get("message").contains("delivery_status")) {
+                chatsRepository.updateDeliveryStatus(remoteMessage.getData().get("message_key"),
+                        remoteMessage.getData().get("delivery_status"));
+                return;
+            }
             dataSender = remoteMessage.getData().get("sender");
             dataMessage = remoteMessage.getData().get("message");
             phoneNumber = remoteMessage.getData().get("phoneNumber");
@@ -101,13 +106,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                             message_key,
                             dataSender,
                             dataMessage,
-                            "Comments",
+                            "0",
                             phoneNumber,
                             receiverUID, //Chats are found using this senderUID(this is senderUID field)
                             timestamp,
                             receiverUID,
                             imageUrl,
-                            type
+                            type,
+                            "Delivered"
                     ));
 
                     chatsRepository.insertComment(new CommentsModel(
@@ -121,6 +127,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     ));
                 }
             } else if (type.contains("Single")) {
+
                 chatsRepository.insertLatestChat(new RecentChatModel(
                         senderUID,
                         dataSender,
@@ -134,15 +141,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         message_key,
                         dataSender,
                         dataMessage,
-                        "Comments",
+                        "0",
                         phoneNumber,
                         senderUID,
                         timestamp,
                         receiverUID,
                         imageUrl,
-                        type
+                        type,
+                        "sent"
                 ));
             } else if (type.contains("Comment")) {
+                String total_num_comments = remoteMessage.getData().get("totalComments");
                 if (!senderUID.contains(currentUser.getUid())) {
                     chatsRepository.insertComment(new CommentsModel(
                             message_key,
@@ -154,6 +163,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                             type
                     ));
                 }
+                chatsRepository.updateNumberOfComments(message_key, total_num_comments);
             }
             Log.d(TAG, "onMessageReceived: " + AppController.getInstance().appStatus);
             if (AppController.getInstance().appStatus) {

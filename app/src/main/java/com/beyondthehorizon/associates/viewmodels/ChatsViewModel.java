@@ -54,6 +54,10 @@ public class ChatsViewModel extends AndroidViewModel {
         chatsRepository.insertLatestChat(recentChatModel);
     }
 
+    public void updateDeliveryStatus(String message_key, String status) {
+        chatsRepository.updateDeliveryStatus(message_key, status);
+    }
+
 //    public void insertResident(Resident resident) {
 //        chatsRepository.insertResident(resident);
 //    }
