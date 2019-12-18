@@ -1,152 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#AFACAC">
+    android:background="#ECE8E8"
+    android:gravity="center_horizontal">
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/R3"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context=".users.FriendProfileActivity">
+        android:layout_height="200dp"
+        android:background="@drawable/biblebg" />
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/ctsToolbar2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
-            android:elevation="4dp"
-            android:padding="0dp"
-            android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
-            app:popupTheme="@style/AppTheme.AppBarOverlay">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:orientation="vertical"
-                android:paddingLeft="10dp">
-
-                <TextView
-                    android:id="@+id/userTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="#fff"
-                    android:text="name"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/userOnlineStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="offline"
-                    android:textColor="#F0EFEF"
-                    android:textStyle="italic" />
-            </LinearLayout>
-        </androidx.appcompat.widget.Toolbar>
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/ctsToolbar2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#90000000"
+        android:elevation="4dp"
+        android:padding="0dp"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+        app:popupTheme="@style/AppTheme.AppBarOverlay">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:orientation="vertical"
+            android:paddingLeft="10dp">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/userTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:text="name"
+                android:textColor="#fff"
+                android:textSize="18sp" />
 
-                <RelativeLayout
-                    android:id="@+id/R3"
-                    android:layout_width="match_parent"
-                    android:layout_height="230dp"
-                    android:background="@drawable/bible">
-
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:background="#fff"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical"
-                    android:padding="10dp">
-
-                    <TextView
-                        android:id="@+id/userName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="80dp"
-                        android:layout_marginTop="75dp"
-                        android:drawableLeft="@drawable/ic_account_box"
-                        android:drawablePadding="5dp"
-                        android:gravity="center"
-                        android:maxLength="50"
-                        android:text="Kelvin the M"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                        android:textColor="#000"
-                        android:textColorHint="#ADABAB"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tagLine"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:drawableLeft="@drawable/ic_format_align"
-                        android:drawablePadding="5dp"
-                        android:hint="tagLine"
-                        android:maxLength="100"
-                        android:padding="10dp"
-                        android:textColor="#000"
-                        android:textColorHint="#ADABAB" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="5dp"
-                        android:background="#A29F9F" />
-
-                    <TextView
-                        android:id="@+id/phoneNumber"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:layout_weight="2"
-                        android:drawableStart="@drawable/ic_phone"
-                        android:drawablePadding="5dp"
-                        android:hint="Phone number"
-                        android:lines="1"
-                        android:maxLength="20"
-                        android:padding="10dp"
-                        android:textColor="#000"
-                        android:textColorHint="#ADABAB" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/L12"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_below="@+id/R2"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="-350dp"
-                    android:layout_marginRight="10dp"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <de.hdodenhof.circleimageview.CircleImageView
-                        android:id="@+id/profile_image"
-                        android:layout_width="150dp"
-                        android:layout_height="150dp"
-                        android:src="@drawable/account"
-                        app:civ_border_color="#FFFFFF"
-                        app:civ_border_width="2dp" />
-
-
-                </LinearLayout>
-            </LinearLayout>
+            <TextView
+                android:id="@+id/userOnlineStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="offline"
+                android:textColor="#fff"
+                android:textStyle="italic" />
         </LinearLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <LinearLayout
+        android:id="@+id/userInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="180dp"
+        android:layout_marginEnd="5dp"
+        android:background="#fff"
+        android:orientation="vertical">
+
+
+        <TextView
+            android:id="@+id/userName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="90dp"
+            android:gravity="center"
+            android:text="My Name is Oliver Queen"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="#000"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tagLine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
+            android:paddingBottom="8dp"
+            android:text="Hey, I am using this cool app"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textStyle="bold" />
     </LinearLayout>
-</ScrollView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/userInfo"
+        android:layout_margin="5dp"
+        android:background="#fff"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/phoneNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_phone"
+            android:drawablePadding="25dp"
+            android:hint="Phone number"
+            android:padding="10dp"
+            android:textColor="#000"
+            android:textColorHint="#ADABAB" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="115dp"
+        android:gravity="center">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/account"
+            app:civ_border_color="#FFFFFF"
+            app:civ_border_width="5dp" />
+    </RelativeLayout>
+</RelativeLayout>

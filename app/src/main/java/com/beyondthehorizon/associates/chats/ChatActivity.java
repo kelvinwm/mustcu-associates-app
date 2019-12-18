@@ -8,13 +8,20 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.print.PrintAttributes;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -74,7 +81,7 @@ public class ChatActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
     private FirebaseDatabase database;
     private DatabaseReference myRef;
-    ImageView emojiImageView;
+    ImageView emojiImageView, attachButton;
     View rootView;
     EmojIconActions emojIcon;
 
@@ -98,6 +105,7 @@ public class ChatActivity extends AppCompatActivity {
         editor.putString("friend_name", intent.getStringExtra("myFriendName"));
         editor.apply();
 
+        attachButton = findViewById(R.id.attachButton);
         typingTextView = findViewById(R.id.typingTextView);
         userTitle = findViewById(R.id.userTitle);
         userOnlineStatus = findViewById(R.id.userOnlineStatus);
@@ -370,6 +378,63 @@ public class ChatActivity extends AppCompatActivity {
         });
         Log.d(TAG, "onCreate: " + intent.getStringExtra("friendUID"));
         getChats(intent.getStringExtra("friendUID"));
+
+
+        attachButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getMediaStaff();
+            }
+        });
+    }
+
+    private void getMediaStaff() {
+
+        // custom dialog
+        final Dialog dialog = new Dialog(ChatActivity.this);
+        dialog.setContentView(R.layout.media_dialog);
+        dialog.setTitle("");
+
+        // set the custom dialog components - text, image and button
+//        final EditText text = dialog.findViewById(R.id.locationName);
+//
+//        Button dialogButtonOk = (Button) dialog.findViewById(R.id.dialogButtonOK);
+//        Button dialogButtonCancel = (Button) dialog.findViewById(R.id.dialogButtonCancel);
+
+        // if button is clicked, close the custom dialog
+//        dialogButtonOk.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//                if (text.getText().toString().isEmpty()) {
+//                    text.setError("Enter name");
+//                    return;
+//                }
+//                //TODO: SAVE LOCATION TO DATABASE
+//
+//            }
+//        });
+//
+//        // if no is clicked, close the custom dialog
+//        dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                dialog.dismiss();
+//                finish();
+//            }
+//        });
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        WindowManager.LayoutParams wlp = dialog.getWindow().getAttributes();
+        wlp.gravity = Gravity.BOTTOM;
+        wlp.y = 150;
+        wlp.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        dialog.getWindow().setAttributes(wlp);
+//            dialog.getWindow().setLayout((6 * width) / 7, (3 * height) / 5);
+
+        dialog.show();
     }
 
     private void getChats(String friendUID) {

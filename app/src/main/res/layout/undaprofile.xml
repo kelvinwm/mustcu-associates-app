@@ -11,11 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#ECE8E8"
-        android:focusableInTouchMode="true"
         android:gravity="center_horizontal">
 
         <RelativeLayout
-            android:id="@+id/R2"
+            android:id="@+id/R3"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:background="@drawable/biblebg" />

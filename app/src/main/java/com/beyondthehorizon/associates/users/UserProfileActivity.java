@@ -64,7 +64,7 @@ public class UserProfileActivity extends AppCompatActivity {
     private EditText userName, tagLine;
     private TextView phoneNumber;
     private FirebaseAuth mAuth;
-    private ImageView changeProfile, editUserName, editTagLine;
+    private ImageView changeProfile;
     private RelativeLayout R2;
     private CircleImageView profile_image;
     public static final int GALLARY_PICK = 1;
@@ -89,8 +89,6 @@ public class UserProfileActivity extends AppCompatActivity {
         tagLine = findViewById(R.id.tagLine);
         phoneNumber = findViewById(R.id.phoneNumber);
         changeProfile = findViewById(R.id.changeProfile);
-        editUserName = findViewById(R.id.editUserName);
-        editTagLine = findViewById(R.id.editTagLine);
 
         R2 = findViewById(R.id.R2);
         profile_image = findViewById(R.id.profile_image);
@@ -104,23 +102,7 @@ public class UserProfileActivity extends AppCompatActivity {
             }
         });
         //ACTIVATE BUTTON AND EDIT TEXTS
-        editUserName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateName.setEnabled(true);
-                userName.setEnabled(true);
-                userName.requestFocus();
 
-            }
-        });
-        editTagLine.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateName.setEnabled(true);
-                tagLine.setEnabled(true);
-                tagLine.requestFocus();
-            }
-        });
         phoneNumber.setText(currentUser.getPhoneNumber());
         if (!(currentUser.getDisplayName() == null)) {
             userName.setText(currentUser.getDisplayName());
@@ -208,35 +190,28 @@ public class UserProfileActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
+                                    String imageUri;
+                                    if (currentUser.getPhotoUrl() == null) {
+                                        imageUri = "none";
+                                    } else {
+                                        imageUri = currentUser.getPhotoUrl().toString();
+                                    }
                                     UserProfile userProfile = new UserProfile(token, currentUser.getUid(),
-                                            username, currentUser.getPhoneNumber(), currentUser.getPhotoUrl().toString(),
+                                            username, currentUser.getPhoneNumber(), imageUri,
                                             tagLine.getText().toString());
                                     myRef.child("Users").child("UserProfile").child(currentUser.getUid())
                                             .setValue(userProfile);
                                     progressDialog.dismiss();
                                     finish();
+                                } else {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(UserProfileActivity.this, "Unable to update profile, try again", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
             }
         });
 
-
-        userName.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                userName.requestFocus();
-                return true;
-            }
-
-        });
-        tagLine.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                tagLine.requestFocus();
-                return true;
-            }
-        });
     }
 
     @Override
