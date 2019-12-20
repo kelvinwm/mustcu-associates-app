@@ -56,7 +56,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         chatsRepository = new ChatsRepository(getApplication());
 
         String dataSender, dataMessage, phoneNumber, senderUID, newGroup,
-                receiverUID, timestamp, type, imageUrl, groupName, message_key;
+                receiverUID, timestamp, type, profileImage, imageUrl, groupName, message_key;
 
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
@@ -75,6 +75,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             receiverUID = remoteMessage.getData().get("receiverUID");
             type = remoteMessage.getData().get("type");
             imageUrl = remoteMessage.getData().get("imageUrl");
+            profileImage = remoteMessage.getData().get("profileImage");
             groupName = remoteMessage.getData().get("groupname");
             newGroup = remoteMessage.getData().get("newGroup");
             message_key = remoteMessage.getData().get("message_key");
@@ -99,7 +100,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                             dataMessage,
                             timestamp,
                             type,
-                            imageUrl
+                            profileImage
                     ));
 
                     chatsRepository.insertChat(new ChatModel(
@@ -111,6 +112,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                             receiverUID, //Chats are found using this senderUID(this is senderUID field)
                             timestamp,
                             receiverUID,
+                            profileImage,
                             imageUrl,
                             type,
                             "Delivered"
@@ -146,6 +148,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         senderUID,
                         timestamp,
                         receiverUID,
+                        profileImage,
                         imageUrl,
                         type,
                         "sent"

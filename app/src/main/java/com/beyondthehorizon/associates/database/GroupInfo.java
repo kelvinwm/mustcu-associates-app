@@ -1,16 +1,16 @@
 package com.beyondthehorizon.associates.database;
 
 public class GroupInfo {
-    String imageUrl;
+    String profileImage;
     String numberOfMembers;
 
     public GroupInfo(String imageUrl, String numberOfMembers) {
-        this.imageUrl = imageUrl;
+        this.profileImage = imageUrl;
         this.numberOfMembers = numberOfMembers;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getProfileImage() {
+        return profileImage;
     }
 
     public String getNumberOfMembers() {

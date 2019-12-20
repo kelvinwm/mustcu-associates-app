@@ -37,6 +37,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
@@ -131,7 +132,7 @@ public class CommentsChatActivity extends AppCompatActivity {
                     return;
                 }
                 Date today = new Date();
-                SimpleDateFormat format = new SimpleDateFormat("HH:mm a      yyyy-MM-dd");
+                SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a", Locale.getDefault());
                 String dateToStr = format.format(today);
 
                 String msg_key = myRef.child("Users").child("UserComments").push().getKey();

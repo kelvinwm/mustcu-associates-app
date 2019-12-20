@@ -48,6 +48,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -69,7 +70,7 @@ public class AddGroupActivity extends AppCompatActivity {
     private Uri resultUri = null;
     private DatabaseReference myRef;
     private FirebaseUser currentUser;
-    private  ProgressDialog progressDialog;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -218,13 +219,13 @@ public class AddGroupActivity extends AppCompatActivity {
         });
     }
 
-    private void setGroupInfo(String imageUri, String myKey, String groupName, String numberOfMembers) {
+    private void setGroupInfo(String profileImage, String myKey, String groupName, String numberOfMembers) {
 
         /**SET GROUP INFO*/
         myRef.child("Rooms").child(myKey).child(groupName).child("GroupInfo").setValue(new GroupInfo(
-                imageUri, numberOfMembers));
+                profileImage, numberOfMembers));
         Date today = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss a      yyyy-MM-dd");
+        SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a", Locale.getDefault());
         String dateToStr = format.format(today);
 
         //Save Group locally to view on latest chats

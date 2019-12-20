@@ -35,15 +35,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.adapters.ChatsAdapter;
+import com.beyondthehorizon.associates.adapters.SendingImagesAdapter;
 import com.beyondthehorizon.associates.database.ChatModel;
 import com.beyondthehorizon.associates.database.CommentsModel;
 import com.beyondthehorizon.associates.database.RecentChatModel;
+import com.beyondthehorizon.associates.database.SendingImagesModel;
 import com.beyondthehorizon.associates.users.FriendProfileActivity;
 import com.beyondthehorizon.associates.users.GroupInfoActivity;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
@@ -64,33 +67,39 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity implements SendingImagesAdapter.SendMyTxtImage {
 
     private FirebaseAuth mAuth;
-    private RecyclerView recyclerView;
+    private RecyclerView recyclerView, mediaRecyclerView;
     private ArrayList<Media> select = new ArrayList<>();
     private ImageButton sendData;
     private EmojiconEditText sampleMessage;
     public static final String TAG = "CHATACTIVITY";
     private ChatsViewModel chatsViewModel;
     private ChatsAdapter chatsAdapter;
+    private SendingImagesAdapter imagesAdapter;
     public static final String MY_SHARED_PREF = "shared_prefs";
     SharedPreferences pref;
-    String imageUrl;
+    String profileUrl;
     private Toolbar contactsToolbar;
     private TextView userTitle, userOnlineStatus, typingTextView;
     private CircleImageView profile_img;
@@ -99,7 +108,9 @@ public class ChatActivity extends AppCompatActivity {
     private DatabaseReference myRef;
     ImageView emojiImageView, attachButton;
     View rootView;
+    Intent intent;
     EmojIconActions emojIcon;
+    private StorageReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +119,7 @@ public class ChatActivity extends AppCompatActivity {
         contactsToolbar = findViewById(R.id.ctsToolbar);
         setSupportActionBar(contactsToolbar);
 
-        final Intent intent = getIntent();
+        intent = getIntent();
         assert getSupportActionBar() != null;
 //        getSupportActionBar().setTitle(intent.getStringExtra("myFriendName"));
 //        getSupportActionBar().setSubtitle("online");
@@ -136,10 +147,17 @@ public class ChatActivity extends AppCompatActivity {
         chatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
         chatsAdapter = new ChatsAdapter(this);
 
+
+        storageReference = FirebaseStorage.getInstance().getReference().child("Chat Images");
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(chatsAdapter);
+//        mediaRecyclerView.setAdapter(chatsAdapter);
+
+        mediaRecyclerView = findViewById(R.id.mediaRecyclerView);
+        mediaRecyclerView.setHasFixedSize(true);
+        mediaRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         sampleMessage = findViewById(R.id.sampleMessage);
         sendData = findViewById(R.id.sendData);
 
@@ -173,8 +191,9 @@ public class ChatActivity extends AppCompatActivity {
                                 if (!(dataSnapshot.getValue().toString().contains("online") ||
                                         dataSnapshot.getValue().toString().contains("Paused"))) {
                                     Date date = new Date(Long.parseLong(dataSnapshot.getValue().toString()));
-                                    SimpleDateFormat sfd = new SimpleDateFormat("HH:mm a  dd-MM-yyyy");
-                                    userOnlineStatus.setText("last seen " + sfd.format(date));
+//                                    SimpleDateFormat sfd = new SimpleDateFormat("HH:mm a  dd-MM-yyyy");
+                                    SimpleDateFormat sfd = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a", Locale.getDefault());
+                                    userOnlineStatus.setText("last seen: " + sfd.format(date));
                                     typingTextView.setVisibility(View.GONE);
                                     return;
                                 }
@@ -288,7 +307,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 if ((dataSnapshot.exists())) {
-                    imageUrl = dataSnapshot.getValue().toString();
+                    profileUrl = dataSnapshot.getValue().toString();
                 }
             }
 
@@ -302,94 +321,7 @@ public class ChatActivity extends AppCompatActivity {
         sendData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                String message = sampleMessage.getText().toString().trim();
-                if (message.isEmpty()) {
-                    return;
-                }
-                Date today = new Date();
-                SimpleDateFormat format = new SimpleDateFormat("HH:mm a      yyyy-MM-dd");
-                String dateToStr = format.format(today);
-
-                final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
-                ChatModel chatModel = new ChatModel(
-                        msg_key,
-                        currentUser.getDisplayName(),
-                        message,
-                        "Comments",
-                        currentUser.getPhoneNumber(),
-                        currentUser.getUid(),
-                        dateToStr,
-                        intent.getStringExtra("friendUID"),
-                        imageUrl,
-                        intent.getStringExtra("chatTypeFromChatsFragment"),
-                        "sent");
-
-                if (intent.getStringExtra("chatTypeFromChatsFragment").contains("Single")) {
-                    /**SEND TO SINGLE CHAT FIRE BASE*/
-                    myRef.child("Users").child("UserChats").child(msg_key)
-                            .setValue(chatModel).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
-                            } else {
-                                chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
-                            }
-                        }
-                    });
-
-                } else {
-                    /**SEND TO FIRE BASE ROOM CHAT*/
-                    myRef.child("Rooms").child(intent.getStringExtra("friendUID"))
-                            .child(intent.getStringExtra("myFriendName")).child("UserChats")
-                            .child(msg_key).setValue(chatModel)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
-                                    } else {
-                                        chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
-                                    }
-                                }
-                            });
-
-
-                    chatsViewModel.insertCommentt(new CommentsModel(
-                            msg_key,
-                            currentUser.getDisplayName(),
-                            message,
-                            currentUser.getPhoneNumber(),
-                            currentUser.getUid(),
-                            dateToStr,
-                            "Comment"
-                    ));
-                }
-
-                //Save locally
-                chatsViewModel.insertChat(new ChatModel(
-                        msg_key,
-                        currentUser.getDisplayName(),
-                        message,
-                        "0",
-                        currentUser.getPhoneNumber(),
-                        intent.getStringExtra("friendUID"),
-                        dateToStr,
-                        currentUser.getUid(),
-                        imageUrl,
-                        intent.getStringExtra("chatTypeFromChatsFragment"),
-                        "sending..."));
-
-                //Save locally to view on latest chats
-                chatsViewModel.insertLatestChat(new RecentChatModel(
-                        intent.getStringExtra("friendUID"),
-                        intent.getStringExtra("myFriendName"),
-                        message,
-                        dateToStr,
-                        intent.getStringExtra("chatTypeFromChatsFragment"),
-                        intent.getStringExtra("imageUrlFromChatsFragment")));
-                sampleMessage.setText("");
+                sendMessage();
             }
         });
         Log.d(TAG, "onCreate: " + intent.getStringExtra("friendUID"));
@@ -402,6 +334,98 @@ public class ChatActivity extends AppCompatActivity {
                 getMediaStaff();
             }
         });
+    }
+
+    private void sendMessage() {
+        String message = sampleMessage.getText().toString().trim();
+        if (message.isEmpty()) {
+            return;
+        }
+        Date today = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a", Locale.getDefault());
+        String dateToStr = format.format(today);
+
+        final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
+        ChatModel chatModel = new ChatModel(
+                msg_key,
+                currentUser.getDisplayName(),
+                message,
+                "Comments",
+                currentUser.getPhoneNumber(),
+                currentUser.getUid(),
+                dateToStr,
+                intent.getStringExtra("friendUID"),
+                profileUrl,
+                "*hak*none0#",
+                intent.getStringExtra("chatTypeFromChatsFragment"),
+                "sent");
+
+        if (intent.getStringExtra("chatTypeFromChatsFragment").contains("Single")) {
+            /**SEND TO SINGLE CHAT FIRE BASE*/
+            myRef.child("Users").child("UserChats").child(msg_key)
+                    .setValue(chatModel).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
+                    } else {
+                        chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                    }
+                }
+            });
+
+        } else {
+            /**SEND TO FIRE BASE ROOM CHAT*/
+            myRef.child("Rooms").child(intent.getStringExtra("friendUID"))
+                    .child(intent.getStringExtra("myFriendName")).child("UserChats")
+                    .child(msg_key).setValue(chatModel)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
+                            } else {
+                                chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                            }
+                        }
+                    });
+
+
+            chatsViewModel.insertCommentt(new CommentsModel(
+                    msg_key,
+                    currentUser.getDisplayName(),
+                    message,
+                    currentUser.getPhoneNumber(),
+                    currentUser.getUid(),
+                    dateToStr,
+                    "Comment"
+            ));
+        }
+
+        //Save locally
+        chatsViewModel.insertChat(new ChatModel(
+                msg_key,
+                currentUser.getDisplayName(),
+                message,
+                "0",
+                currentUser.getPhoneNumber(),
+                intent.getStringExtra("friendUID"),
+                dateToStr,
+                currentUser.getUid(),
+                profileUrl,
+                "*hak*none0#",
+                intent.getStringExtra("chatTypeFromChatsFragment"),
+                "sending..."));
+
+        //Save locally to view on latest chats
+        chatsViewModel.insertLatestChat(new RecentChatModel(
+                intent.getStringExtra("friendUID"),
+                intent.getStringExtra("myFriendName"),
+                message,
+                dateToStr,
+                intent.getStringExtra("chatTypeFromChatsFragment"),
+                intent.getStringExtra("imageUrlFromChatsFragment")));
+        sampleMessage.setText("");
     }
 
     private void getMediaStaff() {
@@ -427,12 +451,14 @@ public class ChatActivity extends AppCompatActivity {
         RelativeLayout pickVideo = dialog.findViewById(R.id.pickVideo);
         RelativeLayout pickAudio = dialog.findViewById(R.id.pickAudio);
         RelativeLayout pickFile = dialog.findViewById(R.id.pickFile);
+
         pickCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //TODO: SAVE LOCATION TO DATABASE
                 Intent intent = new Intent(ChatActivity.this, TakePhotoActivity.class); //Take a photo with a camera
                 startActivityForResult(intent, 200);
+                dialog.dismiss();
             }
         });
         pickImage.setOnClickListener(new View.OnClickListener() {
@@ -447,6 +473,7 @@ public class ChatActivity extends AppCompatActivity {
                 ArrayList<Media> defaultSelect = select; // You can set the photos selected by default, such as setting the list you just selected to the default.
                 intent.putExtra(PickerConfig.DEFAULT_SELECTED_LIST, defaultSelect); // You can set the photo selected by default (optional parameter)
                 startActivityForResult(intent, 200);
+                dialog.dismiss();
             }
         });
         pickVideo.setOnClickListener(new View.OnClickListener() {
@@ -461,6 +488,7 @@ public class ChatActivity extends AppCompatActivity {
                 ArrayList<Media> defaultSelect = select; // You can set the photos selected by default, such as setting the list you just selected to the default.
                 intent.putExtra(PickerConfig.DEFAULT_SELECTED_LIST, defaultSelect); // You can set the photo selected by default (optional parameter)
                 startActivityForResult(intent, 200);
+                dialog.dismiss();
             }
         });
         pickAudio.setOnClickListener(new View.OnClickListener() {
@@ -471,6 +499,7 @@ public class ChatActivity extends AppCompatActivity {
                 intent_upload.setType("audio/*");
                 intent_upload.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(intent_upload, 1);
+                dialog.dismiss();
             }
         });
         pickFile.setOnClickListener(new View.OnClickListener() {
@@ -531,13 +560,57 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 200 && resultCode == PickerConfig.RESULT_CODE) {
+        if (requestCode == 200 && resultCode == PickerConfig.RESULT_CODE && data != null) {
             select = data.getParcelableArrayListExtra(PickerConfig.EXTRA_RESULT);//选择完后返回的list
+            mediaRecyclerView.setVisibility(View.VISIBLE);
+
+            ArrayList<SendingImagesModel> allMedia = new ArrayList<>();
+            LinearLayout L123 = findViewById(R.id.L123);
+            L123.setVisibility(View.GONE);
+
+            for (Media uri : select) {
+                Log.d(TAG, "onActivityResult: " + Uri.fromFile(new File(uri.path)));
+                allMedia.add(new SendingImagesModel(Uri.fromFile(new File(uri.path)), ""));
+
+                imagesAdapter = new SendingImagesAdapter(ChatActivity.this, allMedia, this);
+                mediaRecyclerView.setAdapter(imagesAdapter);
+
+            }
 
         }
         if (requestCode == 1 && resultCode == RESULT_OK) {
             //the selected audio.
             Uri uri = data.getData();
+        }
+    }
+
+    @Override
+    public void sendTextImage(ArrayList<SendingImagesModel> arrayList) {
+        for (SendingImagesModel model : arrayList) {
+            Log.d(TAG, "sendTextImage: " + model.getImageUri().toString() + " " + model.getTxtMessage());
+
+            final StorageReference filePath = storageReference.child(currentUser.getUid() + ".jpg");
+//                filePath.putFile(Uri.fromFile(new File(uri.path))).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+//                        filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                            @Override
+//                            public void onSuccess(Uri uri) {
+//                                Log.d(TAG, "onSuccess: " + uri.toString());
+////                                myRef.child("Users").child("UserProfile").child(currentUser.getUid())
+////                                        .child("imageUrl").setValue(uri.toString());
+////                                profile_image.setImageURI(resultUri);
+////                                progressDialog.dismiss();
+//                            }
+//                        });
+//                    }
+//                });
+
+            mediaRecyclerView.setVisibility(View.GONE);
+            LinearLayout L123 = findViewById(R.id.L123);
+            L123.setVisibility(View.VISIBLE);
+
+            arrayList.clear();
         }
     }
 }

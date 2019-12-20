@@ -8,12 +8,15 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.database.UserProfile;
@@ -27,6 +30,7 @@ import com.squareup.picasso.Target;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -38,6 +42,8 @@ public class FriendProfileActivity extends AppCompatActivity {
     private DatabaseReference myRef;
     private CircleImageView profile_image;
     private RelativeLayout R2;
+    private ImageView gotToWhatsApp;
+    private String PhoneNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,7 @@ public class FriendProfileActivity extends AppCompatActivity {
         tagLine = findViewById(R.id.tagLine);
         profile_image = findViewById(R.id.profile_image);
         phoneNumber = findViewById(R.id.phoneNumber);
+        gotToWhatsApp = findViewById(R.id.gotToWhatsApp);
         R2 = findViewById(R.id.R3);
 
         userTitle.setText(intent.getStringExtra("userName"));
@@ -75,7 +82,7 @@ public class FriendProfileActivity extends AppCompatActivity {
                             if (!(dataSnapshot.getValue().toString().contains("online") ||
                                     dataSnapshot.getValue().toString().contains("Paused"))) {
                                 Date date = new Date(Long.parseLong(dataSnapshot.getValue().toString()));
-                                SimpleDateFormat sfd = new SimpleDateFormat("HH:mm a  dd-MM-yyyy");
+                                SimpleDateFormat sfd = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a", Locale.getDefault());
                                 userOnlineStatus.setText("last seen " + sfd.format(date));
                                 return;
                             }
@@ -99,7 +106,7 @@ public class FriendProfileActivity extends AppCompatActivity {
                             userName.setText(dataSnapshot.child("userName").getValue().toString());
                             tagLine.setText(dataSnapshot.child("tagLine").getValue().toString());
                             phoneNumber.setText(dataSnapshot.child("phoneNumber").getValue().toString());
-
+                            PhoneNumber = dataSnapshot.child("phoneNumber").getValue().toString();
                             Picasso.get().load(dataSnapshot.child("imageUrl").getValue().toString()).into(new Target() {
                                 @Override
                                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -131,6 +138,28 @@ public class FriendProfileActivity extends AppCompatActivity {
 
                     }
                 });
+
+        gotToWhatsApp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (PhoneNumber.isEmpty()) {
+                    return;
+                }
+                try {
+
+                    String smsNumber = PhoneNumber;
+                    Uri uri = Uri.parse("smsto:" + smsNumber);
+                    Intent i = new Intent(Intent.ACTION_SENDTO, uri);
+                    i.putExtra("Test", "grocery");
+                    i.setPackage("com.whatsapp");
+                    startActivity(i);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(FriendProfileActivity.this, "WhatsApp not found", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     @Override
