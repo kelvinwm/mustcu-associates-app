@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,6 +20,7 @@
             android:padding="5dp">
 
             <RelativeLayout
+                android:id="@+id/pickCamera"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/circle_upload"
@@ -50,6 +51,7 @@
             android:padding="5dp">
 
             <RelativeLayout
+                android:id="@+id/pickImage"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/circle_upload"
@@ -80,43 +82,7 @@
             android:padding="5dp">
 
             <RelativeLayout
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/circle_upload"
-                android:gravity="center">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_videocam" />
-            </RelativeLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="center"
-                android:text="Record Video"
-                android:textColor="#000"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="5dp">
-
-            <RelativeLayout
+                android:id="@+id/pickVideo"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/circle_upload"
@@ -137,6 +103,13 @@
                 android:textColor="#000"
                 android:textStyle="bold" />
         </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -147,6 +120,38 @@
             android:padding="5dp">
 
             <RelativeLayout
+                android:id="@+id/pickAudio"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/circle_upload"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_mic" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:text="Choose Audio"
+                android:textColor="#000"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="5dp">
+
+            <RelativeLayout
+                android:id="@+id/pickFile"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/circle_upload"

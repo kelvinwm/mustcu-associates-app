@@ -1,16 +1,26 @@
 package com.beyondthehorizon.associates.chats;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.app.Dialog;
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.print.PrintAttributes;
 import android.text.Editable;
@@ -25,6 +35,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +48,10 @@ import com.beyondthehorizon.associates.users.FriendProfileActivity;
 import com.beyondthehorizon.associates.users.GroupInfoActivity;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
+import com.dmcbig.mediapicker.PickerActivity;
+import com.dmcbig.mediapicker.PickerConfig;
+import com.dmcbig.mediapicker.TakePhotoActivity;
+import com.dmcbig.mediapicker.entity.Media;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -50,6 +65,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
+
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -66,7 +82,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private RecyclerView recyclerView;
-    //    private Button sendData, sendGroup;
+    private ArrayList<Media> select = new ArrayList<>();
     private ImageButton sendData;
     private EmojiconEditText sampleMessage;
     public static final String TAG = "CHATACTIVITY";
@@ -389,40 +405,86 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void getMediaStaff() {
+        //Check Permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(ChatActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(ChatActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            != PackageManager.PERMISSION_GRANTED) {
 
+                // Permission is not granted
+                ActivityCompat.requestPermissions(ChatActivity.this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+                return;
+            }
+        }
         // custom dialog
         final Dialog dialog = new Dialog(ChatActivity.this);
         dialog.setContentView(R.layout.media_dialog);
-        dialog.setTitle("");
 
-        // set the custom dialog components - text, image and button
-//        final EditText text = dialog.findViewById(R.id.locationName);
-//
-//        Button dialogButtonOk = (Button) dialog.findViewById(R.id.dialogButtonOK);
-//        Button dialogButtonCancel = (Button) dialog.findViewById(R.id.dialogButtonCancel);
+        RelativeLayout pickCamera = dialog.findViewById(R.id.pickCamera);
+        RelativeLayout pickImage = dialog.findViewById(R.id.pickImage);
+        RelativeLayout pickVideo = dialog.findViewById(R.id.pickVideo);
+        RelativeLayout pickAudio = dialog.findViewById(R.id.pickAudio);
+        RelativeLayout pickFile = dialog.findViewById(R.id.pickFile);
+        pickCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: SAVE LOCATION TO DATABASE
+                Intent intent = new Intent(ChatActivity.this, TakePhotoActivity.class); //Take a photo with a camera
+                startActivityForResult(intent, 200);
+            }
+        });
+        pickImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: SAVE LOCATION TO DATABASE
+                Intent intent = new Intent(ChatActivity.this, PickerActivity.class);
+                intent.putExtra(PickerConfig.SELECT_MODE, PickerConfig.PICKER_IMAGE); // Set the selection type, the default is that pictures and videos can be selected together (optional parameters)
+                long maxSize = 188743680L; // long long long long
+                intent.putExtra(PickerConfig.MAX_SELECT_SIZE, maxSize); // Maximum selection size, default 180M (optional parameter)
+                intent.putExtra(PickerConfig.MAX_SELECT_COUNT, 15); // Maximum number of choices, default 40 (optional parameter)
+                ArrayList<Media> defaultSelect = select; // You can set the photos selected by default, such as setting the list you just selected to the default.
+                intent.putExtra(PickerConfig.DEFAULT_SELECTED_LIST, defaultSelect); // You can set the photo selected by default (optional parameter)
+                startActivityForResult(intent, 200);
+            }
+        });
+        pickVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: SAVE LOCATION TO DATABASE
+                Intent intent = new Intent(ChatActivity.this, PickerActivity.class);
+                intent.putExtra(PickerConfig.SELECT_MODE, PickerConfig.PICKER_VIDEO); // Set the selection type, the default is that pictures and videos can be selected together (optional parameters)
+                long maxSize = 188743680L; // long long long long
+                intent.putExtra(PickerConfig.MAX_SELECT_SIZE, maxSize); // Maximum selection size, default 180M (optional parameter)
+                intent.putExtra(PickerConfig.MAX_SELECT_COUNT, 15); // Maximum number of choices, default 40 (optional parameter)
+                ArrayList<Media> defaultSelect = select; // You can set the photos selected by default, such as setting the list you just selected to the default.
+                intent.putExtra(PickerConfig.DEFAULT_SELECTED_LIST, defaultSelect); // You can set the photo selected by default (optional parameter)
+                startActivityForResult(intent, 200);
+            }
+        });
+        pickAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: SAVE LOCATION TO DATABASE
+                Intent intent_upload = new Intent();
+                intent_upload.setType("audio/*");
+                intent_upload.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(intent_upload, 1);
+            }
+        });
+        pickFile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: SAVE LOCATION TO DATABASE
+                Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
+                chooseFile.setType("*/*");
+                chooseFile = Intent.createChooser(chooseFile, "Choose a file");
+                startActivityForResult(chooseFile, 1);
+                dialog.dismiss();
+            }
+        });
 
-        // if button is clicked, close the custom dialog
-//        dialogButtonOk.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                if (text.getText().toString().isEmpty()) {
-//                    text.setError("Enter name");
-//                    return;
-//                }
-//                //TODO: SAVE LOCATION TO DATABASE
-//
-//            }
-//        });
-//
-//        // if no is clicked, close the custom dialog
-//        dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                dialog.dismiss();
-//                finish();
-//            }
-//        });
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         int width = metrics.widthPixels;
         int height = metrics.heightPixels;
@@ -464,5 +526,18 @@ public class ChatActivity extends AppCompatActivity {
         super.onPause();
         typingTextView.setVisibility(View.GONE);
         myRef.child("Users").child("UserProfile").child(currentUser.getUid()).child("isTyping").setValue(false);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 200 && resultCode == PickerConfig.RESULT_CODE) {
+            select = data.getParcelableArrayListExtra(PickerConfig.EXTRA_RESULT);//选择完后返回的list
+
+        }
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            //the selected audio.
+            Uri uri = data.getData();
+        }
     }
 }

@@ -6,7 +6,7 @@ android {
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.beyondthehorizon.associates"
-        minSdkVersion 17
+        minSdkVersion 18
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -50,6 +50,8 @@ dependencies {
     //picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'de.hdodenhof:circleimageview:3.0.1'
+    //Media picker
+    implementation 'com.dmcBig:mediapicker:+'
 
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.3.1'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'

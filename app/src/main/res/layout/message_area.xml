@@ -3,7 +3,8 @@
     xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="5dp">
 
     <TextView
         android:id="@+id/typingTextView"
@@ -20,22 +21,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/sms_texts"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="3dp">
 
         <ImageView
             android:id="@+id/emojiButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
             android:layout_gravity="center"
-            android:padding="5dp"
-            android:src="@drawable/emoji_people" />
+            android:paddingBottom="5dp"
+            android:src="@drawable/ic_emoji" />
 
         <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
             android:id="@+id/sampleMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Type Message"
+            android:hint="Type Message..."
             android:inputType="textCapSentences|textMultiLine"
             android:maxHeight="200dp"
             android:padding="10dp"
@@ -46,10 +48,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_marginStart="-10dp"
-            android:layout_marginBottom="10dp"
             android:background="@null"
-            android:rotation="20"
+            android:padding="8dp"
             android:scaleType="fitXY"
             android:src="@drawable/ic_attach_file" />
 
@@ -58,10 +58,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="10dp"
             android:background="@null"
+            android:padding="8dp"
             android:scaleType="fitXY"
             android:src="@drawable/ic_send" />
     </LinearLayout>
