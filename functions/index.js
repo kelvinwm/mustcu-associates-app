@@ -24,7 +24,7 @@
 						    timestamp: new Date().toLocaleString(),
 						    receiverUID:context.params.roomId,
 						    type:"Room",
-						    imageUrl:snap.val().imageUrl
+						    profileImage:snap.val().profileImage
 				         },
 		  				token: groupTokens
 
