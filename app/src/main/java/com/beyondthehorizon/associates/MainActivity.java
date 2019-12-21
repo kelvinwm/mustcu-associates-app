@@ -1,6 +1,7 @@
 package com.beyondthehorizon.associates;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -30,6 +31,12 @@ public class MainActivity extends AppCompatActivity implements AddNewPost.AddNew
     private static final String TAG = "MAIN";
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
+    public static final String CHAT_PREFS = "UserChatInfo";
+    public static final String MyFriendName = "myFriendName";
+    public static final String FriendUID = "friendUID";
+    public static final String ChatTypeFromChatsFragment = "chatTypeFromChatsFragment";
+    public static final String ProfileUrlFromChatsFragment = "profileUrlFromChatsFragment";
+    public static final String UserName = "userName";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

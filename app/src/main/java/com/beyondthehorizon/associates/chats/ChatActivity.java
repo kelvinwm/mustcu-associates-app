@@ -86,6 +86,12 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
 
+import static com.beyondthehorizon.associates.MainActivity.CHAT_PREFS;
+import static com.beyondthehorizon.associates.MainActivity.ChatTypeFromChatsFragment;
+import static com.beyondthehorizon.associates.MainActivity.FriendUID;
+import static com.beyondthehorizon.associates.MainActivity.MyFriendName;
+import static com.beyondthehorizon.associates.MainActivity.ProfileUrlFromChatsFragment;
+
 public class ChatActivity extends AppCompatActivity implements SendingImagesAdapter.SendMyTxtImage {
 
     private FirebaseAuth mAuth;
@@ -98,7 +104,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     private ChatsAdapter chatsAdapter;
     private SendingImagesAdapter imagesAdapter;
     public static final String MY_SHARED_PREF = "shared_prefs";
-    private SharedPreferences pref;
+    private SharedPreferences pref, chatPref;
     private String profileUrl;
     private Toolbar contactsToolbar;
     private TextView userTitle, userOnlineStatus, typingTextView;
@@ -108,9 +114,10 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     private DatabaseReference myRef;
     ImageView emojiImageView, attachButton;
     View rootView;
-    Intent intent;
+//    Intent intent;
     EmojIconActions emojIcon;
     private StorageReference storageReference;
+    String myFriend_Name, friend_Uid,chatType, profile_Uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,17 +126,24 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         contactsToolbar = findViewById(R.id.ctsToolbar);
         setSupportActionBar(contactsToolbar);
 
-        intent = getIntent();
+//        intent = getIntent();
         assert getSupportActionBar() != null;
-//        getSupportActionBar().setTitle(intent.getStringExtra("myFriendName"));
+//        getSupportActionBar().setTitle(myFriend_Name);
 //        getSupportActionBar().setSubtitle("online");
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference();
         pref = getApplicationContext().getSharedPreferences(MY_SHARED_PREF, 0); // 0 - for private mode
+        chatPref = getApplicationContext().getSharedPreferences(CHAT_PREFS, 0);
+        
+        myFriend_Name = chatPref.getString(MyFriendName, "");
+        friend_Uid = chatPref.getString(FriendUID, "");
+        chatType = chatPref.getString(ChatTypeFromChatsFragment, "");
+        profile_Uri = chatPref.getString(ProfileUrlFromChatsFragment, "");
+        
         SharedPreferences.Editor editor = pref.edit();
-        editor.putString("friend_name", intent.getStringExtra("myFriendName"));
+        editor.putString("friend_name", myFriend_Name);
         editor.apply();
 
         attachButton = findViewById(R.id.attachButton);
@@ -137,7 +151,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         userTitle = findViewById(R.id.userTitle);
         userOnlineStatus = findViewById(R.id.userOnlineStatus);
         profile_img = findViewById(R.id.imgProfile);
-        userTitle.setText(intent.getStringExtra("myFriendName"));
+        userTitle.setText(myFriend_Name);
 
         emojiImageView = (ImageView) findViewById(R.id.emojiButton);
         rootView = findViewById(R.id.root_view);
@@ -178,12 +192,12 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         });
 
         /**SINGLE CHAT */
-        if (intent.getStringExtra("chatTypeFromChatsFragment").contains("Single")) {
-            Picasso.get().load(intent.getStringExtra("imageUrlFromChatsFragment")).fit().placeholder(R.drawable.account)
+        if (chatType.contains("Single")) {
+            Picasso.get().load(profile_Uri).fit().placeholder(R.drawable.account)
                     .into(profile_img);
 
             /**GET USER ONLINE STATUS*/
-            myRef.child("Users").child("UserProfile").child(intent.getStringExtra("friendUID")).child("onlineStatus")
+            myRef.child("Users").child("UserProfile").child(friend_Uid).child("onlineStatus")
                     .addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -232,7 +246,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             });
 
             /**GET THEIR TYPING STATUS*/
-            myRef.child("Users").child("UserProfile").child(intent.getStringExtra("friendUID"))
+            myRef.child("Users").child("UserProfile").child(friend_Uid)
                     .child("isTyping").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -259,9 +273,9 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 @Override
                 public void onClick(View v) {
                     Intent intent1 = new Intent(ChatActivity.this, FriendProfileActivity.class);
-                    intent1.putExtra("userUid", intent.getStringExtra("friendUID"));
-                    intent1.putExtra("userName", intent.getStringExtra("myFriendName"));
-                    intent1.putExtra("userImage", intent.getStringExtra("imageUrlFromChatsFragment"));
+                    intent1.putExtra("userUid", friend_Uid);
+                    intent1.putExtra("userName", myFriend_Name);
+                    intent1.putExtra("userImage", profile_Uri);
                     startActivity(intent1);
                 }
             });
@@ -269,7 +283,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         } else {
             /**GROUP CHAT*/
             userOnlineStatus.setText("tap to view group info");
-            Picasso.get().load(intent.getStringExtra("imageUrlFromChatsFragment"))
+            Picasso.get().load(profile_Uri)
                     .fit().placeholder(R.drawable.giconn).into(profile_img);
 
             /**VIEW GROUP DETAILS*/
@@ -277,9 +291,9 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 @Override
                 public void onClick(View v) {
                     Intent intent1 = new Intent(ChatActivity.this, GroupInfoActivity.class);
-                    intent1.putExtra("groupUid", intent.getStringExtra("friendUID"));
-                    intent1.putExtra("groupName", intent.getStringExtra("myFriendName"));
-                    intent1.putExtra("groupImage", intent.getStringExtra("imageUrlFromChatsFragment"));
+                    intent1.putExtra("groupUid", friend_Uid);
+                    intent1.putExtra("groupName", myFriend_Name);
+                    intent1.putExtra("groupImage", profile_Uri);
                     startActivity(intent1);
                 }
             });
@@ -324,8 +338,8 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 sendMessage();
             }
         });
-        Log.d(TAG, "onCreate: " + intent.getStringExtra("friendUID"));
-        getChats(intent.getStringExtra("friendUID"));
+        Log.d(TAG, "onCreate: " + friend_Uid);
+        getChats(friend_Uid);
 
 
         attachButton.setOnClickListener(new View.OnClickListener() {
@@ -354,13 +368,13 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 currentUser.getPhoneNumber(),
                 currentUser.getUid(),
                 dateToStr,
-                intent.getStringExtra("friendUID"),
+                friend_Uid,
                 profileUrl,
                 "*hak*none0#",
-                intent.getStringExtra("chatTypeFromChatsFragment"),
+                chatType,
                 "sent");
 
-        if (intent.getStringExtra("chatTypeFromChatsFragment").contains("Single")) {
+        if (chatType.contains("Single")) {
             /**SEND TO SINGLE CHAT FIRE BASE*/
             myRef.child("Users").child("UserChats").child(msg_key)
                     .setValue(chatModel).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -376,8 +390,8 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
 
         } else {
             /**SEND TO FIRE BASE ROOM CHAT*/
-            myRef.child("Rooms").child(intent.getStringExtra("friendUID"))
-                    .child(intent.getStringExtra("myFriendName")).child("UserChats")
+            myRef.child("Rooms").child(friend_Uid)
+                    .child(myFriend_Name).child("UserChats")
                     .child(msg_key).setValue(chatModel)
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
@@ -409,22 +423,22 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 message,
                 "0",
                 currentUser.getPhoneNumber(),
-                intent.getStringExtra("friendUID"),
+                friend_Uid,
                 dateToStr,
                 currentUser.getUid(),
                 profileUrl,
                 "*hak*none0#",
-                intent.getStringExtra("chatTypeFromChatsFragment"),
+                chatType,
                 "sending..."));
 
         //Save locally to view on latest chats
         chatsViewModel.insertLatestChat(new RecentChatModel(
-                intent.getStringExtra("friendUID"),
-                intent.getStringExtra("myFriendName"),
+                friend_Uid,
+                myFriend_Name,
                 message,
                 dateToStr,
-                intent.getStringExtra("chatTypeFromChatsFragment"),
-                intent.getStringExtra("imageUrlFromChatsFragment")));
+                chatType,
+                profile_Uri));
         sampleMessage.setText("");
     }
 

@@ -2,6 +2,7 @@ package com.beyondthehorizon.associates.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,12 @@ import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
+
+import static com.beyondthehorizon.associates.MainActivity.CHAT_PREFS;
+import static com.beyondthehorizon.associates.MainActivity.ChatTypeFromChatsFragment;
+import static com.beyondthehorizon.associates.MainActivity.FriendUID;
+import static com.beyondthehorizon.associates.MainActivity.MyFriendName;
+import static com.beyondthehorizon.associates.MainActivity.ProfileUrlFromChatsFragment;
 
 public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyViewHolder>
         implements Filterable {
@@ -50,6 +57,8 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyView
     @Override
     public void onBindViewHolder(AllUsersAdapter.MyViewHolder holder, int position) {
         final RecentChatModel provider = providerModelArrayList.get(position);
+        SharedPreferences pref = ctx.getSharedPreferences(CHAT_PREFS, 0); // 0 - for private mode
+        final SharedPreferences.Editor editor = pref.edit();
 //        holder.providePhoto.setImageResource(provider.getImage_drawable());
         holder.providerName.setText(provider.getUsername());
         holder.userMessage.setText(provider.getMessage());
@@ -67,12 +76,17 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyView
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                editor.putString(MyFriendName, provider.getUsername());
+                editor.putString(FriendUID, provider.getSenderUID());
+                editor.putString(ChatTypeFromChatsFragment, provider.getType());
+                editor.putString(ProfileUrlFromChatsFragment, provider.getImageUrl());
+                editor.apply();
                 Intent providerDetails = new Intent(ctx, ChatActivity.class);
-                providerDetails.putExtra("myFriendName", provider.getUsername());
-                providerDetails.putExtra("friendUID", provider.getSenderUID());
-                providerDetails.putExtra("chatTypeFromChatsFragment", provider.getType());
-                providerDetails.putExtra("imageUrlFromChatsFragment", provider.getImageUrl());
-//                providerDetails.putExtra("Name", provider.getName());
+//                providerDetails.putExtra("myFriendName", provider.getUsername());
+//                providerDetails.putExtra("friendUID", provider.getSenderUID());
+//                providerDetails.putExtra("chatTypeFromChatsFragment", provider.getType());
+//                providerDetails.putExtra("imageUrlFromChatsFragment", provider.getImageUrl());
+////                providerDetails.putExtra("Name", provider.getName());
                 ctx.startActivity(providerDetails);
             }
         });
