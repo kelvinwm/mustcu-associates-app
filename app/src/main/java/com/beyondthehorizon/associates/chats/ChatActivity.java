@@ -98,8 +98,8 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     private ChatsAdapter chatsAdapter;
     private SendingImagesAdapter imagesAdapter;
     public static final String MY_SHARED_PREF = "shared_prefs";
-    SharedPreferences pref;
-    String profileUrl;
+    private SharedPreferences pref;
+    private String profileUrl;
     private Toolbar contactsToolbar;
     private TextView userTitle, userOnlineStatus, typingTextView;
     private CircleImageView profile_img;
