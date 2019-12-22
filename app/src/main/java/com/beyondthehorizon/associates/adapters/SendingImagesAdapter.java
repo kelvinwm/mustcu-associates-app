@@ -23,6 +23,7 @@ import com.beyondthehorizon.associates.database.RecentChatModel;
 import com.beyondthehorizon.associates.database.SendingImagesModel;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -56,7 +57,7 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
     @Override
     public void onBindViewHolder(final SendingImagesAdapter.MyViewHolder holder, final int position) {
         final SendingImagesModel provider = providerModelArrayList.get(position);
-        holder.theImage.setImageURI(provider.getImageUri());
+        holder.theImage.setImageURI(Uri.fromFile(new File(provider.getImageUri())));
 //        sendingImagesModelArrayList.add(new SendingImagesModel(provider.getImageUri(), ""));
         holder.imageText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -67,7 +68,7 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.toString().trim().length() == 0) {
-                    sendingImagesModelArrayList.get(position).setTxtMessage("");
+                    sendingImagesModelArrayList.get(position).setTxtMessage("*hak*none0#");
                 } else {
                     sendingImagesModelArrayList.get(position).setTxtMessage(holder.imageText.getText().toString().trim());
                 }

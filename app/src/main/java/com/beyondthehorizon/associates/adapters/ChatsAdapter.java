@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -33,6 +35,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
@@ -82,11 +85,16 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
             holder.commentLayout.setVisibility(View.GONE);
             holder.divider.setVisibility(View.GONE);
         }
-
         holder.message_time.setText(proMember.getTimestamp());
         holder.providerMessage.setText(proMember.getMessage());
         holder.numberOfComments.setText(proMember.getComments());
         holder.del_status.setTextColor(Color.parseColor("#000000"));
+        if (proMember.getImageUrl().contains("*hak*none0#")) {
+            holder.sendImage.setVisibility(View.GONE);
+        } else {
+            holder.sendImage.setVisibility(View.VISIBLE);
+            holder.sendImage.setImageURI(Uri.fromFile(new File(proMember.getImageUrl())));
+        }
         if (proMember.delivery_status.contains("sent")) {
             myRef.child("Users").child("UserChats").child(proMember.getMessage_key()).child("delivery_status").setValue("Seen");
             chatsViewModel.updateDeliveryStatus(proMember.message_key, "Delivered");
@@ -142,8 +150,8 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
     }
 
     public static class ProMemberViewHolder extends RecyclerView.ViewHolder {
-        TextView providerName, numberOfComments, del_status;
-        TextView message_time;
+        TextView providerName, numberOfComments, del_status, message_time;
+        ImageView sendImage;
         EmojiconTextView providerMessage;
         View mView, divider;
         LinearLayout commentLayout, r2;
@@ -158,6 +166,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
             commentLayout = itemView.findViewById(R.id.commentLayout);
             divider = itemView.findViewById(R.id.divider);
             del_status = itemView.findViewById(R.id.del_status);
+            sendImage = itemView.findViewById(R.id.sendImage);
             r2 = itemView.findViewById(R.id.r2);
         }
     }

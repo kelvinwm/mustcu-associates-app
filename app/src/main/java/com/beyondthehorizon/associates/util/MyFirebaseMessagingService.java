@@ -6,11 +6,16 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -26,6 +31,18 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public static final String TAG = "MESSAGING";
@@ -45,7 +62,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
+    public void onMessageReceived(final RemoteMessage remoteMessage) {
 
         /* There are two types of messages data messages and notification messages.
         Data messages are handled here in onMessageReceived whether the app is in the foreground or background.
@@ -55,7 +72,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         chatsRepository = new ChatsRepository(getApplication());
 
-        String dataSender, dataMessage, phoneNumber, senderUID, newGroup,
+        final String dataSender, dataMessage, phoneNumber, senderUID, newGroup,
                 receiverUID, timestamp, type, profileImage, imageUrl, groupName, message_key;
 
         // Check if message contains a data payload.
@@ -83,91 +100,41 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             final String finalDataTitle = dataSender;
             final String finalDataMessage = dataMessage;
 
-
-            if (type.contains("Room")) {
-                if (newGroup.contains("NewGroup")) {
-                    if (dataMessage.contains(currentUser.getPhoneNumber())) {
-                        dataMessage = "You created " + groupName;
-                    } else {
-                        dataMessage = dataMessage + " added You";
+            if (imageUrl.contains("*hak*none0#")) {
+                saveDataLocally(dataSender, dataMessage, phoneNumber, senderUID,
+                        timestamp, receiverUID, type, imageUrl, remoteMessage,
+                        profileImage, groupName, newGroup, message_key);
+            } else {
+                try {
+                    URL url = new URL(imageUrl);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoInput(true);
+                    connection.connect();
+                    InputStream input = connection.getInputStream();
+                    Bitmap bitmap = BitmapFactory.decodeStream(input);
+                    File mydir = new File(Environment.getExternalStorageDirectory() + "/Associates/Media/Associates Images");
+                    if (!mydir.exists()) {
+                        mydir.mkdirs();
                     }
-                    dataSender = "";
+                    String time = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(System.currentTimeMillis());
+                    String fileUri = mydir.getAbsolutePath() + File.separator + "IMG-" + time + ".jpg";
+                    FileOutputStream outputStream = new FileOutputStream(fileUri);
+
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                    outputStream.flush();
+                    outputStream.close();
+
+                    saveDataLocally(dataSender, dataMessage, phoneNumber, senderUID,
+                            timestamp, receiverUID, type, fileUri, remoteMessage,
+                            profileImage, groupName, newGroup, message_key);
+                    Log.d(TAG, "onImageReceived: " + fileUri);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                if (!senderUID.contains(currentUser.getUid())) {
-                    chatsRepository.insertLatestChat(new RecentChatModel(
-                            receiverUID, //Group unique Id
-                            groupName,
-                            dataMessage,
-                            timestamp,
-                            type,
-                            profileImage
-                    ));
-
-                    chatsRepository.insertChat(new ChatModel(
-                            message_key,
-                            dataSender,
-                            dataMessage,
-                            "0",
-                            phoneNumber,
-                            receiverUID, //Chats are found using this senderUID(this is senderUID field)
-                            timestamp,
-                            receiverUID,
-                            profileImage,
-                            imageUrl,
-                            type,
-                            "Delivered"
-                    ));
-
-                    chatsRepository.insertComment(new CommentsModel(
-                            message_key,
-                            dataSender,
-                            dataMessage,
-                            phoneNumber,
-                            senderUID,
-                            timestamp,
-                            type
-                    ));
-                }
-            } else if (type.contains("Single")) {
-
-                chatsRepository.insertLatestChat(new RecentChatModel(
-                        senderUID,
-                        dataSender,
-                        dataMessage,
-                        timestamp,
-                        type,
-                        imageUrl
-                ));
-
-                chatsRepository.insertChat(new ChatModel(
-                        message_key,
-                        dataSender,
-                        dataMessage,
-                        "0",
-                        phoneNumber,
-                        senderUID,
-                        timestamp,
-                        receiverUID,
-                        profileImage,
-                        imageUrl,
-                        type,
-                        "sent"
-                ));
-            } else if (type.contains("Comment")) {
-                String total_num_comments = remoteMessage.getData().get("totalComments");
-                if (!senderUID.contains(currentUser.getUid())) {
-                    chatsRepository.insertComment(new CommentsModel(
-                            message_key,
-                            dataSender,
-                            dataMessage,
-                            phoneNumber,
-                            senderUID,
-                            timestamp,
-                            type
-                    ));
-                }
-                chatsRepository.updateNumberOfComments(message_key, total_num_comments);
             }
+
             Log.d(TAG, "onMessageReceived: " + AppController.getInstance().appStatus);
             if (AppController.getInstance().appStatus) {
                 // Also if you intend on generating your own notifications as a result of a received FCM
@@ -181,6 +148,95 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //            notificationTitle = remoteMessage.getNotification().getTitle();
 //            notificationBody = remoteMessage.getNotification().getBody();
 //        }
+    }
+
+    private void saveDataLocally(String dataSender, String dataMessage, String phoneNumber, String senderUID,
+                                 String timestamp, String receiverUID, String type, String imageUrl, RemoteMessage remoteMessage,
+                                 String profileImage, String groupName, String newGroup, String message_key) {
+        if (type.contains("Room")) {
+            if (newGroup.contains("NewGroup")) {
+                if (dataMessage.contains(currentUser.getPhoneNumber())) {
+                    dataMessage = "You created " + groupName;
+                } else {
+                    dataMessage = dataMessage + " added You";
+                }
+                dataSender = "";
+            }
+            if (!senderUID.contains(currentUser.getUid())) {
+                chatsRepository.insertLatestChat(new RecentChatModel(
+                        receiverUID, //Group unique Id
+                        groupName,
+                        dataMessage,
+                        timestamp,
+                        type,
+                        profileImage
+                ));
+
+                chatsRepository.insertChat(new ChatModel(
+                        message_key,
+                        dataSender,
+                        dataMessage,
+                        "0",
+                        phoneNumber,
+                        receiverUID, //Chats are found using this senderUID(this is senderUID field)
+                        timestamp,
+                        receiverUID,
+                        profileImage,
+                        imageUrl,
+                        type,
+                        "Delivered"
+                ));
+
+                chatsRepository.insertComment(new CommentsModel(
+                        message_key,
+                        dataSender,
+                        dataMessage,
+                        phoneNumber,
+                        senderUID,
+                        timestamp,
+                        type
+                ));
+            }
+        } else if (type.contains("Single")) {
+
+            chatsRepository.insertLatestChat(new RecentChatModel(
+                    senderUID,
+                    dataSender,
+                    dataMessage,
+                    timestamp,
+                    type,
+                    imageUrl
+            ));
+
+            chatsRepository.insertChat(new ChatModel(
+                    message_key,
+                    dataSender,
+                    dataMessage,
+                    "0",
+                    phoneNumber,
+                    senderUID,
+                    timestamp,
+                    receiverUID,
+                    profileImage,
+                    imageUrl,
+                    type,
+                    "sent"
+            ));
+        } else if (type.contains("Comment")) {
+            String total_num_comments = remoteMessage.getData().get("totalComments");
+            if (!senderUID.contains(currentUser.getUid())) {
+                chatsRepository.insertComment(new CommentsModel(
+                        message_key,
+                        dataSender,
+                        dataMessage,
+                        phoneNumber,
+                        senderUID,
+                        timestamp,
+                        type
+                ));
+            }
+            chatsRepository.updateNumberOfComments(message_key, total_num_comments);
+        }
     }
 
     /**

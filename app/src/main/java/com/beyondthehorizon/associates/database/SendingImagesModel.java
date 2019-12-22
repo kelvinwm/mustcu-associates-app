@@ -3,19 +3,19 @@ package com.beyondthehorizon.associates.database;
 import android.net.Uri;
 
 public class SendingImagesModel {
-    Uri imageUri;
+    String imageUri;
     String txtMessage;
 
-    public SendingImagesModel(Uri imageUri, String txtMessage) {
+    public SendingImagesModel(String imageUri, String txtMessage) {
         this.imageUri = imageUri;
         this.txtMessage = txtMessage;
     }
 
-    public Uri getImageUri() {
+    public String getImageUri() {
         return imageUri;
     }
 
-    public void setImageUri(Uri imageUri) {
+    public void setImageUri(String imageUri) {
         this.imageUri = imageUri;
     }
 

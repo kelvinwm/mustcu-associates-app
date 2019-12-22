@@ -114,10 +114,10 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     private DatabaseReference myRef;
     ImageView emojiImageView, attachButton;
     View rootView;
-//    Intent intent;
+    //    Intent intent;
     EmojIconActions emojIcon;
     private StorageReference storageReference;
-    String myFriend_Name, friend_Uid,chatType, profile_Uri;
+    String myFriend_Name, friend_Uid, chatType, profile_Uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,12 +136,12 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         myRef = database.getReference();
         pref = getApplicationContext().getSharedPreferences(MY_SHARED_PREF, 0); // 0 - for private mode
         chatPref = getApplicationContext().getSharedPreferences(CHAT_PREFS, 0);
-        
+
         myFriend_Name = chatPref.getString(MyFriendName, "");
         friend_Uid = chatPref.getString(FriendUID, "");
         chatType = chatPref.getString(ChatTypeFromChatsFragment, "");
         profile_Uri = chatPref.getString(ProfileUrlFromChatsFragment, "");
-        
+
         SharedPreferences.Editor editor = pref.edit();
         editor.putString("friend_name", myFriend_Name);
         editor.apply();
@@ -335,7 +335,39 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         sendData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage();
+                String message = sampleMessage.getText().toString().trim();
+                if (message.isEmpty()) {
+                    return;
+                }
+                Date today = new Date();
+                SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a",
+                        Locale.getDefault());
+                String dateToStr = format.format(today);
+                String msg_key = myRef.child("Users").child("UserChats").push().getKey();
+                //Save locally
+                chatsViewModel.insertChat(new ChatModel(
+                        msg_key,
+                        currentUser.getDisplayName(),
+                        message,
+                        "0",
+                        currentUser.getPhoneNumber(),
+                        friend_Uid,
+                        dateToStr,
+                        currentUser.getUid(),
+                        profileUrl,
+                        "*hak*none0#",
+                        chatType,
+                        "sending..."));
+
+                //Save locally to view on latest chats
+                chatsViewModel.insertLatestChat(new RecentChatModel(
+                        friend_Uid,
+                        myFriend_Name,
+                        message,
+                        dateToStr,
+                        chatType,
+                        profile_Uri));
+                sendMessage(message, "*hak*none0#", dateToStr, msg_key);
             }
         });
         Log.d(TAG, "onCreate: " + friend_Uid);
@@ -350,16 +382,9 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         });
     }
 
-    private void sendMessage() {
-        String message = sampleMessage.getText().toString().trim();
-        if (message.isEmpty()) {
-            return;
-        }
-        Date today = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a", Locale.getDefault());
-        String dateToStr = format.format(today);
+    private void sendMessage(String message, String imageUrl,
+                             String dateToStr, final String msg_key) {
 
-        final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
         ChatModel chatModel = new ChatModel(
                 msg_key,
                 currentUser.getDisplayName(),
@@ -370,7 +395,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 dateToStr,
                 friend_Uid,
                 profileUrl,
-                "*hak*none0#",
+                imageUrl,
                 chatType,
                 "sent");
 
@@ -403,8 +428,6 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                             }
                         }
                     });
-
-
             chatsViewModel.insertCommentt(new CommentsModel(
                     msg_key,
                     currentUser.getDisplayName(),
@@ -416,29 +439,6 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             ));
         }
 
-        //Save locally
-        chatsViewModel.insertChat(new ChatModel(
-                msg_key,
-                currentUser.getDisplayName(),
-                message,
-                "0",
-                currentUser.getPhoneNumber(),
-                friend_Uid,
-                dateToStr,
-                currentUser.getUid(),
-                profileUrl,
-                "*hak*none0#",
-                chatType,
-                "sending..."));
-
-        //Save locally to view on latest chats
-        chatsViewModel.insertLatestChat(new RecentChatModel(
-                friend_Uid,
-                myFriend_Name,
-                message,
-                dateToStr,
-                chatType,
-                profile_Uri));
         sampleMessage.setText("");
     }
 
@@ -584,7 +584,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
 
             for (Media uri : select) {
                 Log.d(TAG, "onActivityResult: " + Uri.fromFile(new File(uri.path)));
-                allMedia.add(new SendingImagesModel(Uri.fromFile(new File(uri.path)), ""));
+                allMedia.add(new SendingImagesModel(uri.path, "IMG"));
 
                 imagesAdapter = new SendingImagesAdapter(ChatActivity.this, allMedia, this);
                 mediaRecyclerView.setAdapter(imagesAdapter);
@@ -600,31 +600,56 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
 
     @Override
     public void sendTextImage(ArrayList<SendingImagesModel> arrayList) {
-        for (SendingImagesModel model : arrayList) {
-            Log.d(TAG, "sendTextImage: " + model.getImageUri().toString() + " " + model.getTxtMessage());
+        for (final SendingImagesModel model : arrayList) {
+            Log.d(TAG, "sendTextImage: " + model.getImageUri() + " " + model.getTxtMessage());
 
-            final StorageReference filePath = storageReference.child(currentUser.getUid() + ".jpg");
-//                filePath.putFile(Uri.fromFile(new File(uri.path))).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-//                        filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                            @Override
-//                            public void onSuccess(Uri uri) {
-//                                Log.d(TAG, "onSuccess: " + uri.toString());
-////                                myRef.child("Users").child("UserProfile").child(currentUser.getUid())
-////                                        .child("imageUrl").setValue(uri.toString());
-////                                profile_image.setImageURI(resultUri);
-////                                progressDialog.dismiss();
-//                            }
-//                        });
-//                    }
-//                });
+            final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
+            final StorageReference filePath = storageReference.child(msg_key + ".jpg");
+            Date today = new Date();
+            SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a",
+                    Locale.getDefault());
+            final String dateToStr = format.format(today);
 
-            mediaRecyclerView.setVisibility(View.GONE);
-            LinearLayout L123 = findViewById(R.id.L123);
-            L123.setVisibility(View.VISIBLE);
+            //Save locally
+            chatsViewModel.insertChat(new ChatModel(
+                    msg_key,
+                    currentUser.getDisplayName(),
+                    model.getTxtMessage(),
+                    "0",
+                    currentUser.getPhoneNumber(),
+                    friend_Uid,
+                    dateToStr,
+                    currentUser.getUid(),
+                    profileUrl,
+                    model.getImageUri(),
+                    chatType,
+                    "sending..."));
 
-            arrayList.clear();
+            //Save locally to view on latest chats
+            chatsViewModel.insertLatestChat(new RecentChatModel(
+                    friend_Uid,
+                    myFriend_Name,
+                    model.getTxtMessage(),
+                    dateToStr,
+                    chatType,
+                    profile_Uri));
+
+            filePath.putFile(Uri.fromFile(new File(model.getImageUri()))).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            Log.d(TAG, "onSuccess: " + uri.toString());
+                            sendMessage(model.getTxtMessage(), uri.toString(), dateToStr, msg_key);
+                        }
+                    });
+                }
+            });
         }
+        mediaRecyclerView.setVisibility(View.GONE);
+        LinearLayout L123 = findViewById(R.id.L123);
+        L123.setVisibility(View.VISIBLE);
+        arrayList.clear();
     }
 }
