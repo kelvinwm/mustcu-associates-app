@@ -29,6 +29,7 @@ import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.chats.CommentsChatActivity;
 import com.beyondthehorizon.associates.database.ChatModel;
 import com.beyondthehorizon.associates.repositories.ChatsRepository;
+import com.beyondthehorizon.associates.viewdetails.ViewImageActivity;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -94,6 +95,14 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
         } else {
             holder.sendImage.setVisibility(View.VISIBLE);
             holder.sendImage.setImageURI(Uri.fromFile(new File(proMember.getImageUrl())));
+            holder.sendImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(context, ViewImageActivity.class);
+                    intent.putExtra("imageUri", proMember.getImageUrl());
+                    context.startActivity(intent);
+                }
+            });
         }
         if (proMember.delivery_status.contains("sent")) {
             myRef.child("Users").child("UserChats").child(proMember.getMessage_key()).child("delivery_status").setValue("Seen");

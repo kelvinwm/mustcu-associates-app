@@ -14,8 +14,9 @@
         <ImageView
             android:id="@+id/theImage"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="300dp"
             android:scaleType="fitXY"
+            android:maxHeight="300dp"
             android:src="@drawable/ic_image" />
 
         <LinearLayout
@@ -39,7 +40,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Type Message..."
+                android:hint="Add caption..."
                 android:inputType="textCapSentences|textMultiLine"
                 android:maxHeight="200dp"
                 android:padding="10dp"

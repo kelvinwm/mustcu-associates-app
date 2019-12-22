@@ -76,10 +76,16 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.MyView
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String profile;
+                if (provider.getImageUrl().isEmpty()) {
+                    profile = "none";
+                } else {
+                    profile = provider.getImageUrl();
+                }
                 editor.putString(MyFriendName, provider.getUsername());
                 editor.putString(FriendUID, provider.getSenderUID());
                 editor.putString(ChatTypeFromChatsFragment, provider.getType());
-                editor.putString(ProfileUrlFromChatsFragment, provider.getImageUrl());
+                editor.putString(ProfileUrlFromChatsFragment, profile);
                 editor.apply();
                 Intent providerDetails = new Intent(ctx, ChatActivity.class);
 //                providerDetails.putExtra("myFriendName", provider.getUsername());

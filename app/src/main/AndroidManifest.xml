@@ -16,6 +16,10 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".viewdetails.ViewImageActivity"
+            android:label="IMG"
+            android:parentActivityName=".chats.ChatActivity" />
+        <activity
             android:name=".users.GroupInfoActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -24,8 +28,7 @@
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
-        <activity
-            android:name=".chats.CommentsChatActivity"/>
+        <activity android:name=".chats.CommentsChatActivity" />
         <activity
             android:name=".chats.AddGroupActivity"
             android:label="New Group"

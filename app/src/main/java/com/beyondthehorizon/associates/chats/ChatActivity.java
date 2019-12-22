@@ -19,6 +19,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -574,22 +575,39 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == 200 && resultCode == PickerConfig.RESULT_CODE && data != null) {
-            select = data.getParcelableArrayListExtra(PickerConfig.EXTRA_RESULT);//选择完后返回的list
-            mediaRecyclerView.setVisibility(View.VISIBLE);
-
+            select = data.getParcelableArrayListExtra(PickerConfig.EXTRA_RESULT);
+            assert select != null;
+            if (select.size() == 0) {
+                return;
+            }
             ArrayList<SendingImagesModel> allMedia = new ArrayList<>();
-            LinearLayout L123 = findViewById(R.id.L123);
-            L123.setVisibility(View.GONE);
+//            LinearLayout L123 = findViewById(R.id.L123);
+//            L123.setVisibility(View.GONE);
+            Dialog dialog = new Dialog(ChatActivity.this);
+//            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            dialog.setContentView(R.layout.dialog_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(true);
+            dialog.show();
 
+            RecyclerView rvTest = (RecyclerView) dialog.findViewById(R.id.rvTest);
+            TextView totalImgs = dialog.findViewById(R.id.totalImgs);
+            String numOfImges = select.size() + " image(s)";
+            totalImgs.setText(numOfImges);
+            rvTest.setHasFixedSize(true);
+            rvTest.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
             for (Media uri : select) {
                 Log.d(TAG, "onActivityResult: " + Uri.fromFile(new File(uri.path)));
                 allMedia.add(new SendingImagesModel(uri.path, "IMG"));
-
                 imagesAdapter = new SendingImagesAdapter(ChatActivity.this, allMedia, this);
-                mediaRecyclerView.setAdapter(imagesAdapter);
-
+                rvTest.setAdapter(imagesAdapter);
+//                imagesAdapter = new SendingImagesAdapter(ChatActivity.this, allMedia, this);
+//                mediaRecyclerView.setAdapter(imagesAdapter);
             }
+
 
         }
         if (requestCode == 1 && resultCode == RESULT_OK) {

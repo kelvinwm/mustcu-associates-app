@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:scaleType="fitXY"
-            android:src="@drawable/biblebg" />
+            android:src="@drawable/default_image" />
 
         <com.cooltechworks.views.shimmer.ShimmerRecyclerView
             android:id="@+id/groupMemberRecycler"

@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.adapters.GroupInfoAdapter;
 import com.beyondthehorizon.associates.database.GroupDetailsModel;
+import com.beyondthehorizon.associates.database.GroupInfo;
 import com.beyondthehorizon.associates.database.UserProfile;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.firebase.database.ChildEventListener;
@@ -66,10 +67,10 @@ public class GroupInfoActivity extends AppCompatActivity {
         group_image = findViewById(R.id.group_image);
         userTitle.setText(intent.getStringExtra("groupName"));
         Log.d("GROUPNAME", "onCreate: " + intent.getStringExtra("groupName"));
-        Picasso.get().load(intent.getStringExtra("groupImage"))
-                .fit().placeholder(R.drawable.ic_image)
-                .error(R.drawable.ic_broken_image)
-                .into(group_image);
+//        Picasso.get().load(intent.getStringExtra("groupImage"))
+//                .fit().placeholder(R.drawable.default_image)
+//                .error(R.drawable.default_image)
+//                .into(group_image);
         userChat = new ArrayList<>();
 
         recyclerView = findViewById(R.id.groupMemberRecycler);
@@ -87,10 +88,12 @@ public class GroupInfoActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
                             numberOfUsers.setText(dataSnapshot.child("numberOfMembers").getValue().toString() + " participants");
-                            Picasso.get().load(dataSnapshot.child("imageUrl").getValue().toString())
-                                    .fit().placeholder(R.drawable.ic_image)
-                                    .error(R.drawable.ic_broken_image)
-                                    .into(group_image);
+                            if (dataSnapshot.child("imageUrl").exists()) {
+                                Picasso.get().load(dataSnapshot.child("imageUrl").getValue().toString())
+                                        .fit().placeholder(R.drawable.default_image)
+                                        .error(R.drawable.default_image)
+                                        .into(group_image);
+                            }
                         }
 
                     }
@@ -111,36 +114,21 @@ public class GroupInfoActivity extends AppCompatActivity {
                             userChat.clear();
                             for (final DataSnapshot snap : dataSnapshot.getChildren()) {
 
-                                myRef.child("Users").child("UserProfile").child(snap.getKey()).addChildEventListener(new ChildEventListener() {
+                                myRef.child("Users").child("UserProfile").child(snap.getKey()).addValueEventListener(new ValueEventListener() {
                                     @Override
-                                    public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                                        Log.d("TAG", "onChildAdded: "+dataSnapshot.getValue());
-//                                        GroupDetailsModel userProfile = new GroupDetailsModel(
-//                                                dataSnap.child("userName").getValue().toString(),
-//                                                snap.child("userRole").getValue().toString(),
-//                                                dataSnap.child("phoneNumber").getValue().toString(),
-//                                                dataSnap.child("imageUrl").getValue().toString(),
-//                                                dataSnap.child("tagLine").getValue().toString()
-//                                        );
-//                                        userChat.add(userProfile);
-//                                        Log.d("TAG", "onDataChange: "+userChat.size());
-//                                        groupInfoAdapter = new GroupInfoAdapter(GroupInfoActivity.this, (ArrayList<GroupDetailsModel>) userChat);
-//                                        recyclerView.setAdapter(groupInfoAdapter);
-                                    }
-
-                                    @Override
-                                    public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                                    }
-
-                                    @Override
-                                    public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-                                    }
-
-                                    @Override
-                                    public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.exists()) {
+                                            GroupDetailsModel groupInfo = new GroupDetailsModel(
+                                                    dataSnapshot.child("userName").getValue().toString(),
+                                                    snap.child("userRole").getValue().toString(),
+                                                    dataSnapshot.child("phoneNumber").getValue().toString(),
+                                                    dataSnapshot.child("imageUrl").getValue().toString(),
+                                                    dataSnapshot.child("tagLine").getValue().toString());
+                                            userChat.add(groupInfo);
+                                        }
+                                        Log.d("TAG", "onDataChange: " + userChat.size());
+                                        groupInfoAdapter = new GroupInfoAdapter(GroupInfoActivity.this, (ArrayList<GroupDetailsModel>) userChat);
+                                        recyclerView.setAdapter(groupInfoAdapter);
                                     }
 
                                     @Override
