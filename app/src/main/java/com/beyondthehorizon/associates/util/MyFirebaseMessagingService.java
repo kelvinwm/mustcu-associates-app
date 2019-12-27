@@ -4,18 +4,13 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -31,8 +26,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -92,7 +85,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             receiverUID = remoteMessage.getData().get("receiverUID");
             type = remoteMessage.getData().get("type");
             imageUrl = remoteMessage.getData().get("imageUrl");
-            profileImage = remoteMessage.getData().get("profileImage");
+            profileImage = remoteMessage.getData().get("profileUrl");
             groupName = remoteMessage.getData().get("groupname");
             newGroup = remoteMessage.getData().get("newGroup");
             message_key = remoteMessage.getData().get("message_key");
@@ -183,6 +176,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         receiverUID,
                         profileImage,
                         imageUrl,
+                        imageUrl,
+                        imageUrl,
+                        imageUrl,
                         type,
                         "Delivered"
                 ));
@@ -194,6 +190,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         phoneNumber,
                         senderUID,
                         timestamp,
+                        imageUrl,
+                        "Delivered",
                         type
                 ));
             }
@@ -205,7 +203,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     dataMessage,
                     timestamp,
                     type,
-                    imageUrl
+                    profileImage
             ));
 
             chatsRepository.insertChat(new ChatModel(
@@ -218,6 +216,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     timestamp,
                     receiverUID,
                     profileImage,
+                    imageUrl,
+                    imageUrl,
+                    imageUrl,
                     imageUrl,
                     type,
                     "sent"
@@ -232,6 +233,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         phoneNumber,
                         senderUID,
                         timestamp,
+                        imageUrl,
+                        "Delivered",
                         type
                 ));
             }
@@ -249,7 +252,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         intentAction.putExtra("action", "action1");
         PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this, 1,
                 intentAction, PendingIntent.FLAG_UPDATE_CURRENT);
-
 
         Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra("title", dataTitle);

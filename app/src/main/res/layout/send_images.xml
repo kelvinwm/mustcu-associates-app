@@ -1,61 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:gravity="center">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="#ffffff"
-        android:padding="10dp">
+    <FrameLayout
+        android:layout_width="400dp"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:layout_gravity="center">
+
+            <VideoView
+                android:id="@+id/videoView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+        </FrameLayout>
 
         <ImageView
             android:id="@+id/theImage"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:scaleType="fitXY"
+            android:layout_gravity="center"
             android:maxHeight="300dp"
-            android:src="@drawable/ic_image" />
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_image"
+            android:visibility="gone" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
+            android:id="@+id/imageText"
+            android:layout_width="400dp"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/theImage"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal"
-            android:padding="3dp">
+            android:layout_gravity="bottom"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="#fff"
+            android:hint="Add caption..."
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxHeight="200dp"
+            android:padding="10dp"
+            emojicon:emojiconSize="28sp" />
+    </FrameLayout>
+    <!--        <LinearLayout-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_below="@+id/theImage"-->
+    <!--            android:layout_marginTop="8dp"-->
+    <!--            android:orientation="horizontal"-->
+    <!--            android:padding="3dp">-->
 
-            <!--            <ImageView-->
-            <!--                android:id="@+id/emojiButton"-->
-            <!--                android:layout_width="38dp"-->
-            <!--                android:layout_height="38dp"-->
-            <!--                android:layout_gravity="center"-->
-            <!--                android:paddingBottom="5dp"-->
-            <!--                android:src="@drawable/ic_emoji" />-->
+    <!--            &lt;!&ndash;            <ImageView&ndash;&gt;-->
+    <!--            &lt;!&ndash;                android:id="@+id/emojiButton"&ndash;&gt;-->
+    <!--            &lt;!&ndash;                android:layout_width="38dp"&ndash;&gt;-->
+    <!--            &lt;!&ndash;                android:layout_height="38dp"&ndash;&gt;-->
+    <!--            &lt;!&ndash;                android:layout_gravity="center"&ndash;&gt;-->
+    <!--            &lt;!&ndash;                android:paddingBottom="5dp"&ndash;&gt;-->
+    <!--            &lt;!&ndash;                android:src="@drawable/ic_emoji" />&ndash;&gt;-->
 
-            <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
-                android:id="@+id/imageText"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Add caption..."
-                android:inputType="textCapSentences|textMultiLine"
-                android:maxHeight="200dp"
-                android:padding="10dp"
-                emojicon:emojiconSize="28sp" />
+    <!--                <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText-->
+    <!--                    android:id="@+id/imageText"-->
+    <!--                    android:layout_width="0dp"-->
+    <!--                    android:layout_height="wrap_content"-->
+    <!--                    android:layout_weight="1"-->
+    <!--                    android:hint="Add caption..."-->
+    <!--                    android:inputType="textCapSentences|textMultiLine"-->
+    <!--                    android:maxHeight="200dp"-->
+    <!--                    android:padding="10dp"-->
+    <!--                    emojicon:emojiconSize="28sp" />-->
 
-            <ImageButton
-                android:id="@+id/sendImgText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:background="@null"
-                android:elevation="8dp"
-                android:padding="8dp"
-                android:scaleType="fitXY"
-                android:src="@drawable/ic_send" />
-        </LinearLayout>
-    </RelativeLayout>
-</ScrollView>
+    <!--            <ImageButton-->
+    <!--                android:id="@+id/sendImgText"-->
+    <!--                android:layout_width="wrap_content"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_gravity="bottom"-->
+    <!--                android:background="@null"-->
+    <!--                android:elevation="8dp"-->
+    <!--                android:padding="8dp"-->
+    <!--                android:scaleType="fitXY"-->
+    <!--                android:src="@drawable/ic_send" />-->
+    <!--        </LinearLayout>-->
+</RelativeLayout>

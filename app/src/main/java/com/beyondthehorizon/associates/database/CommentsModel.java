@@ -14,6 +14,8 @@ public class CommentsModel {
     public String phoneNumber;
     public String senderUID;
     public String timestamp;
+    public String imageUrl;
+    public String deliveryState;
     public String type;
 
     @Ignore
@@ -21,16 +23,25 @@ public class CommentsModel {
     }
 
     public CommentsModel(String message_key, String senderName, String message, String phoneNumber,
-                         String senderUID, String timestamp, String type) {
+                         String senderUID, String timestamp, String imageUrl, String deliveryState, String type) {
         this.message_key = message_key;
         this.senderName = senderName;
         this.message = message;
         this.phoneNumber = phoneNumber;
         this.senderUID = senderUID;
         this.timestamp = timestamp;
+        this.imageUrl = imageUrl;
+        this.deliveryState = deliveryState;
         this.type = type;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public String getDeliveryState() {
+        return deliveryState;
+    }
     public int getId() {
         return id;
     }

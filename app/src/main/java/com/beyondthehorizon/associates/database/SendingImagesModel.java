@@ -5,10 +5,16 @@ import android.net.Uri;
 public class SendingImagesModel {
     String imageUri;
     String txtMessage;
+    String mediaType;
 
-    public SendingImagesModel(String imageUri, String txtMessage) {
+    public SendingImagesModel(String imageUri, String txtMessage, String mediaType) {
         this.imageUri = imageUri;
         this.txtMessage = txtMessage;
+        this.mediaType = mediaType;
+    }
+
+    public String getMediaType() {
+        return mediaType;
     }
 
     public String getImageUri() {

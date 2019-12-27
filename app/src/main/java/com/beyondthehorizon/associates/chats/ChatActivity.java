@@ -13,17 +13,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.print.PrintAttributes;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
@@ -32,14 +27,10 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.adapters.ChatsAdapter;
@@ -49,15 +40,13 @@ import com.beyondthehorizon.associates.database.CommentsModel;
 import com.beyondthehorizon.associates.database.RecentChatModel;
 import com.beyondthehorizon.associates.database.SendingImagesModel;
 import com.beyondthehorizon.associates.users.FriendProfileActivity;
-import com.beyondthehorizon.associates.users.GroupInfoActivity;
+import com.beyondthehorizon.associates.groupchat.GroupInfoActivity;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
-import com.dmcbig.mediapicker.PickerActivity;
 import com.dmcbig.mediapicker.PickerConfig;
 import com.dmcbig.mediapicker.TakePhotoActivity;
 import com.dmcbig.mediapicker.entity.Media;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -66,22 +55,20 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import com.jaiselrahman.filepicker.activity.FilePickerActivity;
+import com.jaiselrahman.filepicker.config.Configurations;
 import com.squareup.picasso.Picasso;
 
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
@@ -95,9 +82,10 @@ import static com.beyondthehorizon.associates.MainActivity.ProfileUrlFromChatsFr
 
 public class ChatActivity extends AppCompatActivity implements SendingImagesAdapter.SendMyTxtImage {
 
+    public static final int GALLARY_PICK = 200;
     private FirebaseAuth mAuth;
     private RecyclerView recyclerView, mediaRecyclerView;
-    private ArrayList<Media> select = new ArrayList<>();
+    public ArrayList<Media> select = new ArrayList<>();
     private ImageButton sendData;
     private EmojiconEditText sampleMessage;
     public static final String TAG = "CHATACTIVITY";
@@ -119,6 +107,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     EmojIconActions emojIcon;
     private StorageReference storageReference;
     String myFriend_Name, friend_Uid, chatType, profile_Uri;
+    Dialog dialog2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,9 +143,10 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         profile_img = findViewById(R.id.imgProfile);
         userTitle.setText(myFriend_Name);
 
-        emojiImageView = (ImageView) findViewById(R.id.emojiButton);
+        emojiImageView = findViewById(R.id.emojiButton);
         rootView = findViewById(R.id.root_view);
 
+        dialog2 = new Dialog(ChatActivity.this);
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         chatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
@@ -357,6 +347,9 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         currentUser.getUid(),
                         profileUrl,
                         "*hak*none0#",
+                        "*hak*none0#",
+                        "*hak*none0#",
+                        "*hak*none0#",
                         chatType,
                         "sending..."));
 
@@ -368,12 +361,12 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         dateToStr,
                         chatType,
                         profile_Uri));
-                sendMessage(message, "*hak*none0#", dateToStr, msg_key);
+                sendMessage(message, "*hak*none0#", "*hak*none0#",
+                        "*hak*none0#", "*hak*none0#", dateToStr, msg_key);
             }
         });
         Log.d(TAG, "onCreate: " + friend_Uid);
         getChats(friend_Uid);
-
 
         attachButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -383,7 +376,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         });
     }
 
-    private void sendMessage(String message, String imageUrl,
+    private void sendMessage(String message, String imageUrl, String videoUrl, String audioUrl, String fileUrl,
                              String dateToStr, final String msg_key) {
 
         ChatModel chatModel = new ChatModel(
@@ -397,6 +390,9 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 friend_Uid,
                 profileUrl,
                 imageUrl,
+                videoUrl,
+                audioUrl,
+                fileUrl,
                 chatType,
                 "sent");
 
@@ -436,6 +432,8 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                     currentUser.getPhoneNumber(),
                     currentUser.getUid(),
                     dateToStr,
+                    imageUrl,
+                    "Delivered",
                     "Comment"
             ));
         }
@@ -472,7 +470,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             public void onClick(View v) {
                 //TODO: SAVE LOCATION TO DATABASE
                 Intent intent = new Intent(ChatActivity.this, TakePhotoActivity.class); //Take a photo with a camera
-                startActivityForResult(intent, 200);
+                startActivityForResult(intent, GALLARY_PICK);
                 dialog.dismiss();
             }
         });
@@ -480,14 +478,27 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             @Override
             public void onClick(View v) {
                 //TODO: SAVE LOCATION TO DATABASE
-                Intent intent = new Intent(ChatActivity.this, PickerActivity.class);
-                intent.putExtra(PickerConfig.SELECT_MODE, PickerConfig.PICKER_IMAGE); // Set the selection type, the default is that pictures and videos can be selected together (optional parameters)
-                long maxSize = 188743680L; // long long long long
-                intent.putExtra(PickerConfig.MAX_SELECT_SIZE, maxSize); // Maximum selection size, default 180M (optional parameter)
-                intent.putExtra(PickerConfig.MAX_SELECT_COUNT, 15); // Maximum number of choices, default 40 (optional parameter)
-                ArrayList<Media> defaultSelect = select; // You can set the photos selected by default, such as setting the list you just selected to the default.
-                intent.putExtra(PickerConfig.DEFAULT_SELECTED_LIST, defaultSelect); // You can set the photo selected by default (optional parameter)
-                startActivityForResult(intent, 200);
+//                startActivity(new Intent(ChatActivity.this, SendingMediaActivity.class));
+//                Intent intent = new Intent(ChatActivity.this, PickerActivity.class);
+//                intent.putExtra(PickerConfig.SELECT_MODE, PickerConfig.PICKER_IMAGE); // Set the selection type, the default is that pictures and videos can be selected together (optional parameters)
+//                long maxSize = 188743680L; // long long long long
+//                intent.putExtra(PickerConfig.MAX_SELECT_SIZE, maxSize); // Maximum selection size, default 180M (optional parameter)
+//                intent.putExtra(PickerConfig.MAX_SELECT_COUNT, 15); // Maximum number of choices, default 40 (optional parameter)
+//                ArrayList<Media> defaultSelect = select; // You can set the photos selected by default, such as setting the list you just selected to the default.
+//                intent.putExtra(PickerConfig.DEFAULT_SELECTED_LIST, defaultSelect); // You can set the photo selected by default (optional parameter)
+//                startActivityForResult(intent, GALLARY_PICK);
+                Intent intent = new Intent(ChatActivity.this, FilePickerActivity.class);
+                intent.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
+                        .setCheckPermission(true)
+                        .setShowImages(true)
+                        .setShowAudios(false)
+                        .setShowFiles(false)
+                        .setShowVideos(false)
+                        .enableImageCapture(true)
+                        .setMaxSelection(5)
+                        .setSkipZeroSizeFiles(true)
+                        .build());
+                startActivityForResult(intent, GALLARY_PICK);
                 dialog.dismiss();
             }
         });
@@ -495,14 +506,27 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             @Override
             public void onClick(View v) {
                 //TODO: SAVE LOCATION TO DATABASE
-                Intent intent = new Intent(ChatActivity.this, PickerActivity.class);
-                intent.putExtra(PickerConfig.SELECT_MODE, PickerConfig.PICKER_VIDEO); // Set the selection type, the default is that pictures and videos can be selected together (optional parameters)
-                long maxSize = 188743680L; // long long long long
-                intent.putExtra(PickerConfig.MAX_SELECT_SIZE, maxSize); // Maximum selection size, default 180M (optional parameter)
-                intent.putExtra(PickerConfig.MAX_SELECT_COUNT, 15); // Maximum number of choices, default 40 (optional parameter)
-                ArrayList<Media> defaultSelect = select; // You can set the photos selected by default, such as setting the list you just selected to the default.
-                intent.putExtra(PickerConfig.DEFAULT_SELECTED_LIST, defaultSelect); // You can set the photo selected by default (optional parameter)
-                startActivityForResult(intent, 200);
+//                Intent intent = new Intent(ChatActivity.this, PickerActivity.class);
+//                intent.putExtra(PickerConfig.SELECT_MODE, PickerConfig.PICKER_VIDEO); // Set the selection type, the default is that pictures and videos can be selected together (optional parameters)
+//                long maxSize = 188743680L; // long long long long
+//                intent.putExtra(PickerConfig.MAX_SELECT_SIZE, maxSize); // Maximum selection size, default 180M (optional parameter)
+//                intent.putExtra(PickerConfig.MAX_SELECT_COUNT, 15); // Maximum number of choices, default 40 (optional parameter)
+//                ArrayList<Media> defaultSelect = select; // You can set the photos selected by default, such as setting the list you just selected to the default.
+//                intent.putExtra(PickerConfig.DEFAULT_SELECTED_LIST, defaultSelect); // You can set the photo selected by default (optional parameter)
+//                startActivityForResult(intent, GALLARY_PICK);
+
+                Intent intent = new Intent(ChatActivity.this, FilePickerActivity.class);
+                intent.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
+                        .setCheckPermission(true)
+                        .setShowImages(false)
+                        .setShowAudios(false)
+                        .setShowFiles(false)
+                        .setShowVideos(true)
+                        .enableVideoCapture(true)
+                        .setMaxSelection(3)
+                        .setSkipZeroSizeFiles(true)
+                        .build());
+                startActivityForResult(intent, GALLARY_PICK);
                 dialog.dismiss();
             }
         });
@@ -510,10 +534,10 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             @Override
             public void onClick(View v) {
                 //TODO: SAVE LOCATION TO DATABASE
-                Intent intent_upload = new Intent();
-                intent_upload.setType("audio/*");
-                intent_upload.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(intent_upload, 1);
+//                Intent intent_upload = new Intent();
+//                intent_upload.setType("audio/*");
+//                intent_upload.setAction(Intent.ACTION_GET_CONTENT);
+//                startActivityForResult(intent_upload, 1);
                 dialog.dismiss();
             }
         });
@@ -521,10 +545,16 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             @Override
             public void onClick(View v) {
                 //TODO: SAVE LOCATION TO DATABASE
-                Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
-                chooseFile.setType("*/*");
-                chooseFile = Intent.createChooser(chooseFile, "Choose a file");
-                startActivityForResult(chooseFile, 1);
+//                Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
+//                chooseFile.setType("*/*");
+//                chooseFile = Intent.createChooser(chooseFile, "Choose a file");
+//                startActivityForResult(chooseFile, 1);
+
+//                Intent intent4 = new Intent(ChatActivity.this, NormalFilePickActivity.class);
+//                intent4.putExtra(Constant.MAX_NUMBER, 9);
+//                intent4.putExtra(NormalFilePickActivity.SUFFIX, new String[]{"xlsx", "xls", "doc", "docx", "ppt", "pptx", "pdf"});
+//                startActivityForResult(intent4, Constant.REQUEST_CODE_PICK_FILE);
+
                 dialog.dismiss();
             }
         });
@@ -576,39 +606,39 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 200 && resultCode == PickerConfig.RESULT_CODE && data != null) {
+        if (requestCode == GALLARY_PICK && resultCode == PickerConfig.RESULT_CODE && data != null) {
             select = data.getParcelableArrayListExtra(PickerConfig.EXTRA_RESULT);
             assert select != null;
             if (select.size() == 0) {
                 return;
             }
-            ArrayList<SendingImagesModel> allMedia = new ArrayList<>();
-//            LinearLayout L123 = findViewById(R.id.L123);
-//            L123.setVisibility(View.GONE);
-            Dialog dialog = new Dialog(ChatActivity.this);
-//            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            dialog.setContentView(R.layout.dialog_layout);
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.setCancelable(true);
-            dialog.show();
-
-            RecyclerView rvTest = (RecyclerView) dialog.findViewById(R.id.rvTest);
-            TextView totalImgs = dialog.findViewById(R.id.totalImgs);
-            String numOfImges = select.size() + " image(s)";
-            totalImgs.setText(numOfImges);
-            rvTest.setHasFixedSize(true);
-            rvTest.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-            for (Media uri : select) {
-                Log.d(TAG, "onActivityResult: " + Uri.fromFile(new File(uri.path)));
-                allMedia.add(new SendingImagesModel(uri.path, "IMG"));
-                imagesAdapter = new SendingImagesAdapter(ChatActivity.this, allMedia, this);
-                rvTest.setAdapter(imagesAdapter);
+            Intent intent = new Intent(ChatActivity.this, SendingMediaActivity.class);
+            intent.putExtra("ikosawa", select);
+            startActivity(intent);
+//            ArrayList<SendingImagesModel> allMedia = new ArrayList<>();
+////            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+//            dialog2.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+//            dialog2.setContentView(R.layout.dialog_layout);
+//            dialog2.setCanceledOnTouchOutside(false);
+//            dialog2.setCancelable(true);
+//            dialog2.show();
+//
+//            RecyclerView rvTest = dialog2.findViewById(R.id.rvTest);
+//            TextView totalImgs = dialog2.findViewById(R.id.totalImgs);
+//            String numOfImges = select.size() + " item(s)";
+//            totalImgs.setText(numOfImges);
+//            rvTest.setHasFixedSize(true);
+//            rvTest.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+//            for (Media uri : select) {
+////                Log.d(TAG, "onActivityResult: " + uri.mediaType + "  " + Uri.fromFile(new File(uri.path)));
+//                Log.d(TAG, "onActivityResult: " + uri.path);
+//
+//                allMedia.add(new SendingImagesModel(uri.path, "IMG", String.valueOf(uri.mediaType)));
 //                imagesAdapter = new SendingImagesAdapter(ChatActivity.this, allMedia, this);
-//                mediaRecyclerView.setAdapter(imagesAdapter);
-            }
-
-
+//                rvTest.setAdapter(imagesAdapter);
+////                imagesAdapter = new SendingImagesAdapter(ChatActivity.this, allMedia, this);
+////                mediaRecyclerView.setAdapter(imagesAdapter);
+//            }
         }
         if (requestCode == 1 && resultCode == RESULT_OK) {
             //the selected audio.
@@ -618,56 +648,53 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
 
     @Override
     public void sendTextImage(ArrayList<SendingImagesModel> arrayList) {
-        for (final SendingImagesModel model : arrayList) {
-            Log.d(TAG, "sendTextImage: " + model.getImageUri() + " " + model.getTxtMessage());
-
-            final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
-            final StorageReference filePath = storageReference.child(msg_key + ".jpg");
-            Date today = new Date();
-            SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a",
-                    Locale.getDefault());
-            final String dateToStr = format.format(today);
-
-            //Save locally
-            chatsViewModel.insertChat(new ChatModel(
-                    msg_key,
-                    currentUser.getDisplayName(),
-                    model.getTxtMessage(),
-                    "0",
-                    currentUser.getPhoneNumber(),
-                    friend_Uid,
-                    dateToStr,
-                    currentUser.getUid(),
-                    profileUrl,
-                    model.getImageUri(),
-                    chatType,
-                    "sending..."));
-
-            //Save locally to view on latest chats
-            chatsViewModel.insertLatestChat(new RecentChatModel(
-                    friend_Uid,
-                    myFriend_Name,
-                    model.getTxtMessage(),
-                    dateToStr,
-                    chatType,
-                    profile_Uri));
-
-            filePath.putFile(Uri.fromFile(new File(model.getImageUri()))).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            Log.d(TAG, "onSuccess: " + uri.toString());
-                            sendMessage(model.getTxtMessage(), uri.toString(), dateToStr, msg_key);
-                        }
-                    });
-                }
-            });
-        }
-        mediaRecyclerView.setVisibility(View.GONE);
-        LinearLayout L123 = findViewById(R.id.L123);
-        L123.setVisibility(View.VISIBLE);
-        arrayList.clear();
+//        for (final SendingImagesModel model : arrayList) {
+//            Log.d(TAG, "sendTextImage: " + model.getImageUri() + " " + model.getTxtMessage());
+//
+//            final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
+//            final StorageReference filePath = storageReference.child(msg_key + ".jpg");
+//            Date today = new Date();
+//            SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a",
+//                    Locale.getDefault());
+//            final String dateToStr = format.format(today);
+//
+//            //Save locally
+//            chatsViewModel.insertChat(new ChatModel(
+//                    msg_key,
+//                    currentUser.getDisplayName(),
+//                    model.getTxtMessage(),
+//                    "0",
+//                    currentUser.getPhoneNumber(),
+//                    friend_Uid,
+//                    dateToStr,
+//                    currentUser.getUid(),
+//                    profileUrl,
+//                    model.getImageUri(),
+//                    chatType,
+//                    "sending..."));
+//
+//            //Save locally to view on latest chats
+//            chatsViewModel.insertLatestChat(new RecentChatModel(
+//                    friend_Uid,
+//                    myFriend_Name,
+//                    model.getTxtMessage(),
+//                    dateToStr,
+//                    chatType,
+//                    profile_Uri));
+//            filePath.putFile(Uri.fromFile(new File(model.getImageUri()))).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+//                @Override
+//                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+//                    filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                        @Override
+//                        public void onSuccess(Uri uri) {
+//                            Log.d(TAG, "onSuccess: " + uri.toString());
+//                            sendMessage(model.getTxtMessage(), uri.toString(), dateToStr, msg_key);
+//                        }
+//                    });
+//                }
+//            });
+//        }
+//        dialog2.dismiss();
+//        arrayList.clear();
     }
 }

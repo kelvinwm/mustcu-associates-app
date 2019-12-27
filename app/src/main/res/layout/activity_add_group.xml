@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".chats.AddGroupActivity">
+    tools:context=".groupchat.AddGroupActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -32,12 +32,14 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:drawablePadding="5dp"
-                android:hint="Group name" />
+                android:hint="Group name"
+                android:inputType="textCapSentences" />
 
             <ImageView
                 android:id="@+id/createGroupButton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:elevation="53dp"
                 android:src="@drawable/ic_check_circle" />
         </LinearLayout>
 

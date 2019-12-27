@@ -1,4 +1,4 @@
-package com.beyondthehorizon.associates.chats;
+package com.beyondthehorizon.associates.groupchat;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,8 +25,8 @@ import com.beyondthehorizon.associates.database.GroupUserInfo;
 import com.beyondthehorizon.associates.database.RecentChatModel;
 import com.beyondthehorizon.associates.database.UserProfile;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,7 +49,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -94,6 +93,7 @@ public class AddGroupActivity extends AppCompatActivity {
         progressDialog = new ProgressDialog(AddGroupActivity.this);
         progressDialog.setTitle("Creating Group...");
         progressDialog.setMessage("Please wait....");
+        progressDialog.setCanceledOnTouchOutside(false);
 
         userChat = new ArrayList<>();
         myRef.child("Users").child("UserProfile").addValueEventListener(new ValueEventListener() {
@@ -153,6 +153,7 @@ public class AddGroupActivity extends AppCompatActivity {
                             public void onComplete(@NonNull Task<InstanceIdResult> task) {
                                 if (!task.isSuccessful()) {
                                     //To do
+                                    Toast.makeText(AddGroupActivity.this, "Asiii", Toast.LENGTH_LONG).show();
                                     return;
                                 }
                                 // Get the Instance ID token//
@@ -167,54 +168,98 @@ public class AddGroupActivity extends AppCompatActivity {
                 final String myKey = myRef.child("Rooms").push().getKey();
                 final StorageReference filePath1 = storageReference.child("Group Profile Images").child(myKey + ".jpg");
 
-                myRef.child("Rooms").child(myKey).setValue(groupName).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-
-
-                        if (!(resultUri == null)) {
-                            filePath1.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                if (!(resultUri == null)) {
+                    filePath1.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            filePath1.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
-                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                                    filePath1.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                        @Override
-                                        public void onSuccess(Uri uri) {
-                                            Log.d(TAG, "onSuccess: " + uri.toString());
-                                            /**SET ADMIN INFO*/
-                                            myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
-                                                    .child(currentUser.getUid()).setValue(new GroupUserInfo(token[0],
-                                                    "Admin", currentUser.getPhoneNumber(), uri.toString()));
-                                            /**SET ALL USERS INFO*/
-                                            for (UserProfile profile : userContactsAdapter.allTokens) {
-                                                myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
-                                                        .child(profile.getUserUid()).setValue(new GroupUserInfo(profile.getUserToken(),
-                                                        "Member", currentUser.getPhoneNumber(), uri.toString()));
-                                            }
-                                            setGroupInfo(uri.toString(), myKey, groupName, numOfUsers);
-                                        }
-                                    });
+                                public void onSuccess(Uri uri) {
+                                    Log.d(TAG, "onSuccess: " + uri.toString());
+                                    /**SET ADMIN INFO*/
+                                    myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
+                                            .child(currentUser.getUid()).setValue(new GroupUserInfo(token[0],
+                                            "Admin", currentUser.getPhoneNumber(), uri.toString()));
+                                    /**SET ALL USERS INFO*/
+                                    for (UserProfile profile : userContactsAdapter.allTokens) {
+                                        myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
+                                                .child(profile.getUserUid()).setValue(new GroupUserInfo(profile.getUserToken(),
+                                                "Member", currentUser.getPhoneNumber(), uri.toString()));
+                                    }
+                                    setGroupInfo(uri.toString(), myKey, groupName, numOfUsers);
                                 }
                             });
-                        } else {
-                            /**SET GROUP INFO*/
-                            /**SET ADMIN INFO*/
-                            myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
-                                    .child(currentUser.getUid()).setValue(new GroupUserInfo(token[0],
-                                    "Admin", currentUser.getPhoneNumber(), "none"));
-
-                            /**SET ALL USERS INFO*/
-                            for (UserProfile profile : userContactsAdapter.allTokens) {
-                                myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
-                                        .child(profile.getUserUid()).setValue(new GroupUserInfo(profile.getUserToken(),
-                                        "Member", currentUser.getPhoneNumber(), "none"));
-                            }
-
-                            setGroupInfo("None", myKey, groupName, numOfUsers);
                         }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            //ON FAILURE
+                            progressDialog.dismiss();
+                            Toast.makeText(AddGroupActivity.this, "Unable to create group, try later", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    /**SET GROUP INFO*/
+                    myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
+                            .child(currentUser.getUid()).setValue(new GroupUserInfo(token[0],
+                            "Admin", currentUser.getPhoneNumber(), "none"));
 
+                    /**SET ALL USERS INFO*/
+                    for (UserProfile profile : userContactsAdapter.allTokens) {
+                        myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
+                                .child(profile.getUserUid()).setValue(new GroupUserInfo(profile.getUserToken(),
+                                "Member", currentUser.getPhoneNumber(), "none"));
                     }
-                });
 
+                    setGroupInfo("None", myKey, groupName, numOfUsers);
+                }
+
+
+//                myRef.child("Rooms").child(myKey).setValue(groupName).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Void> task) {
+//                        if (!(resultUri == null)) {
+//                            filePath1.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+//                                @Override
+//                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+//                                    filePath1.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                                        @Override
+//                                        public void onSuccess(Uri uri) {
+//                                            Log.d(TAG, "onSuccess: " + uri.toString());
+//                                            /**SET ADMIN INFO*/
+//                                            myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
+//                                                    .child(currentUser.getUid()).setValue(new GroupUserInfo(token[0],
+//                                                    "Admin", currentUser.getPhoneNumber(), uri.toString()));
+//                                            /**SET ALL USERS INFO*/
+//                                            for (UserProfile profile : userContactsAdapter.allTokens) {
+//                                                myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
+//                                                        .child(profile.getUserUid()).setValue(new GroupUserInfo(profile.getUserToken(),
+//                                                        "Member", currentUser.getPhoneNumber(), uri.toString()));
+//                                            }
+//                                            setGroupInfo(uri.toString(), myKey, groupName, numOfUsers);
+//                                        }
+//                                    });
+//                                }
+//                            });
+//                        } else {
+//                            /**SET GROUP INFO*/
+//                            /**SET ADMIN INFO*/
+//                            myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
+//                                    .child(currentUser.getUid()).setValue(new GroupUserInfo(token[0],
+//                                    "Admin", currentUser.getPhoneNumber(), "none"));
+//
+//                            /**SET ALL USERS INFO*/
+//                            for (UserProfile profile : userContactsAdapter.allTokens) {
+//                                myRef.child("Rooms").child(myKey).child(groupName).child("UserTokens")
+//                                        .child(profile.getUserUid()).setValue(new GroupUserInfo(profile.getUserToken(),
+//                                        "Member", currentUser.getPhoneNumber(), "none"));
+//                            }
+//
+//                            setGroupInfo("None", myKey, groupName, numOfUsers);
+//                        }
+//
+//                    }
+//                });
             }
         });
     }

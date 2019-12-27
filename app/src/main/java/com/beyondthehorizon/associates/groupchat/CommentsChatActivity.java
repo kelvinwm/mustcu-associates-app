@@ -1,4 +1,4 @@
-package com.beyondthehorizon.associates.chats;
+package com.beyondthehorizon.associates.groupchat;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,16 +13,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.beyondthehorizon.associates.R;
-import com.beyondthehorizon.associates.adapters.ChatsAdapter;
 import com.beyondthehorizon.associates.adapters.CommentsAdapter;
-import com.beyondthehorizon.associates.database.ChatModel;
 import com.beyondthehorizon.associates.database.CommentsModel;
-import com.beyondthehorizon.associates.database.RecentChatModel;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
 import com.google.firebase.auth.FirebaseAuth;
@@ -143,6 +139,8 @@ public class CommentsChatActivity extends AppCompatActivity {
                         currentUser.getPhoneNumber(),
                         currentUser.getUid(),
                         dateToStr,
+                        "*hak*none0#",
+                        "Sending...",
                         "Comment");
 
                 /**SEND TO FIRE BASE ROOM CHAT COMMENTS*/
@@ -159,6 +157,8 @@ public class CommentsChatActivity extends AppCompatActivity {
                         currentUser.getPhoneNumber(),
                         currentUser.getUid(),
                         dateToStr,
+                        "*hak*none0#",
+                        "Sending...",
                         "Comment"));
                 sampleMessage.setText("");
             }

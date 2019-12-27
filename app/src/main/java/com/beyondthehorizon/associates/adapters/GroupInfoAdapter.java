@@ -1,7 +1,6 @@
 package com.beyondthehorizon.associates.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,15 +12,9 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.beyondthehorizon.associates.R;
-import com.beyondthehorizon.associates.chats.ChatActivity;
 import com.beyondthehorizon.associates.database.GroupDetailsModel;
-import com.beyondthehorizon.associates.database.GroupDetailsModel;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-
-import de.hdodenhof.circleimageview.CircleImageView;
-import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 
 public class GroupInfoAdapter extends RecyclerView.Adapter<GroupInfoAdapter.MyViewHolder>
         implements Filterable {

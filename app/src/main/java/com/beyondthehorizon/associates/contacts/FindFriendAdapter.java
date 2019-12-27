@@ -27,8 +27,6 @@ import static com.beyondthehorizon.associates.MainActivity.ChatTypeFromChatsFrag
 import static com.beyondthehorizon.associates.MainActivity.FriendUID;
 import static com.beyondthehorizon.associates.MainActivity.MyFriendName;
 import static com.beyondthehorizon.associates.MainActivity.ProfileUrlFromChatsFragment;
-import static com.beyondthehorizon.associates.MainActivity.UserName;
-import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 
 public class FindFriendAdapter extends RecyclerView.Adapter<FindFriendAdapter.MyViewHolder>
         implements Filterable {

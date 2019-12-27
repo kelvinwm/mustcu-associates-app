@@ -1,36 +1,30 @@
-package com.beyondthehorizon.associates.users;
+package com.beyondthehorizon.associates.groupchat;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.adapters.GroupInfoAdapter;
 import com.beyondthehorizon.associates.database.GroupDetailsModel;
-import com.beyondthehorizon.associates.database.GroupInfo;
-import com.beyondthehorizon.associates.database.UserProfile;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +32,7 @@ import java.util.List;
 public class GroupInfoActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TextView userTitle, numberOfUsers;
-    private ImageView group_image;
+    private ImageView group_image, addNewMember;
     private FirebaseDatabase database;
     private DatabaseReference myRef;
     private ShimmerRecyclerView recyclerView;
@@ -63,14 +57,17 @@ public class GroupInfoActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         userTitle = findViewById(R.id.userTitle2);
+        addNewMember = findViewById(R.id.addNewMember);
         numberOfUsers = findViewById(R.id.numberOfUsers);
         group_image = findViewById(R.id.group_image);
         userTitle.setText(intent.getStringExtra("groupName"));
-        Log.d("GROUPNAME", "onCreate: " + intent.getStringExtra("groupName"));
-//        Picasso.get().load(intent.getStringExtra("groupImage"))
-//                .fit().placeholder(R.drawable.default_image)
-//                .error(R.drawable.default_image)
-//                .into(group_image);
+
+        Log.d("GROUPNAME", "onCreate: " + intent.getStringExtra("groupImage"));
+
+        Picasso.get().load(intent.getStringExtra("groupImage"))
+                .fit().placeholder(R.drawable.default_image)
+                .error(R.drawable.default_image)
+                .into(group_image);
         userChat = new ArrayList<>();
 
         recyclerView = findViewById(R.id.groupMemberRecycler);
@@ -80,6 +77,12 @@ public class GroupInfoActivity extends AppCompatActivity {
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
         recyclerView.showShimmerAdapter();
 
+        addNewMember.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(GroupInfoActivity.this, "Add new member", Toast.LENGTH_SHORT).show();
+            }
+        });
         /**GET GROUP PROFILE STATUS*/
         myRef.child("Rooms").child(intent.getStringExtra("groupUid")).child(intent.getStringExtra("groupName"))
                 .child("GroupInfo")
@@ -88,8 +91,8 @@ public class GroupInfoActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
                             numberOfUsers.setText(dataSnapshot.child("numberOfMembers").getValue().toString() + " participants");
-                            if (dataSnapshot.child("imageUrl").exists()) {
-                                Picasso.get().load(dataSnapshot.child("imageUrl").getValue().toString())
+                            if (dataSnapshot.child("profileImage").exists()) {
+                                Picasso.get().load(dataSnapshot.child("profileImage").getValue().toString())
                                         .fit().placeholder(R.drawable.default_image)
                                         .error(R.drawable.default_image)
                                         .into(group_image);

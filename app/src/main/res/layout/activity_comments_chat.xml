@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/root_view"
-    tools:context=".chats.CommentsChatActivity">
+    tools:context=".groupchat.CommentsChatActivity">
 
     <RelativeLayout
         android:id="@+id/scrollView"

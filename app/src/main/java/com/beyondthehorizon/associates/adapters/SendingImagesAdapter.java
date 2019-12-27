@@ -1,33 +1,25 @@
 package com.beyondthehorizon.associates.adapters;
 
 import android.content.Context;
-import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.MediaController;
+import android.widget.VideoView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.beyondthehorizon.associates.R;
-import com.beyondthehorizon.associates.chats.ChatActivity;
-import com.beyondthehorizon.associates.database.RecentChatModel;
 import com.beyondthehorizon.associates.database.SendingImagesModel;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.ArrayList;
-
-import de.hdodenhof.circleimageview.CircleImageView;
-import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 
 public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdapter.MyViewHolder> {
 
@@ -57,36 +49,51 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
     @Override
     public void onBindViewHolder(final SendingImagesAdapter.MyViewHolder holder, final int position) {
         final SendingImagesModel provider = providerModelArrayList.get(position);
-        holder.theImage.setImageURI(Uri.fromFile(new File(provider.getImageUri())));
-//        sendingImagesModelArrayList.add(new SendingImagesModel(provider.getImageUri(), ""));
-        holder.imageText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.toString().trim().length() == 0) {
-                    sendingImagesModelArrayList.get(position).setTxtMessage("*hak*none0#");
-                } else {
-                    sendingImagesModelArrayList.get(position).setTxtMessage(holder.imageText.getText().toString().trim());
+        if (provider.getMediaType().contains("0") || provider.getMediaType().contains("1")) {
+            holder.theImage.setVisibility(View.VISIBLE);
+            holder.theImage.setImageURI(Uri.fromFile(new File(provider.getImageUri())));
+        }
+        if (provider.getMediaType().contains("3")) {
+            holder.videoView.setVisibility(View.VISIBLE);
+            holder.videoView.setVideoURI(Uri.parse(provider.getImageUri()));
+            MediaController mediaController = new MediaController(ctx);
+            holder.videoView.setMediaController(mediaController);
+            mediaController.setAnchorView(holder.videoView);
+            holder.videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    holder.videoView.seekTo(0);
                 }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
-        holder.sendImgText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //send text and image
-                listener.sendTextImage(sendingImagesModelArrayList);
-            }
-        });
+            });
+        }
+//        holder.imageText.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                if (s.toString().trim().length() == 0) {
+//                    sendingImagesModelArrayList.get(position).setTxtMessage("*hak*none0#");
+//                } else {
+//                    sendingImagesModelArrayList.get(position).setTxtMessage(holder.imageText.getText().toString().trim());
+//                }
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//
+//            }
+//        });
+//
+//        holder.sendImgText.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                //send text and image
+//                listener.sendTextImage(sendingImagesModelArrayList);
+//            }
+//        });
 
     }
 
@@ -98,13 +105,15 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
     class MyViewHolder extends RecyclerView.ViewHolder {
 
         ImageView theImage, sendImgText;
-        EditText imageText;
+        VideoView videoView;
+//        EditText imageText;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             theImage = itemView.findViewById(R.id.theImage);
-            imageText = itemView.findViewById(R.id.imageText);
-            sendImgText = itemView.findViewById(R.id.sendImgText);
+//            imageText = itemView.findViewById(R.id.imageText);
+//            sendImgText = itemView.findViewById(R.id.sendImgText);
+            videoView = itemView.findViewById(R.id.videoView);
         }
     }
 

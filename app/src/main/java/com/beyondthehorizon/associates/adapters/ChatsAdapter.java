@@ -1,14 +1,10 @@
 package com.beyondthehorizon.associates.adapters;
 
-import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +12,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -26,9 +20,8 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.beyondthehorizon.associates.R;
-import com.beyondthehorizon.associates.chats.CommentsChatActivity;
+import com.beyondthehorizon.associates.groupchat.CommentsChatActivity;
 import com.beyondthehorizon.associates.database.ChatModel;
-import com.beyondthehorizon.associates.repositories.ChatsRepository;
 import com.beyondthehorizon.associates.viewdetails.ViewImageActivity;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
 import com.google.firebase.auth.FirebaseAuth;
@@ -129,6 +122,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
                 if (proMember.getType().contains("Single") || proMember.getSenderName().isEmpty()) {
                     return;
                 }
+                holder.mView.setEnabled(false);
                 Intent providerDetails = new Intent(context, CommentsChatActivity.class);
                 providerDetails.putExtra("MainQuestionKey", proMember.getMessage_key());
                 providerDetails.putExtra("RoomId", proMember.getSenderUID());

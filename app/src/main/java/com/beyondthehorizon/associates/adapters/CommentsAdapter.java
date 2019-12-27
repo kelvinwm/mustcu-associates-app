@@ -1,7 +1,6 @@
 package com.beyondthehorizon.associates.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,13 +9,11 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.beyondthehorizon.associates.R;
-import com.beyondthehorizon.associates.chats.CommentsChatActivity;
 import com.beyondthehorizon.associates.database.CommentsModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -58,7 +55,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ProMem
         final CommentsModel proMember = proMemberArrayList.get(position);
         fuser = FirebaseAuth.getInstance().getCurrentUser();
         final String details;
-        final int numberOfComments;
 
         holder.commentLayout.setVisibility(View.GONE);
         holder.divider.setVisibility(View.GONE);
@@ -148,10 +144,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ProMem
     public int getItemViewType(int position) {
         fuser = FirebaseAuth.getInstance().getCurrentUser();
         if (proMemberArrayList.get(position).getPhoneNumber().equals(fuser.getPhoneNumber())) {
-            Log.d(TAG, "getItemViewType: MINE");
             return 0;
         } else {
-            Log.d(TAG, "getItemViewType: THEIRS");
             return 1;
         }
     }

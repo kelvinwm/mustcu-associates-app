@@ -28,9 +28,9 @@ public class SendImages extends BottomSheetDialogFragment {
 
         final String[] gender = new String[1];
         gender[0] = "Male";
-        final EditText propName = v.findViewById(R.id.imageText);
-        ImageView theImage = v.findViewById(R.id.theImage);
-        ImageView sendImgText = v.findViewById(R.id.sendImgText);
+//        final EditText propName = v.findViewById(R.id.imageText);
+//        ImageView theImage = v.findViewById(R.id.theImage);
+//        ImageView sendImgText = v.findViewById(R.id.sendImgText);
 
 
         return v;
