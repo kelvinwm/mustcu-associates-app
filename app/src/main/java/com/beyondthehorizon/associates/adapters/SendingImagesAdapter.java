@@ -10,7 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.MediaController;
+import android.widget.TextView;
 import android.widget.VideoView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,7 +28,7 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
     private LayoutInflater inflater;
     private ArrayList<SendingImagesModel> providerModelArrayList;
     private Context ctx;
-    private ArrayList<SendingImagesModel> sendingImagesModelArrayList;
+    public ArrayList<SendingImagesModel> sendingImagesModelArrayList;
     private SendMyTxtImage listener;
     private static final String TAG = "PAPA";
 
@@ -49,9 +51,15 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
     @Override
     public void onBindViewHolder(final SendingImagesAdapter.MyViewHolder holder, final int position) {
         final SendingImagesModel provider = providerModelArrayList.get(position);
-        if (provider.getMediaType().contains("0") || provider.getMediaType().contains("1")) {
+        String items = position + 1 + "/" + providerModelArrayList.size() + " item(s)";
+        holder.totalItems2.setText(items);
+        if (provider.getMediaType().contains("1")) {
             holder.theImage.setVisibility(View.VISIBLE);
             holder.theImage.setImageURI(Uri.fromFile(new File(provider.getImageUri())));
+        }
+        if (provider.getMediaType().contains("0")) {
+            holder.theFileLayout.setVisibility(View.VISIBLE);
+            holder.theFileName.setText(provider.getMediaFile().getName());
         }
         if (provider.getMediaType().contains("3")) {
             holder.videoView.setVisibility(View.VISIBLE);
@@ -66,26 +74,26 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
                 }
             });
         }
-//        holder.imageText.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                if (s.toString().trim().length() == 0) {
-//                    sendingImagesModelArrayList.get(position).setTxtMessage("*hak*none0#");
-//                } else {
-//                    sendingImagesModelArrayList.get(position).setTxtMessage(holder.imageText.getText().toString().trim());
-//                }
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//
-//            }
-//        });
+        holder.imageText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.toString().trim().length() == 0) {
+                    sendingImagesModelArrayList.get(position).setTxtMessage("*hak*none0#");
+                } else {
+                    sendingImagesModelArrayList.get(position).setTxtMessage(holder.imageText.getText().toString().trim());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 //
 //        holder.sendImgText.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -104,14 +112,20 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
 
     class MyViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView theImage, sendImgText;
+        ImageView theImage, sendImgText, theFile;
         VideoView videoView;
-//        EditText imageText;
+        EditText imageText;
+        LinearLayout theFileLayout;
+        TextView theFileName, totalItems2;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             theImage = itemView.findViewById(R.id.theImage);
-//            imageText = itemView.findViewById(R.id.imageText);
+            imageText = itemView.findViewById(R.id.imageText);
+            theFileLayout = itemView.findViewById(R.id.theFileLayout);
+            theFile = itemView.findViewById(R.id.theFile);
+            theFileName = itemView.findViewById(R.id.theFileName);
+            totalItems2 = itemView.findViewById(R.id.totalItems2);
 //            sendImgText = itemView.findViewById(R.id.sendImgText);
             videoView = itemView.findViewById(R.id.videoView);
         }

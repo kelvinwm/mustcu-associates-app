@@ -5,21 +5,36 @@
     android:layout_height="match_parent"
     android:gravity="center">
 
+    <TextView
+        android:id="@+id/totalItems2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="25dp"
+        android:text="0"
+        android:textColor="#fff"
+        android:textStyle="bold|italic" />
+
     <FrameLayout
         android:layout_width="400dp"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@+id/totalItems2">
 
-        <FrameLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:layout_gravity="center">
+            android:layout_height="match_parent">
 
             <VideoView
                 android:id="@+id/videoView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_centerInParent="true"
                 android:visibility="gone" />
-        </FrameLayout>
+        </RelativeLayout>
+
 
         <ImageView
             android:id="@+id/theImage"
@@ -28,14 +43,43 @@
             android:layout_gravity="center"
             android:maxHeight="300dp"
             android:scaleType="fitXY"
-            android:src="@drawable/ic_image"
+            android:src="@drawable/default_image"
             android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/theFileLayout"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/theFile"
+                android:layout_width="280dp"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_weight="9"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_insert_file" />
+
+            <TextView
+                android:id="@+id/theFileName"
+                android:layout_width="200dp"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="-20dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="File name"
+                android:textColor="#fff"
+                android:textStyle="bold|italic" />
+        </LinearLayout>
 
         <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
             android:id="@+id/imageText"
-            android:layout_width="400dp"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
+            android:layout_gravity="bottom|center"
             android:layout_margin="10dp"
             android:layout_weight="1"
             android:background="#fff"

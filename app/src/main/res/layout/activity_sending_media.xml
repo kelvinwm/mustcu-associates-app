@@ -13,6 +13,7 @@
         android:scrollbarAlwaysDrawVerticalTrack="true" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/sendMedia"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
