@@ -1,10 +1,12 @@
 package com.beyondthehorizon.associates.adapters;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.VideoView;
 
@@ -21,7 +24,13 @@ import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.database.SendingImagesModel;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
+
+import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 
 public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdapter.MyViewHolder> {
 
@@ -31,6 +40,7 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
     public ArrayList<SendingImagesModel> sendingImagesModelArrayList;
     private SendMyTxtImage listener;
     private static final String TAG = "PAPA";
+    public MediaPlayer mPlayer;
 
     public SendingImagesAdapter(Context ctx, ArrayList<SendingImagesModel> providerModelArrayList, SendMyTxtImage listener) {
         inflater = LayoutInflater.from(ctx);
@@ -74,6 +84,87 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
                 }
             });
         }
+        //AUDIO
+        if (provider.getMediaType().contains("2")) {
+            holder.audioLayout.setVisibility(View.VISIBLE);
+            holder.playAudio.setBackgroundResource(R.drawable.ic_play_arrow);
+            final boolean[] isPlaying = {false};
+            Uri myUri = Uri.parse(provider.getImageUri());
+            if (mPlayer == null) {
+                mPlayer = new MediaPlayer();
+            }
+            mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            try {
+                mPlayer.setDataSource(ctx, myUri);
+                mPlayer.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            holder.audioProgrs.setClickable(false);
+            int startTime = mPlayer.getDuration();
+
+            holder.audioTime.setText(String.format("%d min %d sec", TimeUnit.MILLISECONDS.toMinutes((long) startTime),
+                    TimeUnit.MILLISECONDS.toSeconds((long) startTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.
+                            toMinutes((long) startTime)))
+            );
+
+            holder.playAudio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (isPlaying[0]) {
+                        //PAUSED
+                        mPlayer.pause();
+                        isPlaying[0] = false;
+                        holder.playAudio.setBackgroundResource(R.drawable.ic_play_arrow);
+                    } else {
+                        //PLAYING AUDIO
+                        mPlayer.start();
+                        isPlaying[0] = true;
+                        holder.playAudio.setBackgroundResource(R.drawable.ic_pause);
+                        holder.audioProgrs.setMax(mPlayer.getDuration() / 1000);
+
+
+                        Timer timer = new Timer();
+                        timer.scheduleAtFixedRate(new TimerTask() {
+                            @Override
+                            public void run() {
+                                holder.audioProgrs.setProgress(mPlayer.getCurrentPosition() / 1000);
+
+                                if (mPlayer.getDuration() / 1000 == mPlayer.getCurrentPosition() / 1000) {
+                                    holder.playAudio.setBackgroundResource(R.drawable.ic_play_arrow);
+                                    isPlaying[0] = false;
+                                    mPlayer.seekTo(0);
+                                    holder.audioProgrs.setProgress(0);
+                                    mPlayer.pause();
+                                }
+                            }
+                        }, 0, 1000);
+
+                    }
+                }
+            });
+
+            // DRAG SONG TO POSITION
+            holder.audioProgrs.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (mPlayer != null && fromUser) {
+                        mPlayer.seekTo(progress * 1000);
+                    }
+                }
+            });
+        }
         holder.imageText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -94,14 +185,6 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
 
             }
         });
-//
-//        holder.sendImgText.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                //send text and image
-//                listener.sendTextImage(sendingImagesModelArrayList);
-//            }
-//        });
 
     }
 
@@ -112,11 +195,12 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
 
     class MyViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView theImage, sendImgText, theFile;
+        ImageView theImage, sendImgText, theFile, playAudio;
         VideoView videoView;
         EditText imageText;
-        LinearLayout theFileLayout;
-        TextView theFileName, totalItems2;
+        LinearLayout theFileLayout, audioLayout;
+        TextView theFileName, totalItems2, audioTime;
+        SeekBar audioProgrs;
 
         public MyViewHolder(View itemView) {
             super(itemView);
@@ -128,10 +212,16 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
             totalItems2 = itemView.findViewById(R.id.totalItems2);
 //            sendImgText = itemView.findViewById(R.id.sendImgText);
             videoView = itemView.findViewById(R.id.videoView);
+            playAudio = itemView.findViewById(R.id.playAudio);
+            audioLayout = itemView.findViewById(R.id.audioLayout);
+            audioProgrs = itemView.findViewById(R.id.audioProgrs);
+            audioTime = itemView.findViewById(R.id.audioTime);
         }
     }
 
     public interface SendMyTxtImage {
-        void sendTextImage(ArrayList<SendingImagesModel> arrayList);
+        void sendTextImage(ArrayList<SendingImagesModel> arrayList, String imageUrl, String videoUrl,
+                           String audioUrl, String fileUrl, String profileUrl, String friend_Uid,
+                           String chatType, String myFriend_Name);
     }
 }

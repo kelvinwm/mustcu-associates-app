@@ -50,25 +50,25 @@
             android:id="@+id/theFileLayout"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:orientation="vertical"
+            android:gravity="center"
+            android:orientation="horizontal"
             android:visibility="gone">
 
             <ImageView
                 android:id="@+id/theFile"
-                android:layout_width="280dp"
-                android:layout_height="0dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_gravity="center"
-                android:layout_weight="9"
+                android:layout_margin="5dp"
                 android:scaleType="fitXY"
-                android:src="@drawable/ic_insert_file" />
+                android:src="@drawable/docimage" />
 
             <TextView
                 android:id="@+id/theFileName"
-                android:layout_width="200dp"
-                android:layout_height="0dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="-20dp"
-                android:layout_weight="1"
+                android:layout_margin="5dp"
                 android:gravity="center"
                 android:text="File name"
                 android:textColor="#fff"
@@ -89,42 +89,36 @@
             android:padding="10dp"
             emojicon:emojiconSize="28sp" />
     </FrameLayout>
-    <!--        <LinearLayout-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:layout_below="@+id/theImage"-->
-    <!--            android:layout_marginTop="8dp"-->
-    <!--            android:orientation="horizontal"-->
-    <!--            android:padding="3dp">-->
 
-    <!--            &lt;!&ndash;            <ImageView&ndash;&gt;-->
-    <!--            &lt;!&ndash;                android:id="@+id/emojiButton"&ndash;&gt;-->
-    <!--            &lt;!&ndash;                android:layout_width="38dp"&ndash;&gt;-->
-    <!--            &lt;!&ndash;                android:layout_height="38dp"&ndash;&gt;-->
-    <!--            &lt;!&ndash;                android:layout_gravity="center"&ndash;&gt;-->
-    <!--            &lt;!&ndash;                android:paddingBottom="5dp"&ndash;&gt;-->
-    <!--            &lt;!&ndash;                android:src="@drawable/ic_emoji" />&ndash;&gt;-->
+    <LinearLayout
+        android:id="@+id/audioLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_margin="10dp"
+        android:background="#90000000"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:visibility="gone">
 
-    <!--                <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText-->
-    <!--                    android:id="@+id/imageText"-->
-    <!--                    android:layout_width="0dp"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:layout_weight="1"-->
-    <!--                    android:hint="Add caption..."-->
-    <!--                    android:inputType="textCapSentences|textMultiLine"-->
-    <!--                    android:maxHeight="200dp"-->
-    <!--                    android:padding="10dp"-->
-    <!--                    emojicon:emojiconSize="28sp" />-->
+        <ImageView
+            android:id="@+id/playAudio"
+            android:layout_width="40dp"
+            android:layout_height="30dp" />
 
-    <!--            <ImageButton-->
-    <!--                android:id="@+id/sendImgText"-->
-    <!--                android:layout_width="wrap_content"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:layout_gravity="bottom"-->
-    <!--                android:background="@null"-->
-    <!--                android:elevation="8dp"-->
-    <!--                android:padding="8dp"-->
-    <!--                android:scaleType="fitXY"-->
-    <!--                android:src="@drawable/ic_send" />-->
-    <!--        </LinearLayout>-->
+        <SeekBar
+            android:id="@+id/audioProgrs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2" />
+
+        <TextView
+            android:id="@+id/audioTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="time"
+            android:textColor="#fff" />
+    </LinearLayout>
 </RelativeLayout>

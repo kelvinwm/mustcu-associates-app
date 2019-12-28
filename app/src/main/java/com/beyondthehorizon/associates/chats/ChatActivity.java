@@ -39,11 +39,13 @@ import com.beyondthehorizon.associates.database.ChatModel;
 import com.beyondthehorizon.associates.database.CommentsModel;
 import com.beyondthehorizon.associates.database.RecentChatModel;
 import com.beyondthehorizon.associates.database.SendingImagesModel;
+import com.beyondthehorizon.associates.repositories.ChatsRepository;
 import com.beyondthehorizon.associates.users.FriendProfileActivity;
 import com.beyondthehorizon.associates.groupchat.GroupInfoActivity;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -152,7 +154,6 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         chatsAdapter = new ChatsAdapter(this);
 
 
-        storageReference = FirebaseStorage.getInstance().getReference().child("Chat Images");
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -334,6 +335,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         Locale.getDefault());
                 String dateToStr = format.format(today);
                 String msg_key = myRef.child("Users").child("UserChats").push().getKey();
+
                 //Save locally
                 chatsViewModel.insertChat(new ChatModel(
                         msg_key,
@@ -345,6 +347,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         dateToStr,
                         currentUser.getUid(),
                         profileUrl,
+                        "*hak*none0#",
                         "*hak*none0#",
                         "*hak*none0#",
                         "*hak*none0#",
@@ -361,7 +364,10 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         chatType,
                         profile_Uri));
                 sendMessage(message, "*hak*none0#", "*hak*none0#",
-                        "*hak*none0#", "*hak*none0#", dateToStr, msg_key);
+                        "*hak*none0#", "*hak*none0#", dateToStr, msg_key, friend_Uid
+                        , chatType, profile_Uri, "*hak*none0#");
+
+                sampleMessage.setText("");
             }
         });
         Log.d(TAG, "onCreate: " + friend_Uid);
@@ -376,7 +382,14 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     }
 
     private void sendMessage(String message, String imageUrl, String videoUrl, String audioUrl, String fileUrl,
-                             String dateToStr, final String msg_key) {
+                             String dateToStr, final String msg_key, String friend_Uid, String chatType,
+                             String profileUrl, String docName) {
+
+        final ChatsRepository chatsRepository = new ChatsRepository(getApplication());
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference();
 
         ChatModel chatModel = new ChatModel(
                 msg_key,
@@ -388,6 +401,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 dateToStr,
                 friend_Uid,
                 profileUrl,
+                docName,
                 imageUrl,
                 videoUrl,
                 audioUrl,
@@ -402,9 +416,9 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
-                        chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
+                        chatsRepository.updateDeliveryStatus(msg_key, "Delivered");
                     } else {
-                        chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                        chatsRepository.updateDeliveryStatus(msg_key, "Failed");
                     }
                 }
             });
@@ -418,13 +432,13 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
+                                chatsRepository.updateDeliveryStatus(msg_key, "Delivered");
                             } else {
-                                chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                                chatsRepository.updateDeliveryStatus(msg_key, "Failed");
                             }
                         }
                     });
-            chatsViewModel.insertCommentt(new CommentsModel(
+            chatsRepository.insertComment(new CommentsModel(
                     msg_key,
                     currentUser.getDisplayName(),
                     message,
@@ -436,8 +450,6 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                     "Comment"
             ));
         }
-
-        sampleMessage.setText("");
     }
 
     private void getMediaStaff() {
@@ -677,20 +689,49 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     }
 
     @Override
-    public void sendTextImage(ArrayList<SendingImagesModel> arrayList) {
+    protected void onResume() {
+        super.onResume();
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference();
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+        storageReference = FirebaseStorage.getInstance().getReference();
+    }
+
+    @Override
+    public void sendTextImage(ArrayList<SendingImagesModel> arrayList, String imageUrl, String videoUrl,
+                              String audioUrl, String fileUrl, final String profileUrl, final String friend_Uid,
+                              final String chatType, String myFriend_Name) {
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference();
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+        storageReference = FirebaseStorage.getInstance().getReference();
+        ChatsRepository chatsRepository = new ChatsRepository(getApplication());
+//        chatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
+
         for (final SendingImagesModel model : arrayList) {
             Log.d(TAG, "sendTextImage: " + model.getImageUri() + " " + model.getTxtMessage());
-
             final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
-            final StorageReference filePath = storageReference.child(msg_key + ".jpg");
+            final StorageReference filePath;
+
             Date today = new Date();
             SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a",
                     Locale.getDefault());
             final String dateToStr = format.format(today);
-
+//
+//            Log.d(TAG, "sendTextImage: " + friend_Uid + " " +
+//                    dateToStr + " " +
+//                    currentUser.getUid() + " " +
+//                    profileUrl + " " +
+//                    imageUrl + " " +
+//                    videoUrl + " " +
+//                    audioUrl + " " +
+//                    fileUrl + " " +
+//                    chatType);
             //GET MEDIATYPE FROM MEDIAFILE
             //Save locally
-            chatsViewModel.insertChat(new ChatModel(
+            chatsRepository.insertChat(new ChatModel(
                     msg_key,
                     currentUser.getDisplayName(),
                     model.getTxtMessage(),
@@ -700,35 +741,62 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                     dateToStr,
                     currentUser.getUid(),
                     profileUrl,
-                    model.getImageUri(),
-                    "",
-                    "",
-                    "",
+                    model.getMediaFile().getName(),
+                    imageUrl,
+                    videoUrl,
+                    audioUrl,
+                    fileUrl,
                     chatType,
                     "sending..."));
 
             //Save locally to view on latest chats
-            chatsViewModel.insertLatestChat(new RecentChatModel(
+            chatsRepository.insertLatestChat(new RecentChatModel(
                     friend_Uid,
                     myFriend_Name,
                     model.getTxtMessage(),
                     dateToStr,
                     chatType,
-                    profile_Uri));
-            filePath.putFile(Uri.fromFile(new File(model.getImageUri()))).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            Log.d(TAG, "onSuccess: " + uri.toString());
-                            sendMessage(model.getTxtMessage(), uri.toString(), dateToStr, msg_key);
-                        }
-                    });
-                }
-            });
+                    profileUrl));
+
+            if (model.getMediaType().contains("0")) {
+//                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
+//                        "*hak*none0#", "*hak*none0#", "*hak*none0#", model.getImageUri());
+
+            } else if (model.getMediaType().contains("1")) {
+
+                filePath = storageReference.child("Chat Images").child(msg_key + ".jpg");
+                filePath.putFile(Uri.fromFile(new File(model.getImageUri()))).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                Log.d(TAG, "onSuccess: " + uri.toString());
+                                sendMessage(model.getTxtMessage(), uri.toString(), "*hak*none0#",
+                                        "*hak*none0#", "*hak*none0#", dateToStr, msg_key,
+                                        friend_Uid, chatType, profileUrl, model.getMediaFile().getName());
+                            }
+                        });
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "onFailure: " + e.getMessage());
+                    }
+                });
+
+            } else if (model.getMediaType().contains("2")) {
+//                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
+//                        "*hak*none0#", "*hak*none0#", model.getImageUri(), "*hak*none0#");
+
+            } else if (model.getMediaType().contains("3")) {
+
+//                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
+//                        "*hak*none0#", model.getImageUri(), "*hak*none0#", "*hak*none0#");
+            }
+
         }
-        dialog2.dismiss();
-        arrayList.clear();
+//        dialog2.dismiss();
+//        arrayList.clear();
     }
 }

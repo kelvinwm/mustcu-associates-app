@@ -17,6 +17,7 @@ public class ChatModel {
     public String timestamp;
     public String receiverUID;
     public String profileUrl;
+    public String docName;
     public String imageUrl;
     public String videoUrl;
     public String audioUrl;
@@ -30,8 +31,8 @@ public class ChatModel {
 
     public ChatModel(String message_key, String senderName, String message, String comments,
                      String phoneNumber, String senderUID, String timestamp, String receiverUID,
-                     String profileUrl, String imageUrl, String videoUrl, String audioUrl, String fileUrl,
-                     String type, String delivery_status) {
+                     String profileUrl, String docName, String imageUrl, String videoUrl, String audioUrl,
+                     String fileUrl, String type, String delivery_status) {
         this.message_key = message_key;
         this.senderName = senderName;
         this.message = message;
@@ -41,6 +42,7 @@ public class ChatModel {
         this.timestamp = timestamp;
         this.receiverUID = receiverUID;
         this.profileUrl = profileUrl;
+        this.docName = docName;
         this.imageUrl = imageUrl;
         this.videoUrl = videoUrl;
         this.audioUrl = audioUrl;
@@ -55,6 +57,10 @@ public class ChatModel {
 
     public String getVideoUrl() {
         return videoUrl;
+    }
+
+    public String getDocName() {
+        return docName;
     }
 
     public String getAudioUrl() {

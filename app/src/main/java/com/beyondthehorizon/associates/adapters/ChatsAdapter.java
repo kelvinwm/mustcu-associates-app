@@ -1,8 +1,11 @@
 package com.beyondthehorizon.associates.adapters;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,11 +13,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,7 +39,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 
@@ -44,6 +57,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
     private FirebaseDatabase database;
     private FirebaseUser fuser;
     private ChatsViewModel chatsViewModel;
+    public MediaPlayer mPlayer;
 
 
     public ChatsAdapter(Context context) {
@@ -73,7 +87,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
         final ChatModel proMember = proMemberArrayList.get(position);
         fuser = FirebaseAuth.getInstance().getCurrentUser();
         final String details;
-        final int numberOfComments;
+        holder.myFrame.setVisibility(View.GONE);
 
         if (proMember.getType().contains("Single")) {
             holder.commentLayout.setVisibility(View.GONE);
@@ -83,20 +97,173 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
         holder.providerMessage.setText(proMember.getMessage());
         holder.numberOfComments.setText(proMember.getComments());
         holder.del_status.setTextColor(Color.parseColor("#000000"));
+
+        //SHOW IMAGE
         if (proMember.getImageUrl().contains("*hak*none0#")) {
             holder.sendImage.setVisibility(View.GONE);
         } else {
+            Log.d(TAG, "onBindViewHolder: " + proMember.getImageUrl());
+            holder.myFrame.setVisibility(View.VISIBLE);
             holder.sendImage.setVisibility(View.VISIBLE);
+            holder.myRel.setVisibility(View.VISIBLE);
             holder.sendImage.setImageURI(Uri.fromFile(new File(proMember.getImageUrl())));
             holder.sendImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(context, ViewImageActivity.class);
-                    intent.putExtra("imageUri", proMember.getImageUrl());
+                    intent.putExtra("Uri", proMember.getImageUrl());
+                    intent.putExtra("mediaType", "image");
                     context.startActivity(intent);
                 }
             });
         }
+
+        //SHOW VIDEO
+        if (proMember.getVideoUrl().contains("*hak*none0#")) {
+            holder.videoView1.setVisibility(View.GONE);
+            holder.playVideo.setVisibility(View.GONE);
+        } else {
+            Log.d(TAG, "onBindViewHolder: " + proMember.getVideoUrl());
+            holder.myFrame.setVisibility(View.VISIBLE);
+            holder.playVideo.setVisibility(View.VISIBLE);
+            holder.videoView1.setVisibility(View.VISIBLE);
+            holder.myRel.setVisibility(View.VISIBLE);
+            holder.videoView1.setVideoURI(Uri.parse(proMember.getVideoUrl()));
+            holder.playVideo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(context, ViewImageActivity.class);
+                    intent.putExtra("Uri", proMember.getVideoUrl());
+                    intent.putExtra("mediaType", "video");
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.videoView1.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    holder.videoView1.seekTo(0);
+                }
+            });
+        }
+
+        //SHOW FILE
+        if (proMember.getFileUrl().contains("*hak*none0#")) {
+            holder.fileLayout.setVisibility(View.GONE);
+        } else {
+            Log.d(TAG, "onBindViewHolder: " + proMember.getVideoUrl());
+            holder.fileLayout.setVisibility(View.VISIBLE);
+            holder.fileImage.setVisibility(View.VISIBLE);
+            holder.fileName.setVisibility(View.VISIBLE);
+            holder.fileName.setText(proMember.getDocName());
+            holder.fileLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    File file = new File(proMember.getFileUrl());
+                    Intent install = new Intent(Intent.ACTION_VIEW);
+                    install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    // Old Approach
+//                    install.setDataAndType(Uri.fromFile(file), "*/*");
+                    // End Old approach
+                    // New Approach
+                    Uri apkURI = FileProvider.getUriForFile(
+                            context,
+                            context.getApplicationContext()
+                                    .getPackageName() + ".provider", file);
+                    install.setDataAndType(apkURI, "*/*");
+                    install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    // End New Approach
+                    context.startActivity(install);
+                }
+            });
+        }
+        //SHOW AUDIO
+        if (proMember.getAudioUrl().contains("*hak*none0#")) {
+            holder.audioLayout.setVisibility(View.GONE);
+        } else {
+            holder.audioLayout.setVisibility(View.VISIBLE);
+//            holder.playAudio.setVisibility(View.VISIBLE);
+//            holder.audioProgrs.setVisibility(View.VISIBLE);
+//            holder.audioTime.setText(proMember.getDocName());
+            holder.playAudio.setBackgroundResource(R.drawable.ic_play_arrow);
+            final boolean[] isPlaying = {false};
+            Uri myUri = Uri.parse(proMember.getAudioUrl());
+
+            if (mPlayer == null) {
+                mPlayer = new MediaPlayer();
+            }
+            mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mPlayer.reset();
+            try {
+                mPlayer.setDataSource(context, myUri);
+                mPlayer.prepareAsync();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//
+            holder.audioProgrs.setClickable(false);
+            int startTime = mPlayer.getDuration();
+
+            holder.audioTime.setText(String.format("%d min %d sec", TimeUnit.MILLISECONDS.toMinutes((long) startTime),
+                    TimeUnit.MILLISECONDS.toSeconds((long) startTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.
+                            toMinutes((long) startTime))));
+            holder.playAudio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (isPlaying[0]) {
+                        //PAUSED
+                        mPlayer.pause();
+                        isPlaying[0] = false;
+                        holder.playAudio.setBackgroundResource(R.drawable.ic_play_arrow);
+                    } else {
+                        //PLAYING AUDIO
+                        mPlayer.start();
+                        isPlaying[0] = true;
+                        holder.playAudio.setBackgroundResource(R.drawable.ic_pause);
+                        holder.audioProgrs.setMax(mPlayer.getDuration() / 1000);
+
+
+                        Timer timer = new Timer();
+                        timer.scheduleAtFixedRate(new TimerTask() {
+                            @Override
+                            public void run() {
+                                holder.audioProgrs.setProgress(mPlayer.getCurrentPosition() / 1000);
+
+                                if (mPlayer.getDuration() / 1000 == mPlayer.getCurrentPosition() / 1000) {
+                                    holder.playAudio.setBackgroundResource(R.drawable.ic_play_arrow);
+                                    isPlaying[0] = false;
+                                    mPlayer.seekTo(0);
+                                    holder.audioProgrs.setProgress(0);
+                                    mPlayer.pause();
+                                }
+                            }
+                        }, 0, 1000);
+
+                    }
+                }
+            });
+
+            // DRAG SONG TO POSITION
+            holder.audioProgrs.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if (mPlayer != null && fromUser) {
+                        mPlayer.seekTo(progress * 1000);
+                    }
+                }
+            });
+        }
+
         if (proMember.delivery_status.contains("sent")) {
             myRef.child("Users").child("UserChats").child(proMember.getMessage_key()).child("delivery_status").setValue("Seen");
             chatsViewModel.updateDeliveryStatus(proMember.message_key, "Delivered");
@@ -153,11 +320,15 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
     }
 
     public static class ProMemberViewHolder extends RecyclerView.ViewHolder {
-        TextView providerName, numberOfComments, del_status, message_time;
-        ImageView sendImage;
+        TextView providerName, numberOfComments, del_status, message_time, fileName, audioTime;
+        ImageView sendImage, playVideo, fileImage, playAudio;
         EmojiconTextView providerMessage;
         View mView, divider;
-        LinearLayout commentLayout, r2;
+        LinearLayout commentLayout, r2, fileLayout, audioLayout;
+        RelativeLayout myRel;
+        FrameLayout myFrame;
+        VideoView videoView1;
+        SeekBar audioProgrs;
 
         public ProMemberViewHolder(View itemView) {
             super(itemView);
@@ -170,7 +341,18 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
             divider = itemView.findViewById(R.id.divider);
             del_status = itemView.findViewById(R.id.del_status);
             sendImage = itemView.findViewById(R.id.sendImage);
+            playVideo = itemView.findViewById(R.id.playVideo);
             r2 = itemView.findViewById(R.id.r2);
+            fileLayout = itemView.findViewById(R.id.fileLayout);
+            myFrame = itemView.findViewById(R.id.myFrame);
+            fileImage = itemView.findViewById(R.id.fileImage);
+            myRel = itemView.findViewById(R.id.myRel);
+            videoView1 = itemView.findViewById(R.id.videoView1);
+            fileName = itemView.findViewById(R.id.fileName);
+            audioLayout = itemView.findViewById(R.id.audioLayout);
+            playAudio = itemView.findViewById(R.id.playAudio);
+            audioProgrs = itemView.findViewById(R.id.audioProgrs);
+            audioTime = itemView.findViewById(R.id.audioTime);
         }
     }
 

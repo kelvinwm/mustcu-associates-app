@@ -36,8 +36,10 @@
             android:visibility="gone">
 
             <RelativeLayout
+                android:id="@+id/myRel"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:visibility="gone">
 
                 <VideoView
                     android:id="@+id/videoView1"
@@ -52,6 +54,15 @@
             </RelativeLayout>
 
             <ImageView
+                android:id="@+id/playVideo"
+                android:layout_width="70dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_play_arrow"
+                android:visibility="gone" />
+
+            <ImageView
                 android:id="@+id/sendImage"
                 android:layout_width="300dp"
                 android:layout_height="300dp"
@@ -59,7 +70,67 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/default_image"
                 android:visibility="gone" />
+
         </FrameLayout>
+        <!--        VIEW FILE-->
+        <LinearLayout
+            android:id="@+id/fileLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/fileImage"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:src="@drawable/docimage"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/fileName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:text="File Name"
+                android:textColor="#fff"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </LinearLayout>
+        <!--        VIEW AUDIO-->
+
+        <LinearLayout
+            android:id="@+id/audioLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="10dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <ImageView
+                android:id="@+id/playAudio"
+                android:layout_width="40dp"
+                android:layout_height="30dp" />
+
+            <SeekBar
+                android:id="@+id/audioProgrs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="2" />
+
+            <TextView
+                android:id="@+id/audioTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="time"
+                android:textColor="#fff" />
+        </LinearLayout>
 
         <hani.momanii.supernova_emoji_library.Helper.EmojiconTextView
             android:id="@+id/message_body"
