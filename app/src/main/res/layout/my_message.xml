@@ -107,21 +107,25 @@
             android:id="@+id/audioLayout"
             android:layout_width="280dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:layout_margin="10dp"
+            android:background="#90333333"
             android:orientation="horizontal"
-            android:paddingTop="10dp"
-            android:paddingRight="10dp"
             android:visibility="gone">
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/playAudio"
                 android:layout_width="40dp"
-                android:layout_height="30dp" />
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:background="#90333333"
+                android:scaleType="fitXY"
+                android:src="@android:drawable/ic_media_play" />
 
             <SeekBar
                 android:id="@+id/audioProgrs"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_weight="2" />
 
             <TextView
@@ -129,7 +133,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="time"
                 android:textColor="#fff" />
         </LinearLayout>
 

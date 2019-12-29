@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
@@ -193,9 +194,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
         } else {
             holder.audioLayout.setVisibility(View.VISIBLE);
 //            holder.playAudio.setVisibility(View.VISIBLE);
-//            holder.audioProgrs.setVisibility(View.VISIBLE);
 //            holder.audioTime.setText(proMember.getDocName());
-            holder.playAudio.setBackgroundResource(R.drawable.ic_play_arrow);
             final boolean[] isPlaying = {false};
             Uri myUri = Uri.parse(proMember.getAudioUrl());
 
@@ -270,7 +269,8 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
 
     public static class ProMemberViewHolder extends RecyclerView.ViewHolder {
         TextView providerName, numberOfComments, del_status, message_time, fileName, audioTime;
-        ImageView sendImage, playVideo, fileImage, playAudio;
+        ImageView sendImage, playVideo, fileImage;
+        ImageButton playAudio;
         EmojiconTextView providerMessage;
         View mView, divider;
         LinearLayout commentLayout, r2, fileLayout, audioLayout;
