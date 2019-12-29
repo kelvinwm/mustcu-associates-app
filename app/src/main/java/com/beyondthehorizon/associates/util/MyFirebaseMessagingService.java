@@ -192,6 +192,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         senderUID,
                         timestamp,
                         imageUrl,
+                        imageUrl,
+                        imageUrl,
+                        imageUrl,
+                        imageUrl,
                         "Delivered",
                         type
                 ));
@@ -235,6 +239,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         phoneNumber,
                         senderUID,
                         timestamp,
+                        imageUrl,
+                        imageUrl,
+                        imageUrl,
+                        imageUrl,
                         imageUrl,
                         "Delivered",
                         type

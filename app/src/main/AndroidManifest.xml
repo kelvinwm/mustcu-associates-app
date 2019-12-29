@@ -44,7 +44,9 @@
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
-        <activity android:name=".groupchat.CommentsChatActivity" />
+        <activity
+            android:name=".groupchat.CommentsChatActivity"
+            android:launchMode="singleTask" />
         <activity
             android:name=".groupchat.AddGroupActivity"
             android:label="New Group"

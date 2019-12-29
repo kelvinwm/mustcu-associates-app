@@ -116,6 +116,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
             holder.myFrame.setVisibility(View.VISIBLE);
             holder.sendImage.setVisibility(View.VISIBLE);
             holder.myRel.setVisibility(View.VISIBLE);
+            holder.providerMessage.setText(proMember.getDocName());
             holder.sendImage.setImageURI(Uri.fromFile(new File(proMember.getImageUrl())));
             holder.sendImage.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -137,6 +138,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
             holder.myFrame.setVisibility(View.VISIBLE);
             holder.playVideo.setVisibility(View.VISIBLE);
             holder.videoView1.setVisibility(View.VISIBLE);
+            holder.providerMessage.setText(proMember.getDocName());
             holder.myRel.setVisibility(View.VISIBLE);
             holder.videoView1.setVideoURI(Uri.parse(proMember.getVideoUrl()));
             holder.playVideo.setOnClickListener(new View.OnClickListener() {
@@ -194,7 +196,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
         } else {
             holder.audioLayout.setVisibility(View.VISIBLE);
 //            holder.playAudio.setVisibility(View.VISIBLE);
-//            holder.audioTime.setText(proMember.getDocName());
+            holder.providerMessage.setText(proMember.getDocName());
             final boolean[] isPlaying = {false};
             Uri myUri = Uri.parse(proMember.getAudioUrl());
 
@@ -230,6 +232,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
             holder.providerName.setText(details);
         }
 
+        //VIEW COMMENTS
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -237,7 +240,6 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
                 if (proMember.getType().contains("Single") || proMember.getSenderName().isEmpty()) {
                     return;
                 }
-                holder.mView.setEnabled(false);
                 Intent providerDetails = new Intent(context, CommentsChatActivity.class);
                 providerDetails.putExtra("MainQuestionKey", proMember.getMessage_key());
                 providerDetails.putExtra("RoomId", proMember.getSenderUID());

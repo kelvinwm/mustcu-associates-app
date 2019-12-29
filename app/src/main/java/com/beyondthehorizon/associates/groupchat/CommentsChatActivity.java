@@ -140,6 +140,10 @@ public class CommentsChatActivity extends AppCompatActivity {
                         currentUser.getUid(),
                         dateToStr,
                         "*hak*none0#",
+                        "*hak*none0#",
+                        "*hak*none0#",
+                        "*hak*none0#",
+                        "*hak*none0#",
                         "Sending...",
                         "Comment");
 
@@ -157,6 +161,10 @@ public class CommentsChatActivity extends AppCompatActivity {
                         currentUser.getPhoneNumber(),
                         currentUser.getUid(),
                         dateToStr,
+                        "*hak*none0#",
+                        "*hak*none0#",
+                        "*hak*none0#",
+                        "*hak*none0#",
                         "*hak*none0#",
                         "Sending...",
                         "Comment"));

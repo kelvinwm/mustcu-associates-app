@@ -58,6 +58,7 @@
                 android:layout_width="70dp"
                 android:layout_height="60dp"
                 android:layout_gravity="center"
+                android:layout_marginStart="-10dp"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_play_arrow"
                 android:visibility="gone" />
@@ -169,6 +170,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="1dp"
+            android:paddingStart="15dp"
             android:paddingBottom="1dp">
 
             <TextView

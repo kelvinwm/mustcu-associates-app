@@ -403,6 +403,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 chatType,
                 "sent");
 
+        final String[] deliverySate = new String[1];
         if (chatType.contains("Single")) {
             /**SEND TO SINGLE CHAT FIRE BASE*/
             myRef.child("Users").child("UserChats").child(msg_key)
@@ -411,14 +412,17 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
                         chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
+                        deliverySate[0] = "Delivered";
                     } else {
                         chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                        deliverySate[0] = "Failed";
                     }
                 }
             });
 
         } else {
             /**SEND TO FIRE BASE ROOM CHAT*/
+
             myRef.child("Rooms").child(friend_Uid)
                     .child(myFriend_Name).child("UserChats")
                     .child(msg_key).setValue(chatModel)
@@ -427,8 +431,10 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
+                                deliverySate[0] = "Delivered";
                             } else {
                                 chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                                deliverySate[0] = "Failed";
                             }
                         }
                     });
@@ -439,8 +445,12 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                     currentUser.getPhoneNumber(),
                     currentUser.getUid(),
                     dateToStr,
+                    docName,
                     imageUrl,
-                    "Delivered",
+                    videoUrl,
+                    audioUrl,
+                    fileUrl,
+                    deliverySate[0],
                     "Comment"
             ));
         }
@@ -566,16 +576,6 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             @Override
             public void onClick(View v) {
                 //TODO: SAVE LOCATION TO DATABASE
-//                Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
-//                chooseFile.setType("*/*");
-//                chooseFile = Intent.createChooser(chooseFile, "Choose a file");
-//                startActivityForResult(chooseFile, 1);
-
-//                Intent intent4 = new Intent(ChatActivity.this, NormalFilePickActivity.class);
-//                intent4.putExtra(Constant.MAX_NUMBER, 9);
-//                intent4.putExtra(NormalFilePickActivity.SUFFIX, new String[]{"xlsx", "xls", "doc", "docx", "ppt", "pptx", "pdf"});
-//                startActivityForResult(intent4, Constant.REQUEST_CODE_PICK_FILE);
-
                 Intent intent = new Intent(ChatActivity.this, FilePickerActivity.class);
                 intent.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
                         .setCheckPermission(true)
@@ -594,6 +594,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             }
         });
 
+        //CHOOSE DIALOG
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         int width = metrics.widthPixels;
         int height = metrics.heightPixels;

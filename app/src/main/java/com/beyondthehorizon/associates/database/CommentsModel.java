@@ -14,7 +14,11 @@ public class CommentsModel {
     public String phoneNumber;
     public String senderUID;
     public String timestamp;
+    public String docName;
     public String imageUrl;
+    public String videoUrl;
+    public String audioUrl;
+    public String fileUrl;
     public String deliveryState;
     public String type;
 
@@ -23,16 +27,37 @@ public class CommentsModel {
     }
 
     public CommentsModel(String message_key, String senderName, String message, String phoneNumber,
-                         String senderUID, String timestamp, String imageUrl, String deliveryState, String type) {
+                         String senderUID, String timestamp, String docName, String imageUrl,
+                         String videoUrl, String audioUrl, String fileUrl, String deliveryState, String type) {
         this.message_key = message_key;
         this.senderName = senderName;
         this.message = message;
         this.phoneNumber = phoneNumber;
         this.senderUID = senderUID;
         this.timestamp = timestamp;
+        this.docName = docName;
         this.imageUrl = imageUrl;
+        this.videoUrl = videoUrl;
+        this.audioUrl = audioUrl;
+        this.fileUrl = fileUrl;
         this.deliveryState = deliveryState;
         this.type = type;
+    }
+
+    public String getDocName() {
+        return docName;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public String getAudioUrl() {
+        return audioUrl;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
     }
 
     public String getImageUrl() {
@@ -42,6 +67,7 @@ public class CommentsModel {
     public String getDeliveryState() {
         return deliveryState;
     }
+
     public int getId() {
         return id;
     }
@@ -65,6 +91,7 @@ public class CommentsModel {
     public String getSenderUID() {
         return senderUID;
     }
+
 
     public String getTimestamp() {
         return timestamp;
