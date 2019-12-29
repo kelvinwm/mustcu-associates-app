@@ -46,7 +46,7 @@ public class ChatsViewModel extends AndroidViewModel {
         chatsRepository.insertChat(chatModel);
     }
 
-    public void insertCommentt(CommentsModel commentsModel) {
+    public void insertComment(CommentsModel commentsModel) {
         chatsRepository.insertComment(commentsModel);
     }
 
@@ -58,20 +58,7 @@ public class ChatsViewModel extends AndroidViewModel {
         chatsRepository.updateDeliveryStatus(message_key, status);
     }
 
-//    public void insertResident(Resident resident) {
-//        chatsRepository.insertResident(resident);
-//    }
-//
-//    public void deleteVisitor(String visitorId) {
-//        chatsRepository.deleteSpecificVisitorById(visitorId);
-//    }
-//
-//    public void deleteAllVisitors() {
-//        chatsRepository.deleteAllVisitors();
-//    }
-//
-//    public void deleteAllResidents() {
-//        chatsRepository.deleteAllResidents();
-//    }
-
+    public void updateCommentDeliveryStatus(String message_key, String status) {
+        chatsRepository.updateCommentDeliveryStatus(message_key, status);
+    }
 }

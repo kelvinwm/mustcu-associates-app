@@ -37,6 +37,10 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+import static com.beyondthehorizon.associates.util.Constants.Delivered;
+import static com.beyondthehorizon.associates.util.Constants.NothingToSend;
+import static com.beyondthehorizon.associates.util.Constants.Sent;
+
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public static final String TAG = "MESSAGING";
     private ChatsRepository chatsRepository;
@@ -93,7 +97,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             final String finalDataTitle = dataSender;
             final String finalDataMessage = dataMessage;
 
-            if (imageUrl.contains("*hak*none0#")) {
+            if (imageUrl.contains(NothingToSend)) {
                 saveDataLocally(dataSender, dataMessage, phoneNumber, senderUID,
                         timestamp, receiverUID, type, imageUrl, remoteMessage,
                         profileImage, groupName, newGroup, message_key);
@@ -181,10 +185,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         imageUrl,
                         imageUrl,
                         type,
-                        "Delivered"
+                        Delivered
                 ));
 
                 chatsRepository.insertComment(new CommentsModel(
+                        message_key,
                         message_key,
                         dataSender,
                         dataMessage,
@@ -196,7 +201,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         imageUrl,
                         imageUrl,
                         imageUrl,
-                        "Delivered",
+                        Delivered,
                         type
                 ));
             }
@@ -227,13 +232,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     imageUrl,
                     imageUrl,
                     type,
-                    "sent"
+                    Sent
             ));
         } else if (type.contains("Comment")) {
             String total_num_comments = remoteMessage.getData().get("totalComments");
+//            String parent_message_key = remoteMessage.getData().get("parent_message_key");
             if (!senderUID.contains(currentUser.getUid())) {
                 chatsRepository.insertComment(new CommentsModel(
-                        message_key,
+                        message_key, // parent_message_key
+                        message_key,// the comment message
                         dataSender,
                         dataMessage,
                         phoneNumber,
@@ -244,7 +251,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         imageUrl,
                         imageUrl,
                         imageUrl,
-                        "Delivered",
+                        Delivered,
                         type
                 ));
             }

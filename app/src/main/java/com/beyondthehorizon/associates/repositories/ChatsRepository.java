@@ -69,36 +69,11 @@ public class ChatsRepository {
     public void updateDeliveryStatus(String message_key, String status) {
         new UpdateDeliveryStatus(chatsDao).execute(message_key, status);
     }
-//    //Get Specific visitors
-//    public LiveData<List<Chat>> getSpecificVisitors(String status) {
-//        return chatsDao.allSpecificVisitors(status);
-//
-//    }
-//
-//    //Get Specific visitorByID
-//    public LiveData<List<Chat>> getSpecificVisitorById(String visitorId) {
-//        return chatsDao.allSpecificVisitorById(visitorId);
-//    }
 
-//    //Get Specific residentByID
-//    public LiveData<List<Resident>> getSpecificResidentById(String residentId) {
-//        return residentDao.getSpecificResidentById(residentId);
-//    }
-
-//    //Delete all visitors
-//    public void deleteAllVisitors() {
-//        new DeleteAllVisitorsAsyncTask(chatsDao).execute();
-//    }
-//
-//    //Delete all residents
-//    public void deleteAllResidents() {
-//        new DeleteAllResidentsAsyncTask(residentDao).execute();
-//    }
-//
-//    //Get Specific residentByID
-//    public void deleteSpecificVisitorById(String visitorId) {
-//        new DeleteVisitorAsyncTask(chatsDao).execute(visitorId);
-//    }
+    //Update comment delivery statue
+    public void updateCommentDeliveryStatus(String message_key, String status) {
+        new UpdateCommentDeliveryStatus(commentsDao).execute(message_key, status);
+    }
 
     // INSERT CHAT
     private static class InsertChatAsyncTask extends AsyncTask<ChatModel, Void, Void> {
@@ -180,6 +155,24 @@ public class ChatsRepository {
             String message_key = params[0];
             String numOfComments = params[1];
             chatsDao.updateDeliveryState(message_key, numOfComments);
+            return null;
+        }
+    }
+
+    // UPDATE delivery state of Comment
+    private static class UpdateCommentDeliveryStatus extends AsyncTask<String, Void, Void> {
+        private CommentsDao commentsDao;
+
+        private UpdateCommentDeliveryStatus(CommentsDao commentsDao) {
+            this.commentsDao = commentsDao;
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            Log.d(TAG, "doInBackground: ");
+            String message_key = params[0];
+            String numOfComments = params[1];
+            commentsDao.updateDeliveryState(message_key, numOfComments);
             return null;
         }
     }

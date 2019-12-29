@@ -80,6 +80,11 @@ import static com.beyondthehorizon.associates.MainActivity.ChatTypeFromChatsFrag
 import static com.beyondthehorizon.associates.MainActivity.FriendUID;
 import static com.beyondthehorizon.associates.MainActivity.MyFriendName;
 import static com.beyondthehorizon.associates.MainActivity.ProfileUrlFromChatsFragment;
+import static com.beyondthehorizon.associates.util.Constants.Delivered;
+import static com.beyondthehorizon.associates.util.Constants.Failed;
+import static com.beyondthehorizon.associates.util.Constants.NothingToSend;
+import static com.beyondthehorizon.associates.util.Constants.Sending;
+import static com.beyondthehorizon.associates.util.Constants.Sent;
 
 public class ChatActivity extends AppCompatActivity implements SendingImagesAdapter.SendMyTxtImage {
 
@@ -349,13 +354,13 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         dateToStr,
                         currentUser.getUid(),
                         profileUrl,
-                        "*hak*none0#",
-                        "*hak*none0#",
-                        "*hak*none0#",
-                        "*hak*none0#",
-                        "*hak*none0#",
+                        NothingToSend,
+                        NothingToSend,
+                        NothingToSend,
+                        NothingToSend,
+                        NothingToSend,
                         chatType,
-                        "sending..."));
+                        Sending));
 
                 //Save locally to view on latest chats
                 chatsViewModel.insertLatestChat(new RecentChatModel(
@@ -365,8 +370,8 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         dateToStr,
                         chatType,
                         profile_Uri));
-                sendMessage(message, "*hak*none0#", "*hak*none0#",
-                        "*hak*none0#", "*hak*none0#", dateToStr, msg_key, "*hak*none0#");
+                sendMessage(message, NothingToSend, NothingToSend,
+                        NothingToSend, NothingToSend, dateToStr, msg_key, NothingToSend);
 
                 sampleMessage.setText("");
             }
@@ -401,7 +406,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 audioUrl,
                 fileUrl,
                 chatType,
-                "sent");
+                Sent);
 
         final String[] deliverySate = new String[1];
         if (chatType.contains("Single")) {
@@ -411,11 +416,11 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
-                        chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
-                        deliverySate[0] = "Delivered";
+                        chatsViewModel.updateDeliveryStatus(msg_key, Delivered);
+                        deliverySate[0] = Delivered;
                     } else {
-                        chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
-                        deliverySate[0] = "Failed";
+                        chatsViewModel.updateDeliveryStatus(msg_key, Failed);
+                        deliverySate[0] = Failed;
                     }
                 }
             });
@@ -430,15 +435,16 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
-                                deliverySate[0] = "Delivered";
+                                chatsViewModel.updateDeliveryStatus(msg_key, Delivered);
+                                deliverySate[0] = Delivered;
                             } else {
-                                chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
-                                deliverySate[0] = "Failed";
+                                chatsViewModel.updateDeliveryStatus(msg_key, Failed);
+                                deliverySate[0] =Failed;
                             }
                         }
                     });
-            chatsViewModel.insertCommentt(new CommentsModel(
+            chatsViewModel.insertComment(new CommentsModel(
+                    msg_key,
                     msg_key,
                     currentUser.getDisplayName(),
                     message,
@@ -497,15 +503,6 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             @Override
             public void onClick(View v) {
                 //TODO: SAVE LOCATION TO DATABASE
-//                startActivity(new Intent(ChatActivity.this, SendingMediaActivity.class));
-//                Intent intent = new Intent(ChatActivity.this, PickerActivity.class);
-//                intent.putExtra(PickerConfig.SELECT_MODE, PickerConfig.PICKER_IMAGE); // Set the selection type, the default is that pictures and videos can be selected together (optional parameters)
-//                long maxSize = 188743680L; // long long long long
-//                intent.putExtra(PickerConfig.MAX_SELECT_SIZE, maxSize); // Maximum selection size, default 180M (optional parameter)
-//                intent.putExtra(PickerConfig.MAX_SELECT_COUNT, 15); // Maximum number of choices, default 40 (optional parameter)
-//                ArrayList<Media> defaultSelect = select; // You can set the photos selected by default, such as setting the list you just selected to the default.
-//                intent.putExtra(PickerConfig.DEFAULT_SELECTED_LIST, defaultSelect); // You can set the photo selected by default (optional parameter)
-//                startActivityForResult(intent, GALLARY_PICK);
                 Intent intent = new Intent(ChatActivity.this, FilePickerActivity.class);
                 intent.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
                         .setCheckPermission(true)
@@ -525,15 +522,6 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             @Override
             public void onClick(View v) {
                 //TODO: SAVE LOCATION TO DATABASE
-//                Intent intent = new Intent(ChatActivity.this, PickerActivity.class);
-//                intent.putExtra(PickerConfig.SELECT_MODE, PickerConfig.PICKER_VIDEO); // Set the selection type, the default is that pictures and videos can be selected together (optional parameters)
-//                long maxSize = 188743680L; // long long long long
-//                intent.putExtra(PickerConfig.MAX_SELECT_SIZE, maxSize); // Maximum selection size, default 180M (optional parameter)
-//                intent.putExtra(PickerConfig.MAX_SELECT_COUNT, 15); // Maximum number of choices, default 40 (optional parameter)
-//                ArrayList<Media> defaultSelect = select; // You can set the photos selected by default, such as setting the list you just selected to the default.
-//                intent.putExtra(PickerConfig.DEFAULT_SELECTED_LIST, defaultSelect); // You can set the photo selected by default (optional parameter)
-//                startActivityForResult(intent, GALLARY_PICK);
-
                 Intent intent = new Intent(ChatActivity.this, FilePickerActivity.class);
                 intent.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
                         .setCheckPermission(true)
@@ -661,8 +649,8 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
 
                 if (String.valueOf(mediaFile.getMediaType()).contains("0")) {
-                    sendMediaContent(mediaFile.getName(), "Doc", "*hak*none0#",
-                            "*hak*none0#", "*hak*none0#", mediaFile.getPath(), msg_key, dateToStr);
+                    sendMediaContent(mediaFile.getName(), "Doc", NothingToSend,
+                            NothingToSend, NothingToSend, mediaFile.getPath(), msg_key, dateToStr);
 
                     //SEND TO FIRE BASE
                     final StorageReference filePath = storageReference.child("Chat Documents")
@@ -675,8 +663,8 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                                         @Override
                                         public void onSuccess(Uri uri) {
                                             Log.d(TAG, "onSuccess: " + uri.toString());
-                                            sendMessage("Doc", "*hak*none0#",
-                                                    "*hak*none0#", "*hak*none0#"
+                                            sendMessage("Doc", NothingToSend,
+                                                    NothingToSend, NothingToSend
                                                     , uri.toString(), dateToStr, msg_key,
                                                     mediaFile.getName());
                                         }
@@ -686,13 +674,13 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Log.d(TAG, "onFailure: " + e.getMessage());
-                            chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                            chatsViewModel.updateDeliveryStatus(msg_key, Failed);
                         }
                     });
 
                 } else if (String.valueOf(mediaFile.getMediaType()).contains("1")) {
                     sendMediaContent(mediaFile.getName(), "IMG", mediaFile.getPath(),
-                            "*hak*none0#", "*hak*none0#", "*hak*none0#", msg_key, dateToStr);
+                            NothingToSend, NothingToSend, NothingToSend, msg_key, dateToStr);
 
                     //SEND TO FIRE BASE
                     final StorageReference filePath = storageReference.child("Chat Images")
@@ -705,8 +693,8 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                                         @Override
                                         public void onSuccess(Uri uri) {
                                             Log.d(TAG, "onSuccess: " + uri.toString());
-                                            sendMessage("IMG", uri.toString(), "*hak*none0#",
-                                                    "*hak*none0#", "*hak*none0#", dateToStr, msg_key,
+                                            sendMessage("IMG", uri.toString(), NothingToSend,
+                                                    NothingToSend, NothingToSend, dateToStr, msg_key,
                                                     mediaFile.getName());
                                         }
                                     });
@@ -715,14 +703,13 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Log.d(TAG, "onFailure: " + e.getMessage());
-                            chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                            chatsViewModel.updateDeliveryStatus(msg_key, Failed);
                         }
                     });
 
                 } else if (String.valueOf(mediaFile.getMediaType()).contains("2")) {
-                    sendMediaContent(mediaFile.getName(), "Audio", "*hak*none0#",
-                            "*hak*none0#", mediaFile.getPath(), "*hak*none0#", msg_key, dateToStr);
-
+                    sendMediaContent(mediaFile.getName(), "Audio", NothingToSend,
+                            NothingToSend, mediaFile.getPath(), NothingToSend, msg_key, dateToStr);
 
                     //SEND TO FIRE BASE
                     final StorageReference filePath = storageReference.child("Chat Audios")
@@ -735,9 +722,9 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                                         @Override
                                         public void onSuccess(Uri uri) {
                                             Log.d(TAG, "onSuccess: " + uri.toString());
-                                            sendMessage("Audio", "*hak*none0#",
-                                                    "*hak*none0#", uri.toString(),
-                                                    "*hak*none0#", dateToStr, msg_key,
+                                            sendMessage("Audio", NothingToSend,
+                                                    NothingToSend, uri.toString(),
+                                                    NothingToSend, dateToStr, msg_key,
                                                     mediaFile.getName());
                                         }
                                     });
@@ -746,13 +733,13 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Log.d(TAG, "onFailure: " + e.getMessage());
-                            chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                            chatsViewModel.updateDeliveryStatus(msg_key, Failed);
                         }
                     });
 
                 } else if (String.valueOf(mediaFile.getMediaType()).contains("3")) {
-                    sendMediaContent(mediaFile.getName(), "Video", "*hak*none0#",
-                            mediaFile.getPath(), "*hak*none0#", "*hak*none0#", msg_key, dateToStr);
+                    sendMediaContent(mediaFile.getName(), "Video", NothingToSend,
+                            mediaFile.getPath(), NothingToSend, NothingToSend, msg_key, dateToStr);
 
                     //SEND TO FIRE BASE
                     final StorageReference filePath = storageReference.child("Chat Videos")
@@ -765,9 +752,9 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                                         @Override
                                         public void onSuccess(Uri uri) {
                                             Log.d(TAG, "onSuccess: " + uri.toString());
-                                            sendMessage("Video", "*hak*none0#",
-                                                    uri.toString(), "*hak*none0#",
-                                                    "*hak*none0#", dateToStr, msg_key,
+                                            sendMessage("Video", NothingToSend,
+                                                    uri.toString(), NothingToSend,
+                                                    NothingToSend, dateToStr, msg_key,
                                                     mediaFile.getName());
                                         }
                                     });
@@ -776,7 +763,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Log.d(TAG, "onFailure: " + e.getMessage());
-                            chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                            chatsViewModel.updateDeliveryStatus(msg_key, Failed);
                         }
                     });
                 }
@@ -798,9 +785,6 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     public void sendMediaContent(final String mediaName, final String message, String imageUrl,
                                  String videoUrl, String audioUrl, String fileUrl, String msg_key,
                                  String dateToStr) {
-//        ChatsRepository chatsRepository = new ChatsRepository(getApplication());
-//        chatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
-
 
         //GET MEDIATYPE FROM MEDIAFILE
         //Save locally
@@ -820,7 +804,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 audioUrl,
                 fileUrl,
                 chatType,
-                "sending..."));
+                Sending));
 
         //Save locally to view on latest chats
         chatsViewModel.insertLatestChat(new RecentChatModel(
@@ -830,45 +814,6 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 dateToStr,
                 chatType,
                 profileUrl));
-
-//        if (model.getMediaType().contains("0")) {
-////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-////                        "*hak*none0#", "*hak*none0#", "*hak*none0#", model.getImageUri());
-//
-//        } else if (model.getMediaType().contains("1")) {
-//
-//            filePath = storageReference.child("Chat Images").child(msg_key + ".jpg");
-//            filePath.putFile(Uri.fromFile(new File(model.getImageUri())))
-//                    .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-//                @Override
-//                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-//                    filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                        @Override
-//                        public void onSuccess(Uri uri) {
-//                            Log.d(TAG, "onSuccess: " + uri.toString());
-//                            sendMessage(message, uri.toString(), "*hak*none0#",
-//                                    "*hak*none0#", "*hak*none0#", dateToStr, msg_key,
-//                                    friend_Uid, chatType, profileUrl, mediaName);
-//                        }
-//                    });
-//                }
-//            }).addOnFailureListener(new OnFailureListener() {
-//                @Override
-//                public void onFailure(@NonNull Exception e) {
-//                    Log.d(TAG, "onFailure: " + e.getMessage());
-//                }
-//            });
-//
-//        } else if (model.getMediaType().contains("2")) {
-////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-////                        "*hak*none0#", "*hak*none0#", model.getImageUri(), "*hak*none0#");
-//
-//        } else if (model.getMediaType().contains("3")) {
-//
-////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-////                        "*hak*none0#", model.getImageUri(), "*hak*none0#", "*hak*none0#");
-//        }
-
     }
 
 
@@ -921,7 +866,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
 //                    audioUrl,
 //                    fileUrl,
 //                    chatType,
-//                    "sending..."));
+//                    Sending));
 //
 //            //Save locally to view on latest chats
 //            chatsRepository.insertLatestChat(new RecentChatModel(
@@ -934,7 +879,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
 //
 //            if (model.getMediaType().contains("0")) {
 ////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-////                        "*hak*none0#", "*hak*none0#", "*hak*none0#", model.getImageUri());
+////                        NothingToSend, NothingToSend, NothingToSend, model.getImageUri());
 //
 //            } else if (model.getMediaType().contains("1")) {
 //
@@ -946,8 +891,8 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
 //                            @Override
 //                            public void onSuccess(Uri uri) {
 //                                Log.d(TAG, "onSuccess: " + uri.toString());
-//                                sendMessage(model.getTxtMessage(), uri.toString(), "*hak*none0#",
-//                                        "*hak*none0#", "*hak*none0#", dateToStr, msg_key,
+//                                sendMessage(model.getTxtMessage(), uri.toString(), NothingToSend,
+//                                        NothingToSend, NothingToSend, dateToStr, msg_key,
 //                                        friend_Uid, chatType, profileUrl, model.getMediaFile().getName());
 //                            }
 //                        });
@@ -961,12 +906,12 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
 //
 //            } else if (model.getMediaType().contains("2")) {
 ////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-////                        "*hak*none0#", "*hak*none0#", model.getImageUri(), "*hak*none0#");
+////                        NothingToSend, NothingToSend, model.getImageUri(), NothingToSend);
 //
 //            } else if (model.getMediaType().contains("3")) {
 //
 ////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-////                        "*hak*none0#", model.getImageUri(), "*hak*none0#", "*hak*none0#");
+////                        NothingToSend, model.getImageUri(), NothingToSend, NothingToSend);
 //            }
 //
 //        }

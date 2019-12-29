@@ -36,6 +36,7 @@ import static com.beyondthehorizon.associates.MainActivity.CHAT_PREFS;
 import static com.beyondthehorizon.associates.MainActivity.ChatTypeFromChatsFragment;
 import static com.beyondthehorizon.associates.MainActivity.FriendUID;
 import static com.beyondthehorizon.associates.MainActivity.MyFriendName;
+import static com.beyondthehorizon.associates.util.Constants.NothingToSend;
 
 public class SendingMediaActivity extends AppCompatActivity implements SendingImagesAdapter.SendMyTxtImage {
 
@@ -89,24 +90,24 @@ public class SendingMediaActivity extends AppCompatActivity implements SendingIm
                 for (SendingImagesModel model : imagesAdapter.sendingImagesModelArrayList) {
                     if (model.getMediaType().contains("0")) {
                         sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-                                "*hak*none0#", "*hak*none0#", "*hak*none0#",
+                                NothingToSend, NothingToSend, NothingToSend,
                                 model.getImageUri(), profileUrl, friend_Uid, chatType, myFriend_Name);
 
                     } else if (model.getMediaType().contains("1")) {
                         sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-                                model.getImageUri(), "*hak*none0#", "*hak*none0#",
-                                "*hak*none0#", profileUrl, friend_Uid, chatType, myFriend_Name);
+                                model.getImageUri(), NothingToSend, NothingToSend,
+                                NothingToSend, profileUrl, friend_Uid, chatType, myFriend_Name);
 
                     } else if (model.getMediaType().contains("2")) {
                         sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-                                "*hak*none0#", "*hak*none0#", model.getImageUri(),
-                                "*hak*none0#", profileUrl, friend_Uid, chatType, myFriend_Name);
+                                NothingToSend, NothingToSend, model.getImageUri(),
+                                NothingToSend, profileUrl, friend_Uid, chatType, myFriend_Name);
 
                     } else if (model.getMediaType().contains("3")) {
 
                         sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-                                "*hak*none0#", model.getImageUri(), "*hak*none0#",
-                                "*hak*none0#", profileUrl, friend_Uid, chatType, myFriend_Name);
+                                NothingToSend, model.getImageUri(), NothingToSend,
+                                NothingToSend, profileUrl, friend_Uid, chatType, myFriend_Name);
                     }
                 }
 //                sendTextImage(imagesAdapter.sendingImagesModelArrayList, imageUrl, videoUrl, audioUrl, fileUrl);

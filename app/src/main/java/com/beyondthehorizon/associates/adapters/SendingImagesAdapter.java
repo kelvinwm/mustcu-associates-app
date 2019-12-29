@@ -30,6 +30,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
+import static com.beyondthehorizon.associates.util.Constants.NothingToSend;
 import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 
 public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdapter.MyViewHolder> {
@@ -174,7 +175,7 @@ public class SendingImagesAdapter extends RecyclerView.Adapter<SendingImagesAdap
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.toString().trim().length() == 0) {
-                    sendingImagesModelArrayList.get(position).setTxtMessage("*hak*none0#");
+                    sendingImagesModelArrayList.get(position).setTxtMessage(NothingToSend);
                 } else {
                     sendingImagesModelArrayList.get(position).setTxtMessage(holder.imageText.getText().toString().trim());
                 }

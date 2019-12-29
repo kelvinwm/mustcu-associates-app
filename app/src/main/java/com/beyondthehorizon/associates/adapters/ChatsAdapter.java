@@ -23,6 +23,7 @@ import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
@@ -54,6 +55,11 @@ import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 import static com.beyondthehorizon.associates.MainActivity.CHAT_PREFS;
 import static com.beyondthehorizon.associates.MainActivity.FriendUID;
 import static com.beyondthehorizon.associates.MainActivity.MyFriendName;
+import static com.beyondthehorizon.associates.util.Constants.Delivered;
+import static com.beyondthehorizon.associates.util.Constants.Failed;
+import static com.beyondthehorizon.associates.util.Constants.NothingToSend;
+import static com.beyondthehorizon.associates.util.Constants.Sending;
+import static com.beyondthehorizon.associates.util.Constants.Sent;
 
 public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberViewHolder>
         implements Filterable {
@@ -109,7 +115,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
         holder.del_status.setTextColor(Color.parseColor("#000000"));
 
         //SHOW IMAGE
-        if (proMember.getImageUrl().contains("*hak*none0#")) {
+        if (proMember.getImageUrl().contains(NothingToSend)) {
             holder.sendImage.setVisibility(View.GONE);
         } else {
             Log.d(TAG, "onBindViewHolder: " + proMember.getImageUrl());
@@ -130,7 +136,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
         }
 
         //SHOW VIDEO
-        if (proMember.getVideoUrl().contains("*hak*none0#")) {
+        if (proMember.getVideoUrl().contains(NothingToSend)) {
             holder.videoView1.setVisibility(View.GONE);
             holder.playVideo.setVisibility(View.GONE);
         } else {
@@ -160,7 +166,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
         }
 
         //SHOW FILE
-        if (proMember.getFileUrl().contains("*hak*none0#")) {
+        if (proMember.getFileUrl().contains(NothingToSend)) {
             holder.fileLayout.setVisibility(View.GONE);
         } else {
             Log.d(TAG, "onBindViewHolder: " + proMember.getVideoUrl());
@@ -191,7 +197,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
             });
         }
         //SHOW AUDIO
-        if (proMember.getAudioUrl().contains("*hak*none0#")) {
+        if (proMember.getAudioUrl().contains(NothingToSend)) {
             holder.audioLayout.setVisibility(View.GONE);
         } else {
             holder.audioLayout.setVisibility(View.VISIBLE);
@@ -214,9 +220,9 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
             });
         }
 
-        if (proMember.delivery_status.contains("sent")) {
+        if (proMember.delivery_status.contains(Sent)) {
             myRef.child("Users").child("UserChats").child(proMember.getMessage_key()).child("delivery_status").setValue("Seen");
-            chatsViewModel.updateDeliveryStatus(proMember.message_key, "Delivered");
+            chatsViewModel.updateDeliveryStatus(proMember.message_key, Delivered);
         }
         if (proMember.delivery_status.contains("Seen")) {
             holder.del_status.setTextColor(Color.parseColor("#0398fc"));
@@ -236,8 +242,14 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "onClick: ");
                 if (proMember.getType().contains("Single") || proMember.getSenderName().isEmpty()) {
+                    return;
+                }
+                if(proMember.getDelivery_status().contains(Sending)
+                || proMember.getDelivery_status().contains(Failed)){
+
+                    Log.d(TAG, "onClick: ");
+                    Toast.makeText(context, "message not delivered..", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 Intent providerDetails = new Intent(context, CommentsChatActivity.class);

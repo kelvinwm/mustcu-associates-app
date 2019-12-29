@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey;
 public class CommentsModel {
     @PrimaryKey(autoGenerate = true)
     public int id;
+    public String parent_message_key;
     public String message_key;
     public String senderName;
     public String message;
@@ -26,9 +27,10 @@ public class CommentsModel {
     public CommentsModel() {
     }
 
-    public CommentsModel(String message_key, String senderName, String message, String phoneNumber,
-                         String senderUID, String timestamp, String docName, String imageUrl,
-                         String videoUrl, String audioUrl, String fileUrl, String deliveryState, String type) {
+    public CommentsModel(String parent_message_key, String message_key, String senderName, String message,
+                         String phoneNumber, String senderUID, String timestamp, String docName,
+                         String imageUrl, String videoUrl, String audioUrl, String fileUrl, String deliveryState, String type) {
+        this.parent_message_key = parent_message_key;
         this.message_key = message_key;
         this.senderName = senderName;
         this.message = message;
@@ -42,6 +44,10 @@ public class CommentsModel {
         this.fileUrl = fileUrl;
         this.deliveryState = deliveryState;
         this.type = type;
+    }
+
+    public String getParent_message_key() {
+        return parent_message_key;
     }
 
     public String getDocName() {
