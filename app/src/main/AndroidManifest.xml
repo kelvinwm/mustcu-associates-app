@@ -16,6 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".viewdetails.AndroidMediaPlayerActivity"
+            android:screenOrientation="portrait" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.beyondthehorizon.associates.provider"
@@ -26,7 +30,7 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <activity android:name=".chats.SendingMediaActivity"></activity>
+        <activity android:name=".chats.SendingMediaActivity" />
         <activity
             android:name=".viewdetails.ViewImageActivity"
             android:label="IMG"

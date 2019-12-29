@@ -125,6 +125,8 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         currentUser = mAuth.getCurrentUser();
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference();
+        storageReference = FirebaseStorage.getInstance().getReference();
+
         pref = getApplicationContext().getSharedPreferences(MY_SHARED_PREF, 0); // 0 - for private mode
         chatPref = getApplicationContext().getSharedPreferences(CHAT_PREFS, 0);
 
@@ -364,8 +366,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         chatType,
                         profile_Uri));
                 sendMessage(message, "*hak*none0#", "*hak*none0#",
-                        "*hak*none0#", "*hak*none0#", dateToStr, msg_key, friend_Uid
-                        , chatType, profile_Uri, "*hak*none0#");
+                        "*hak*none0#", "*hak*none0#", dateToStr, msg_key, "*hak*none0#");
 
                 sampleMessage.setText("");
             }
@@ -382,14 +383,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     }
 
     private void sendMessage(String message, String imageUrl, String videoUrl, String audioUrl, String fileUrl,
-                             String dateToStr, final String msg_key, String friend_Uid, String chatType,
-                             String profileUrl, String docName) {
-
-        final ChatsRepository chatsRepository = new ChatsRepository(getApplication());
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-        database = FirebaseDatabase.getInstance();
-        myRef = database.getReference();
+                             String dateToStr, final String msg_key, String docName) {
 
         ChatModel chatModel = new ChatModel(
                 msg_key,
@@ -416,9 +410,9 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
-                        chatsRepository.updateDeliveryStatus(msg_key, "Delivered");
+                        chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
                     } else {
-                        chatsRepository.updateDeliveryStatus(msg_key, "Failed");
+                        chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
                     }
                 }
             });
@@ -432,13 +426,13 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                chatsRepository.updateDeliveryStatus(msg_key, "Delivered");
+                                chatsViewModel.updateDeliveryStatus(msg_key, "Delivered");
                             } else {
-                                chatsRepository.updateDeliveryStatus(msg_key, "Failed");
+                                chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
                             }
                         }
                     });
-            chatsRepository.insertComment(new CommentsModel(
+            chatsViewModel.insertCommentt(new CommentsModel(
                     msg_key,
                     currentUser.getDisplayName(),
                     message,
@@ -653,38 +647,139 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             if (select.size() == 0) {
                 return;
             }
-            Log.d("TAG", "onActivityResult: " + select.get(0).getPath() + " HERE" + select.get(0).getMediaType());
-            Intent intent = new Intent(ChatActivity.this, SendingMediaActivity.class);
-            intent.putExtra("ikosawa", select);
-            startActivity(intent);
-//            ArrayList<SendingImagesModel> allMedia = new ArrayList<>();
-////            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-//            dialog2.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-//            dialog2.setContentView(R.layout.dialog_layout);
-//            dialog2.setCanceledOnTouchOutside(false);
-//            dialog2.setCancelable(true);
-//            dialog2.show();
-//
-//            RecyclerView rvTest = dialog2.findViewById(R.id.rvTest);
-//            TextView totalImgs = dialog2.findViewById(R.id.totalImgs);
-//            String numOfImges = select.size() + " item(s)";
-//            totalImgs.setText(numOfImges);
-//            rvTest.setHasFixedSize(true);
-//            rvTest.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-//            for (Media uri : select) {
-////                Log.d(TAG, "onActivityResult: " + uri.mediaType + "  " + Uri.fromFile(new File(uri.path)));
-//                Log.d(TAG, "onActivityResult: " + uri.path);
-//
-//                allMedia.add(new SendingImagesModel(uri.path, "IMG", String.valueOf(uri.mediaType)));
-//                imagesAdapter = new SendingImagesAdapter(ChatActivity.this, allMedia, this);
-//                rvTest.setAdapter(imagesAdapter);
-////                imagesAdapter = new SendingImagesAdapter(ChatActivity.this, allMedia, this);
-////                mediaRecyclerView.setAdapter(imagesAdapter);
-//            }
-        }
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            //the selected audio.
-            Uri uri = data.getData();
+//            Log.d("TAG", "onActivityResult: " + select.get(0).getPath() + " HERE" + select.get(0).getMediaType());
+//            Intent intent = new Intent(ChatActivity.this, SendingMediaActivity.class);
+//            intent.putExtra("ikosawa", select);
+//            startActivity(intent);
+
+            Date today = new Date();
+            SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a", Locale.getDefault());
+            final String dateToStr = format.format(today);
+
+            for (final MediaFile mediaFile : select) {
+                final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
+
+                if (String.valueOf(mediaFile.getMediaType()).contains("0")) {
+                    sendMediaContent(mediaFile.getName(), "Doc", "*hak*none0#",
+                            "*hak*none0#", "*hak*none0#", mediaFile.getPath(), msg_key, dateToStr);
+
+                    //SEND TO FIRE BASE
+                    final StorageReference filePath = storageReference.child("Chat Documents")
+                            .child(msg_key + mediaFile.getUri().getLastPathSegment());
+                    filePath.putFile(Uri.fromFile(new File(mediaFile.getPath())))
+                            .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                    filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Log.d(TAG, "onSuccess: " + uri.toString());
+                                            sendMessage("Doc", "*hak*none0#",
+                                                    "*hak*none0#", "*hak*none0#"
+                                                    , uri.toString(), dateToStr, msg_key,
+                                                    mediaFile.getName());
+                                        }
+                                    });
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "onFailure: " + e.getMessage());
+                            chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                        }
+                    });
+
+                } else if (String.valueOf(mediaFile.getMediaType()).contains("1")) {
+                    sendMediaContent(mediaFile.getName(), "IMG", mediaFile.getPath(),
+                            "*hak*none0#", "*hak*none0#", "*hak*none0#", msg_key, dateToStr);
+
+                    //SEND TO FIRE BASE
+                    final StorageReference filePath = storageReference.child("Chat Images")
+                            .child(msg_key + mediaFile.getUri().getLastPathSegment());
+                    filePath.putFile(Uri.fromFile(new File(mediaFile.getPath())))
+                            .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                    filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Log.d(TAG, "onSuccess: " + uri.toString());
+                                            sendMessage("IMG", uri.toString(), "*hak*none0#",
+                                                    "*hak*none0#", "*hak*none0#", dateToStr, msg_key,
+                                                    mediaFile.getName());
+                                        }
+                                    });
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "onFailure: " + e.getMessage());
+                            chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                        }
+                    });
+
+                } else if (String.valueOf(mediaFile.getMediaType()).contains("2")) {
+                    sendMediaContent(mediaFile.getName(), "Audio", "*hak*none0#",
+                            "*hak*none0#", mediaFile.getPath(), "*hak*none0#", msg_key, dateToStr);
+
+
+                    //SEND TO FIRE BASE
+                    final StorageReference filePath = storageReference.child("Chat Audios")
+                            .child(msg_key + mediaFile.getUri().getLastPathSegment());
+                    filePath.putFile(Uri.fromFile(new File(mediaFile.getPath())))
+                            .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                    filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Log.d(TAG, "onSuccess: " + uri.toString());
+                                            sendMessage("Audio", "*hak*none0#",
+                                                    "*hak*none0#", uri.toString(),
+                                                    "*hak*none0#", dateToStr, msg_key,
+                                                    mediaFile.getName());
+                                        }
+                                    });
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "onFailure: " + e.getMessage());
+                            chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                        }
+                    });
+
+                } else if (String.valueOf(mediaFile.getMediaType()).contains("3")) {
+                    sendMediaContent(mediaFile.getName(), "Video", "*hak*none0#",
+                            mediaFile.getPath(), "*hak*none0#", "*hak*none0#", msg_key, dateToStr);
+
+                    //SEND TO FIRE BASE
+                    final StorageReference filePath = storageReference.child("Chat Videos")
+                            .child(msg_key + mediaFile.getUri().getLastPathSegment());
+                    filePath.putFile(Uri.fromFile(new File(mediaFile.getPath())))
+                            .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                    filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Log.d(TAG, "onSuccess: " + uri.toString());
+                                            sendMessage("Video", "*hak*none0#",
+                                                    uri.toString(), "*hak*none0#",
+                                                    "*hak*none0#", dateToStr, msg_key,
+                                                    mediaFile.getName());
+                                        }
+                                    });
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "onFailure: " + e.getMessage());
+                            chatsViewModel.updateDeliveryStatus(msg_key, "Failed");
+                        }
+                    });
+                }
+            }
         }
     }
 
@@ -698,105 +793,184 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         storageReference = FirebaseStorage.getInstance().getReference();
     }
 
+
+    public void sendMediaContent(final String mediaName, final String message, String imageUrl,
+                                 String videoUrl, String audioUrl, String fileUrl, String msg_key,
+                                 String dateToStr) {
+//        ChatsRepository chatsRepository = new ChatsRepository(getApplication());
+//        chatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
+
+
+        //GET MEDIATYPE FROM MEDIAFILE
+        //Save locally
+        chatsViewModel.insertChat(new ChatModel(
+                msg_key,
+                currentUser.getDisplayName(),
+                message,
+                "0",
+                currentUser.getPhoneNumber(),
+                friend_Uid,
+                dateToStr,
+                currentUser.getUid(),
+                profileUrl,
+                mediaName,
+                imageUrl,
+                videoUrl,
+                audioUrl,
+                fileUrl,
+                chatType,
+                "sending..."));
+
+        //Save locally to view on latest chats
+        chatsViewModel.insertLatestChat(new RecentChatModel(
+                friend_Uid,
+                myFriend_Name,
+                message,
+                dateToStr,
+                chatType,
+                profileUrl));
+
+//        if (model.getMediaType().contains("0")) {
+////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
+////                        "*hak*none0#", "*hak*none0#", "*hak*none0#", model.getImageUri());
+//
+//        } else if (model.getMediaType().contains("1")) {
+//
+//            filePath = storageReference.child("Chat Images").child(msg_key + ".jpg");
+//            filePath.putFile(Uri.fromFile(new File(model.getImageUri())))
+//                    .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+//                @Override
+//                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+//                    filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                        @Override
+//                        public void onSuccess(Uri uri) {
+//                            Log.d(TAG, "onSuccess: " + uri.toString());
+//                            sendMessage(message, uri.toString(), "*hak*none0#",
+//                                    "*hak*none0#", "*hak*none0#", dateToStr, msg_key,
+//                                    friend_Uid, chatType, profileUrl, mediaName);
+//                        }
+//                    });
+//                }
+//            }).addOnFailureListener(new OnFailureListener() {
+//                @Override
+//                public void onFailure(@NonNull Exception e) {
+//                    Log.d(TAG, "onFailure: " + e.getMessage());
+//                }
+//            });
+//
+//        } else if (model.getMediaType().contains("2")) {
+////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
+////                        "*hak*none0#", "*hak*none0#", model.getImageUri(), "*hak*none0#");
+//
+//        } else if (model.getMediaType().contains("3")) {
+//
+////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
+////                        "*hak*none0#", model.getImageUri(), "*hak*none0#", "*hak*none0#");
+//        }
+
+    }
+
+
     @Override
     public void sendTextImage(ArrayList<SendingImagesModel> arrayList, String imageUrl, String videoUrl,
                               String audioUrl, String fileUrl, final String profileUrl, final String friend_Uid,
                               final String chatType, String myFriend_Name) {
-        database = FirebaseDatabase.getInstance();
-        myRef = database.getReference();
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-        storageReference = FirebaseStorage.getInstance().getReference();
-        ChatsRepository chatsRepository = new ChatsRepository(getApplication());
-//        chatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
-
-        for (final SendingImagesModel model : arrayList) {
-            Log.d(TAG, "sendTextImage: " + model.getImageUri() + " " + model.getTxtMessage());
-            final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
-            final StorageReference filePath;
-
-            Date today = new Date();
-            SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a",
-                    Locale.getDefault());
-            final String dateToStr = format.format(today);
+//        database = FirebaseDatabase.getInstance();
+//        myRef = database.getReference();
+//        mAuth = FirebaseAuth.getInstance();
+//        currentUser = mAuth.getCurrentUser();
+//        storageReference = FirebaseStorage.getInstance().getReference();
+//        ChatsRepository chatsRepository = new ChatsRepository(getApplication());
+////        chatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
 //
-//            Log.d(TAG, "sendTextImage: " + friend_Uid + " " +
-//                    dateToStr + " " +
-//                    currentUser.getUid() + " " +
-//                    profileUrl + " " +
-//                    imageUrl + " " +
-//                    videoUrl + " " +
-//                    audioUrl + " " +
-//                    fileUrl + " " +
-//                    chatType);
-            //GET MEDIATYPE FROM MEDIAFILE
-            //Save locally
-            chatsRepository.insertChat(new ChatModel(
-                    msg_key,
-                    currentUser.getDisplayName(),
-                    model.getTxtMessage(),
-                    "0",
-                    currentUser.getPhoneNumber(),
-                    friend_Uid,
-                    dateToStr,
-                    currentUser.getUid(),
-                    profileUrl,
-                    model.getMediaFile().getName(),
-                    imageUrl,
-                    videoUrl,
-                    audioUrl,
-                    fileUrl,
-                    chatType,
-                    "sending..."));
-
-            //Save locally to view on latest chats
-            chatsRepository.insertLatestChat(new RecentChatModel(
-                    friend_Uid,
-                    myFriend_Name,
-                    model.getTxtMessage(),
-                    dateToStr,
-                    chatType,
-                    profileUrl));
-
-            if (model.getMediaType().contains("0")) {
-//                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-//                        "*hak*none0#", "*hak*none0#", "*hak*none0#", model.getImageUri());
-
-            } else if (model.getMediaType().contains("1")) {
-
-                filePath = storageReference.child("Chat Images").child(msg_key + ".jpg");
-                filePath.putFile(Uri.fromFile(new File(model.getImageUri()))).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                            @Override
-                            public void onSuccess(Uri uri) {
-                                Log.d(TAG, "onSuccess: " + uri.toString());
-                                sendMessage(model.getTxtMessage(), uri.toString(), "*hak*none0#",
-                                        "*hak*none0#", "*hak*none0#", dateToStr, msg_key,
-                                        friend_Uid, chatType, profileUrl, model.getMediaFile().getName());
-                            }
-                        });
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "onFailure: " + e.getMessage());
-                    }
-                });
-
-            } else if (model.getMediaType().contains("2")) {
-//                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-//                        "*hak*none0#", "*hak*none0#", model.getImageUri(), "*hak*none0#");
-
-            } else if (model.getMediaType().contains("3")) {
-
-//                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-//                        "*hak*none0#", model.getImageUri(), "*hak*none0#", "*hak*none0#");
-            }
-
-        }
-//        dialog2.dismiss();
-//        arrayList.clear();
+//        for (final SendingImagesModel model : arrayList) {
+//            Log.d(TAG, "sendTextImage: " + model.getImageUri() + " " + model.getTxtMessage());
+//            final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
+//            final StorageReference filePath;
+//
+//            Date today = new Date();
+//            SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a",
+//                    Locale.getDefault());
+//            final String dateToStr = format.format(today);
+////
+////            Log.d(TAG, "sendTextImage: " + friend_Uid + " " +
+////                    dateToStr + " " +
+////                    currentUser.getUid() + " " +
+////                    profileUrl + " " +
+////                    imageUrl + " " +
+////                    videoUrl + " " +
+////                    audioUrl + " " +
+////                    fileUrl + " " +
+////                    chatType);
+//            //GET MEDIATYPE FROM MEDIAFILE
+//            //Save locally
+//            chatsRepository.insertChat(new ChatModel(
+//                    msg_key,
+//                    currentUser.getDisplayName(),
+//                    model.getTxtMessage(),
+//                    "0",
+//                    currentUser.getPhoneNumber(),
+//                    friend_Uid,
+//                    dateToStr,
+//                    currentUser.getUid(),
+//                    profileUrl,
+//                    model.getMediaFile().getName(),
+//                    imageUrl,
+//                    videoUrl,
+//                    audioUrl,
+//                    fileUrl,
+//                    chatType,
+//                    "sending..."));
+//
+//            //Save locally to view on latest chats
+//            chatsRepository.insertLatestChat(new RecentChatModel(
+//                    friend_Uid,
+//                    myFriend_Name,
+//                    model.getTxtMessage(),
+//                    dateToStr,
+//                    chatType,
+//                    profileUrl));
+//
+//            if (model.getMediaType().contains("0")) {
+////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
+////                        "*hak*none0#", "*hak*none0#", "*hak*none0#", model.getImageUri());
+//
+//            } else if (model.getMediaType().contains("1")) {
+//
+//                filePath = storageReference.child("Chat Images").child(msg_key + ".jpg");
+//                filePath.putFile(Uri.fromFile(new File(model.getImageUri()))).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+//                        filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                            @Override
+//                            public void onSuccess(Uri uri) {
+//                                Log.d(TAG, "onSuccess: " + uri.toString());
+//                                sendMessage(model.getTxtMessage(), uri.toString(), "*hak*none0#",
+//                                        "*hak*none0#", "*hak*none0#", dateToStr, msg_key,
+//                                        friend_Uid, chatType, profileUrl, model.getMediaFile().getName());
+//                            }
+//                        });
+//                    }
+//                }).addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Log.d(TAG, "onFailure: " + e.getMessage());
+//                    }
+//                });
+//
+//            } else if (model.getMediaType().contains("2")) {
+////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
+////                        "*hak*none0#", "*hak*none0#", model.getImageUri(), "*hak*none0#");
+//
+//            } else if (model.getMediaType().contains("3")) {
+//
+////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
+////                        "*hak*none0#", model.getImageUri(), "*hak*none0#", "*hak*none0#");
+//            }
+//
+//        }
+////        dialog2.dismiss();
+////        arrayList.clear();
     }
+
 }

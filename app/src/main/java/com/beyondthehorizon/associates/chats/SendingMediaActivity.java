@@ -174,7 +174,9 @@ public class SendingMediaActivity extends AppCompatActivity implements SendingIm
     @Override
     protected void onPause() {
         super.onPause();
-        imagesAdapter.mPlayer.stop();
-        imagesAdapter.mPlayer.release();
+        if (imagesAdapter.mPlayer != null) {
+            imagesAdapter.mPlayer.stop();
+            imagesAdapter.mPlayer.release();
+        }
     }
 }

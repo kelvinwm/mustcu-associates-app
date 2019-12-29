@@ -3,10 +3,12 @@ package com.beyondthehorizon.associates.adapters;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +33,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.groupchat.CommentsChatActivity;
 import com.beyondthehorizon.associates.database.ChatModel;
+import com.beyondthehorizon.associates.viewdetails.AndroidMediaPlayerActivity;
 import com.beyondthehorizon.associates.viewdetails.ViewImageActivity;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
 import com.google.firebase.auth.FirebaseAuth;
@@ -46,6 +49,10 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
+
+import static com.beyondthehorizon.associates.MainActivity.CHAT_PREFS;
+import static com.beyondthehorizon.associates.MainActivity.FriendUID;
+import static com.beyondthehorizon.associates.MainActivity.MyFriendName;
 
 public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberViewHolder>
         implements Filterable {
@@ -81,6 +88,8 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
 
     @Override
     public void onBindViewHolder(@NonNull final ProMemberViewHolder holder, int position) {
+        SharedPreferences pref = context.getSharedPreferences(CHAT_PREFS, 0); // 0 - for private mode
+        final SharedPreferences.Editor editor = pref.edit();
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference();
         chatsViewModel = ViewModelProviders.of((FragmentActivity) context).get(ChatsViewModel.class);
@@ -162,17 +171,18 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
                     File file = new File(proMember.getFileUrl());
                     Intent install = new Intent(Intent.ACTION_VIEW);
                     install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    // Old Approach
-//                    install.setDataAndType(Uri.fromFile(file), "*/*");
-                    // End Old approach
+
                     // New Approach
-                    Uri apkURI = FileProvider.getUriForFile(
-                            context,
-                            context.getApplicationContext()
-                                    .getPackageName() + ".provider", file);
-                    install.setDataAndType(apkURI, "*/*");
-                    install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    // End New Approach
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        Uri apkURI = FileProvider.getUriForFile(context, context.getApplicationContext()
+                                .getPackageName() + ".provider", file);
+                        install.setDataAndType(apkURI, "*/*");
+                        install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        // End New Approach
+                    } else {
+                        // Old Approach
+                        install.setDataAndType(Uri.fromFile(file), "*/*");
+                    }
                     context.startActivity(install);
                 }
             });
@@ -189,77 +199,16 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ProMemberVie
             final boolean[] isPlaying = {false};
             Uri myUri = Uri.parse(proMember.getAudioUrl());
 
-            if (mPlayer == null) {
-                mPlayer = new MediaPlayer();
-            }
-            mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mPlayer.reset();
-            try {
-                mPlayer.setDataSource(context, myUri);
-                mPlayer.prepareAsync();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-//
-            holder.audioProgrs.setClickable(false);
-            int startTime = mPlayer.getDuration();
-
-            holder.audioTime.setText(String.format("%d min %d sec", TimeUnit.MILLISECONDS.toMinutes((long) startTime),
-                    TimeUnit.MILLISECONDS.toSeconds((long) startTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.
-                            toMinutes((long) startTime))));
             holder.playAudio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (isPlaying[0]) {
-                        //PAUSED
-                        mPlayer.pause();
-                        isPlaying[0] = false;
-                        holder.playAudio.setBackgroundResource(R.drawable.ic_play_arrow);
-                    } else {
-                        //PLAYING AUDIO
-                        mPlayer.start();
-                        isPlaying[0] = true;
-                        holder.playAudio.setBackgroundResource(R.drawable.ic_pause);
-                        holder.audioProgrs.setMax(mPlayer.getDuration() / 1000);
-
-
-                        Timer timer = new Timer();
-                        timer.scheduleAtFixedRate(new TimerTask() {
-                            @Override
-                            public void run() {
-                                holder.audioProgrs.setProgress(mPlayer.getCurrentPosition() / 1000);
-
-                                if (mPlayer.getDuration() / 1000 == mPlayer.getCurrentPosition() / 1000) {
-                                    holder.playAudio.setBackgroundResource(R.drawable.ic_play_arrow);
-                                    isPlaying[0] = false;
-                                    mPlayer.seekTo(0);
-                                    holder.audioProgrs.setProgress(0);
-                                    mPlayer.pause();
-                                }
-                            }
-                        }, 0, 1000);
-
-                    }
-                }
-            });
-
-            // DRAG SONG TO POSITION
-            holder.audioProgrs.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if (mPlayer != null && fromUser) {
-                        mPlayer.seekTo(progress * 1000);
-                    }
+//                    editor.putString("audioUri", proMember.getAudioUrl());
+//                    editor.putString("audioName", proMember.getDocName());
+//                    editor.apply();
+                    Intent intent = new Intent(context, AndroidMediaPlayerActivity.class);
+                    intent.putExtra("audioUri", proMember.getAudioUrl());
+                    intent.putExtra("audioName", proMember.getDocName());
+                    context.startActivity(intent);
                 }
             });
         }
