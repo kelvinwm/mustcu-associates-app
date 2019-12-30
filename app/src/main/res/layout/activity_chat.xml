@@ -75,14 +75,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/mediaRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:background="#E2E2E2"
-            android:elevation="13dp"
-            android:visibility="gone" />
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/cashFab"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentRight="true"
+            android:layout_margin="10dp"
+            android:elevation="30dp"
+            android:src="@drawable/cashmoney" />
     </RelativeLayout>
 
     <include

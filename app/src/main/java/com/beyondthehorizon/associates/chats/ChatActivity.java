@@ -23,7 +23,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -31,18 +33,20 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.adapters.ChatsAdapter;
 import com.beyondthehorizon.associates.adapters.SendingImagesAdapter;
+import com.beyondthehorizon.associates.contributions.ContributionsActivity;
 import com.beyondthehorizon.associates.database.ChatModel;
 import com.beyondthehorizon.associates.database.CommentsModel;
 import com.beyondthehorizon.associates.database.RecentChatModel;
 import com.beyondthehorizon.associates.database.SendingImagesModel;
-import com.beyondthehorizon.associates.repositories.ChatsRepository;
 import com.beyondthehorizon.associates.users.FriendProfileActivity;
 import com.beyondthehorizon.associates.groupchat.GroupInfoActivity;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
+import com.beyondthehorizon.associates.util.OnDragTouchListener;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -86,34 +90,42 @@ import static com.beyondthehorizon.associates.util.Constants.NothingToSend;
 import static com.beyondthehorizon.associates.util.Constants.Sending;
 import static com.beyondthehorizon.associates.util.Constants.Sent;
 
-public class ChatActivity extends AppCompatActivity implements SendingImagesAdapter.SendMyTxtImage {
+public class ChatActivity extends AppCompatActivity implements SendingImagesAdapter.SendMyTxtImage,
+        OnDragTouchListener.OnDragActionListener {
 
-    public static final int GALLARY_PICK = 200;
+    public static final int GALLERY_PICK = 200;
     private FirebaseAuth mAuth;
-    private RecyclerView recyclerView, mediaRecyclerView;
+    private RecyclerView recyclerView;
     public ArrayList<MediaFile> select = new ArrayList<>();
     private ImageButton sendData;
     private EmojiconEditText sampleMessage;
     public static final String TAG = "CHATACTIVITY";
     private ChatsViewModel chatsViewModel;
     private ChatsAdapter chatsAdapter;
-    private SendingImagesAdapter imagesAdapter;
     public static final String MY_SHARED_PREF = "shared_prefs";
     private SharedPreferences pref, chatPref;
     private String profileUrl;
     private Toolbar contactsToolbar;
     private TextView userTitle, userOnlineStatus, typingTextView;
-    private CircleImageView profile_img;
+    private CircleImageView profile_img, cashFab;
     private FirebaseUser currentUser;
     private FirebaseDatabase database;
     private DatabaseReference myRef;
-    ImageView emojiImageView, attachButton;
-    View rootView;
-    //    Intent intent;
-    EmojIconActions emojIcon;
+    private ImageView emojiImageView, attachButton;
+    private View rootView;
+    private EmojIconActions emojIcon;
     private StorageReference storageReference;
-    String myFriend_Name, friend_Uid, chatType, profile_Uri;
-    Dialog dialog2;
+    private String myFriend_Name, friend_Uid, chatType, profile_Uri;
+    private Dialog dialog2;
+    private GestureDetector mDetector;
+
+    private View mParent;
+    private boolean isDragging, isInitialized = false;
+
+    private int width, height;
+    private float xWhenAttached, maxLeft, maxRight, dX, yWhenAttached, maxTop, maxBottom, dY;
+
+    RelativeLayout scrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,9 +143,29 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference();
         storageReference = FirebaseStorage.getInstance().getReference();
-
         pref = getApplicationContext().getSharedPreferences(MY_SHARED_PREF, 0); // 0 - for private mode
         chatPref = getApplicationContext().getSharedPreferences(CHAT_PREFS, 0);
+
+        scrollView = findViewById(R.id.scrollView);
+        attachButton = findViewById(R.id.attachButton);
+        typingTextView = findViewById(R.id.typingTextView);
+        userTitle = findViewById(R.id.userTitle);
+        userOnlineStatus = findViewById(R.id.userOnlineStatus);
+        profile_img = findViewById(R.id.imgProfile);
+        cashFab = findViewById(R.id.cashFab);
+
+        // Add a touch listener to the view
+        // The touch listener passes all its events on to the gesture detector
+        cashFab.setOnTouchListener(touchListener);
+//        cashFab.setOnTouchListener(new OnDragTouchListener(cashFab));
+//        cashFab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Toast.makeText(ChatActivity.this, "HOW MUCH", Toast.LENGTH_LONG).show();
+//            }
+//        });
+        mDetector = new GestureDetector(this, new MyGestureListener());
+
 
         myFriend_Name = chatPref.getString(MyFriendName, "");
         friend_Uid = chatPref.getString(FriendUID, "");
@@ -144,11 +176,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         editor.putString("friend_name", myFriend_Name);
         editor.apply();
 
-        attachButton = findViewById(R.id.attachButton);
-        typingTextView = findViewById(R.id.typingTextView);
-        userTitle = findViewById(R.id.userTitle);
-        userOnlineStatus = findViewById(R.id.userOnlineStatus);
-        profile_img = findViewById(R.id.imgProfile);
+
         userTitle.setText(myFriend_Name);
 
         emojiImageView = findViewById(R.id.emojiButton);
@@ -165,11 +193,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         linearLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(chatsAdapter);
-//        mediaRecyclerView.setAdapter(chatsAdapter);
 
-        mediaRecyclerView = findViewById(R.id.mediaRecyclerView);
-        mediaRecyclerView.setHasFixedSize(true);
-        mediaRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         sampleMessage = findViewById(R.id.sampleMessage);
         sendData = findViewById(R.id.sendData);
 
@@ -439,7 +463,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                                 deliverySate[0] = Delivered;
                             } else {
                                 chatsViewModel.updateDeliveryStatus(msg_key, Failed);
-                                deliverySate[0] =Failed;
+                                deliverySate[0] = Failed;
                             }
                         }
                     });
@@ -463,7 +487,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     }
 
     private void getMediaStaff() {
-        //Check Permissions
+        //GestureDetector Permissions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(ChatActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED ||
@@ -495,7 +519,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             public void onClick(View v) {
                 //TODO: SAVE LOCATION TO DATABASE
 //                Intent intent = new Intent(ChatActivity.this, TakePhotoActivity.class); //Take a photo with a camera
-//                startActivityForResult(intent, GALLARY_PICK);
+//                startActivityForResult(intent, GALLERY_PICK);
                 dialog.dismiss();
             }
         });
@@ -514,7 +538,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         .setMaxSelection(5)
                         .setSkipZeroSizeFiles(true)
                         .build());
-                startActivityForResult(intent, GALLARY_PICK);
+                startActivityForResult(intent, GALLERY_PICK);
                 dialog.dismiss();
             }
         });
@@ -533,7 +557,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         .setMaxSelection(3)
                         .setSkipZeroSizeFiles(true)
                         .build());
-                startActivityForResult(intent, GALLARY_PICK);
+                startActivityForResult(intent, GALLERY_PICK);
                 dialog.dismiss();
             }
         });
@@ -556,7 +580,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         .setMaxSelection(3)
                         .setSkipZeroSizeFiles(true)
                         .build());
-                startActivityForResult(intent, GALLARY_PICK);
+                startActivityForResult(intent, GALLERY_PICK);
                 dialog.dismiss();
             }
         });
@@ -577,7 +601,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
                         .setMaxSelection(5)
                         .setSkipZeroSizeFiles(true)
                         .build());
-                startActivityForResult(intent, GALLARY_PICK);
+                startActivityForResult(intent, GALLERY_PICK);
                 dialog.dismiss();
             }
         });
@@ -630,7 +654,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == GALLARY_PICK && resultCode == RESULT_OK && data != null) {
+        if (requestCode == GALLERY_PICK && resultCode == RESULT_OK && data != null) {
             select = data.getParcelableArrayListExtra(FilePickerActivity.MEDIA_FILES);
             assert select != null;
             if (select.size() == 0) {
@@ -917,6 +941,171 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
 //        }
 ////        dialog2.dismiss();
 ////        arrayList.clear();
+    }
+
+    /**
+     * DRAG AND DROP
+     */
+    View.OnTouchListener touchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            // pass the events to the gesture detector
+            // a return value of true means the detector is handling it
+            // a return value of false means the detector didn't
+            // recognize the event
+            if (isDragging) {
+                float[] bounds = new float[4];
+                // LEFT
+                bounds[0] = event.getRawX() + dX;
+                if (bounds[0] < maxLeft) {
+                    bounds[0] = maxLeft;
+                }
+                // RIGHT
+                bounds[2] = bounds[0] + width;
+                if (bounds[2] > maxRight) {
+                    bounds[2] = maxRight;
+                    bounds[0] = bounds[2] - width;
+                }
+                // TOP
+                bounds[1] = event.getRawY() + dY;
+                if (bounds[1] < maxTop) {
+                    bounds[1] = maxTop;
+                }
+                // BOTTOM
+                bounds[3] = bounds[1] + height;
+                if (bounds[3] > maxBottom) {
+                    bounds[3] = maxBottom;
+                    bounds[1] = bounds[3] - height;
+                }
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_CANCEL:
+                    case MotionEvent.ACTION_UP:
+                        onDragFinish();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        v.animate().x(bounds[0]).y(bounds[1]).setDuration(0).start();
+                        break;
+                }
+                return mDetector.onTouchEvent(event);
+            } else {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        isDragging = true;
+                        if (!isInitialized) {
+                            updateBounds();
+                        }
+                        dX = v.getX() - event.getRawX();
+                        dY = v.getY() - event.getRawY();
+                        onDragStart(v);
+
+                        return mDetector.onTouchEvent(event);
+                }
+            }
+            return mDetector.onTouchEvent(event);
+
+        }
+    };
+
+    @Override
+    public void onDragStart(View view) {
+
+    }
+
+    @Override
+    public void onDragEnd(View view) {
+
+    }
+
+    private void onDragFinish() {
+        onDragEnd(cashFab);
+        dX = 0;
+        dY = 0;
+        isDragging = false;
+    }
+
+    public void updateBounds() {
+        updateViewBounds();
+        updateParentBounds();
+        isInitialized = true;
+    }
+
+    public void updateViewBounds() {
+        width = cashFab.getWidth();
+        xWhenAttached = cashFab.getX();
+        dX = 0;
+
+        height = cashFab.getHeight();
+        yWhenAttached = cashFab.getY();
+        dY = 0;
+    }
+
+    public void updateParentBounds() {
+        maxLeft = 0;
+        maxRight = maxLeft + scrollView.getWidth();
+
+        maxTop = 0;
+        maxBottom = maxTop + scrollView.getHeight();
+    }
+
+    // In the SimpleOnGestureListener subclass you should override
+    // onDown and any other gesture that you want to detect.
+    class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+
+        @Override
+        public boolean onDown(MotionEvent event) {
+            Log.d("TAG", "onDown: ");
+
+            // don't return false here or else none of the other
+            // gestures will work
+            return true;
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            Log.i("TAG", "onSingleTapConfirmed: ");
+
+            startActivity(new Intent(ChatActivity.this, ContributionsActivity.class));
+            return true;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            Log.i("TAG", "onLongPress: ");
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            Log.i("TAG", "onDoubleTap: ");
+            return true;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2,
+                                float distanceX, float distanceY) {
+            Log.i("TAG", "onScroll: ");
+            // Make sure that mTextView is the text view you want to move around
+
+//            if (!(cashFab.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)) {
+//                return false;
+//            }
+//
+//            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) cashFab.getLayoutParams();
+//
+//            marginLayoutParams.leftMargin = (int) (marginLayoutParams.leftMargin - distanceX);
+//            marginLayoutParams.topMargin = (int) (marginLayoutParams.topMargin - distanceY);
+//
+//            cashFab.requestLayout();
+
+            return true;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent event1, MotionEvent event2,
+                               float velocityX, float velocityY) {
+            Log.d("TAG", "onFling: ");
+            return true;
+        }
     }
 
 }

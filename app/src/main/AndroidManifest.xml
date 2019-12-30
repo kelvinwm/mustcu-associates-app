@@ -17,6 +17,10 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".contributions.ContributionsActivity"
+            android:label="@string/title_activity_contribtions"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
             android:name=".viewdetails.AndroidMediaPlayerActivity"
             android:screenOrientation="portrait" />
 

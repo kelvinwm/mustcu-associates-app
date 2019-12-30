@@ -255,7 +255,7 @@ public class CommentsChatActivity extends AppCompatActivity {
 
 
     private void getMediaStaff() {
-        //Check Permissions
+        //GestureDetector Permissions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(CommentsChatActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED ||
@@ -287,7 +287,7 @@ public class CommentsChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //TODO: SAVE LOCATION TO DATABASE
 //                Intent intent = new Intent(CommentsChatActivity.this, TakePhotoActivity.class); //Take a photo with a camera
-//                startActivityForResult(intent, GALLARY_PICK);
+//                startActivityForResult(intent, GALLERY_PICK);
                 dialog.dismiss();
             }
         });

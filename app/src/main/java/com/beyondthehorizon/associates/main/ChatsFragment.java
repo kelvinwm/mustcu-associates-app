@@ -178,7 +178,7 @@ public class ChatsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
+        // GestureDetector if user is signed in (non-null) and update UI accordingly.
         updateUI();
     }
 

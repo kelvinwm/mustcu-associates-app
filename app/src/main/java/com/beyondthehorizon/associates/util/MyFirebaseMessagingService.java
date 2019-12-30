@@ -72,7 +72,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         final String dataSender, dataMessage, phoneNumber, senderUID, newGroup,
                 receiverUID, timestamp, type, profileImage, imageUrl, groupName, message_key;
 
-        // Check if message contains a data payload.
+        // GestureDetector if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData().get("message"));
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
@@ -139,7 +139,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 sendNotification(finalDataTitle, finalDataMessage, senderUID);
             }
         }
-//        // Check if message contains a notification payload.
+//        // GestureDetector if message contains a notification payload.
 //        if (remoteMessage.getNotification() != null) {
 //            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
 //            notificationTitle = remoteMessage.getNotification().getTitle();
