@@ -63,7 +63,11 @@ return snap.ref.parent.parent.child("GroupInfo")
 	    newGroup:"Nop",
 		profileUrl:post.profileImage,
 		message_key: newMessage.message_key,
-		imageUrl:newMessage.imageUrl
+		imageUrl:newMessage.imageUrl,
+		audioUrl:newMessage.audioUrl,
+		videoUrl:newMessage.videoUrl,
+		fileUrl:newMessage.fileUrl,
+		docName:newMessage.docName
      }
  };
 
@@ -97,7 +101,11 @@ return snap.ref.parent.parent.parent.child("allCount").child(newMessage.message_
 	    receiverUID:context.params.roomId, //should be the unique id--- senderId kwa android
 	    type:newMessage.type,
 	    newGroup:"Nop",
-		imageUrl:"*hak*none0#",
+		imageUrl:newMessage.imageUrl,
+		audioUrl:newMessage.audioUrl,
+		videoUrl:newMessage.videoUrl,
+		fileUrl:newMessage.fileUrl,
+		docName:newMessage.docName,
 		message_key: newMessage.message_key,
 		totalComments:counts
      }
@@ -124,6 +132,10 @@ return snap.ref.parent.parent.child("UserProfile").child(newMessage.receiverUID)
 	    receiverUID:newMessage.receiverUID,
 	    type:newMessage.type,
 	    imageUrl:newMessage.imageUrl,
+		audioUrl:newMessage.audioUrl,
+		videoUrl:newMessage.videoUrl,
+		fileUrl:newMessage.fileUrl,
+		docName:newMessage.docName,
 	    profileUrl:newMessage.profileUrl,
 	    message_key: newMessage.message_key
 
