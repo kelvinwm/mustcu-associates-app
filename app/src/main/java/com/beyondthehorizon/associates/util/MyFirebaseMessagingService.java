@@ -150,6 +150,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void saveDataLocally(String dataSender, String dataMessage, String phoneNumber, String senderUID,
                                  String timestamp, String receiverUID, String type, String imageUrl, RemoteMessage remoteMessage,
                                  String profileImage, String groupName, String newGroup, String message_key) {
+
+        String audioUrl = remoteMessage.getData().get("audioUrl");
+        String videoUrl = remoteMessage.getData().get("videoUrl");
+        String fileUrl = remoteMessage.getData().get("fileUrl");
+        String docName = remoteMessage.getData().get("docName");
+
         if (type.contains("Room")) {
             if (newGroup.contains("NewGroup")) {
                 if (dataMessage.contains(currentUser.getPhoneNumber())) {
@@ -179,11 +185,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         timestamp,
                         receiverUID,
                         profileImage,
-                        "docName",
+                        docName,
                         imageUrl,
-                        imageUrl,
-                        imageUrl,
-                        imageUrl,
+                        videoUrl,
+                        audioUrl,
+                        fileUrl,
                         type,
                         Delivered
                 ));
@@ -196,11 +202,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         phoneNumber,
                         senderUID,
                         timestamp,
+                        docName,
                         imageUrl,
-                        imageUrl,
-                        imageUrl,
-                        imageUrl,
-                        imageUrl,
+                        videoUrl,
+                        audioUrl,
+                        fileUrl,
                         Delivered,
                         type
                 ));
@@ -226,11 +232,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     timestamp,
                     receiverUID,
                     profileImage,
-                    "docName",
+                    docName,
                     imageUrl,
-                    imageUrl,
-                    imageUrl,
-                    imageUrl,
+                    videoUrl,
+                    audioUrl,
+                    fileUrl,
                     type,
                     Sent
             ));
@@ -246,11 +252,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         phoneNumber,
                         senderUID,
                         timestamp,
+                        docName,
                         imageUrl,
-                        imageUrl,
-                        imageUrl,
-                        imageUrl,
-                        imageUrl,
+                        videoUrl,
+                        audioUrl,
+                        fileUrl,
                         Delivered,
                         type
                 ));

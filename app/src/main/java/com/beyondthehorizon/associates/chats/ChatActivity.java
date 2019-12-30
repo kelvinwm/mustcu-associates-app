@@ -158,14 +158,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         // The touch listener passes all its events on to the gesture detector
         cashFab.setOnTouchListener(touchListener);
 //        cashFab.setOnTouchListener(new OnDragTouchListener(cashFab));
-//        cashFab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(ChatActivity.this, "HOW MUCH", Toast.LENGTH_LONG).show();
-//            }
-//        });
         mDetector = new GestureDetector(this, new MyGestureListener());
-
 
         myFriend_Name = chatPref.getString(MyFriendName, "");
         friend_Uid = chatPref.getString(FriendUID, "");
@@ -307,7 +300,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
             userOnlineStatus.setText("tap to view group info");
             Picasso.get().load(profile_Uri)
                     .fit().placeholder(R.drawable.giconn).into(profile_img);
-
+            cashFab.setVisibility(View.VISIBLE);
             /**VIEW GROUP DETAILS*/
             contactsToolbar.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -845,102 +838,6 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
     public void sendTextImage(ArrayList<SendingImagesModel> arrayList, String imageUrl, String videoUrl,
                               String audioUrl, String fileUrl, final String profileUrl, final String friend_Uid,
                               final String chatType, String myFriend_Name) {
-//        database = FirebaseDatabase.getInstance();
-//        myRef = database.getReference();
-//        mAuth = FirebaseAuth.getInstance();
-//        currentUser = mAuth.getCurrentUser();
-//        storageReference = FirebaseStorage.getInstance().getReference();
-//        ChatsRepository chatsRepository = new ChatsRepository(getApplication());
-////        chatsViewModel = ViewModelProviders.of(this).get(ChatsViewModel.class);
-//
-//        for (final SendingImagesModel model : arrayList) {
-//            Log.d(TAG, "sendTextImage: " + model.getImageUri() + " " + model.getTxtMessage());
-//            final String msg_key = myRef.child("Users").child("UserChats").push().getKey();
-//            final StorageReference filePath;
-//
-//            Date today = new Date();
-//            SimpleDateFormat format = new SimpleDateFormat("EEE MMM d ''yy  HH:mm a",
-//                    Locale.getDefault());
-//            final String dateToStr = format.format(today);
-////
-////            Log.d(TAG, "sendTextImage: " + friend_Uid + " " +
-////                    dateToStr + " " +
-////                    currentUser.getUid() + " " +
-////                    profileUrl + " " +
-////                    imageUrl + " " +
-////                    videoUrl + " " +
-////                    audioUrl + " " +
-////                    fileUrl + " " +
-////                    chatType);
-//            //GET MEDIATYPE FROM MEDIAFILE
-//            //Save locally
-//            chatsRepository.insertChat(new ChatModel(
-//                    msg_key,
-//                    currentUser.getDisplayName(),
-//                    model.getTxtMessage(),
-//                    "0",
-//                    currentUser.getPhoneNumber(),
-//                    friend_Uid,
-//                    dateToStr,
-//                    currentUser.getUid(),
-//                    profileUrl,
-//                    model.getMediaFile().getName(),
-//                    imageUrl,
-//                    videoUrl,
-//                    audioUrl,
-//                    fileUrl,
-//                    chatType,
-//                    Sending));
-//
-//            //Save locally to view on latest chats
-//            chatsRepository.insertLatestChat(new RecentChatModel(
-//                    friend_Uid,
-//                    myFriend_Name,
-//                    model.getTxtMessage(),
-//                    dateToStr,
-//                    chatType,
-//                    profileUrl));
-//
-//            if (model.getMediaType().contains("0")) {
-////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-////                        NothingToSend, NothingToSend, NothingToSend, model.getImageUri());
-//
-//            } else if (model.getMediaType().contains("1")) {
-//
-//                filePath = storageReference.child("Chat Images").child(msg_key + ".jpg");
-//                filePath.putFile(Uri.fromFile(new File(model.getImageUri()))).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-//                        filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                            @Override
-//                            public void onSuccess(Uri uri) {
-//                                Log.d(TAG, "onSuccess: " + uri.toString());
-//                                sendMessage(model.getTxtMessage(), uri.toString(), NothingToSend,
-//                                        NothingToSend, NothingToSend, dateToStr, msg_key,
-//                                        friend_Uid, chatType, profileUrl, model.getMediaFile().getName());
-//                            }
-//                        });
-//                    }
-//                }).addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        Log.d(TAG, "onFailure: " + e.getMessage());
-//                    }
-//                });
-//
-//            } else if (model.getMediaType().contains("2")) {
-////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-////                        NothingToSend, NothingToSend, model.getImageUri(), NothingToSend);
-//
-//            } else if (model.getMediaType().contains("3")) {
-//
-////                sendTextImage(imagesAdapter.sendingImagesModelArrayList,
-////                        NothingToSend, model.getImageUri(), NothingToSend, NothingToSend);
-//            }
-//
-//        }
-////        dialog2.dismiss();
-////        arrayList.clear();
     }
 
     /**
@@ -1054,7 +951,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
 
         @Override
         public boolean onDown(MotionEvent event) {
-            Log.d("TAG", "onDown: ");
+//            Log.d("TAG", "onDown: ");
 
             // don't return false here or else none of the other
             // gestures will work
@@ -1063,7 +960,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            Log.i("TAG", "onSingleTapConfirmed: ");
+//            Log.i("TAG", "onSingleTapConfirmed: ");
 
             startActivity(new Intent(ChatActivity.this, ContributionsActivity.class));
             return true;
@@ -1071,31 +968,18 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
 
         @Override
         public void onLongPress(MotionEvent e) {
-            Log.i("TAG", "onLongPress: ");
+//            Log.i("TAG", "onLongPress: ");
         }
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            Log.i("TAG", "onDoubleTap: ");
+//            Log.i("TAG", "onDoubleTap: ");
             return true;
         }
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2,
                                 float distanceX, float distanceY) {
-            Log.i("TAG", "onScroll: ");
-            // Make sure that mTextView is the text view you want to move around
-
-//            if (!(cashFab.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)) {
-//                return false;
-//            }
-//
-//            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) cashFab.getLayoutParams();
-//
-//            marginLayoutParams.leftMargin = (int) (marginLayoutParams.leftMargin - distanceX);
-//            marginLayoutParams.topMargin = (int) (marginLayoutParams.topMargin - distanceY);
-//
-//            cashFab.requestLayout();
 
             return true;
         }
@@ -1103,7 +987,7 @@ public class ChatActivity extends AppCompatActivity implements SendingImagesAdap
         @Override
         public boolean onFling(MotionEvent event1, MotionEvent event2,
                                float velocityX, float velocityY) {
-            Log.d("TAG", "onFling: ");
+//            Log.d("TAG", "onFling: ");
             return true;
         }
     }

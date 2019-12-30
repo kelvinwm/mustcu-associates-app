@@ -82,7 +82,8 @@
             android:layout_alignParentRight="true"
             android:layout_margin="10dp"
             android:elevation="30dp"
-            android:src="@drawable/cashmoney" />
+            android:src="@drawable/cashmoney"
+            android:visibility="gone" />
     </RelativeLayout>
 
     <include
