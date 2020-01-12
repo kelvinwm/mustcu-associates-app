@@ -85,13 +85,12 @@
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
 
-        <receiver android:name=".util.ActionReceiver" />
-
-        <service android:name=".util.MyFirebaseMessagingService">
+        <service android:name=".notifications.MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+        <receiver android:name=".notifications.NotificationReceiver" />
     </application>
 
 </manifest>

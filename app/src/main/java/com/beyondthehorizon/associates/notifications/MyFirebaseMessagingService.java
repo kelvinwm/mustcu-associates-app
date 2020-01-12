@@ -1,21 +1,25 @@
-package com.beyondthehorizon.associates.util;
+package com.beyondthehorizon.associates.notifications;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.RemoteInput;
 
 import com.beyondthehorizon.associates.AppController;
+import com.beyondthehorizon.associates.MainActivity;
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.chats.ChatActivity;
 import com.beyondthehorizon.associates.database.ChatModel;
@@ -35,8 +39,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
+import static com.beyondthehorizon.associates.AppController.CHANNEL_1_ID;
+import static com.beyondthehorizon.associates.AppController.CHANNEL_2_ID;
 import static com.beyondthehorizon.associates.util.Constants.Delivered;
 import static com.beyondthehorizon.associates.util.Constants.NothingToSend;
 import static com.beyondthehorizon.associates.util.Constants.Sent;
@@ -46,6 +54,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private ChatsRepository chatsRepository;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
+    public static List<String> uniqueChats = new ArrayList<>();
+    public static List<AllNotifiChatModel> allNotifChats = new ArrayList<>();
 //    private boolean appStatus;
 
     @Override
@@ -97,6 +107,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             final String finalDataTitle = dataSender;
             final String finalDataMessage = dataMessage;
 
+            allNotifChats.add(new AllNotifiChatModel(dataSender, dataMessage));
+            if (!uniqueChats.contains(dataSender)) {
+                uniqueChats.add(dataSender);
+            }
             if (imageUrl.contains(NothingToSend)) {
                 saveDataLocally(dataSender, dataMessage, phoneNumber, senderUID,
                         timestamp, receiverUID, type, imageUrl, remoteMessage,
@@ -136,7 +150,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             if (AppController.getInstance().appStatus) {
                 // Also if you intend on generating your own notifications as a result of a received FCM
                 // message, here is where that should be initiated. See sendNotification method below.
-                sendNotification(finalDataTitle, finalDataMessage, senderUID);
+                sendNotification(finalDataTitle, finalDataMessage, senderUID, dataSender);
             }
         }
 //        // GestureDetector if message contains a notification payload.
@@ -269,66 +283,193 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * //     * Create and show a simple notification containing the received FCM message.
      * //
      */
-    private void sendNotification(String dataTitle, String dataMessage, String senderUID) {
+    private void sendNotification(String dataTitle, String dataMessage, String senderUID, String dataSender) {
+        int NOTIFICATION_ID = (int) System.currentTimeMillis();
 
-        Intent intentAction = new Intent(this, ActionReceiver.class);
-        intentAction.putExtra("action", "action1");
-        PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this, 1,
-                intentAction, PendingIntent.FLAG_UPDATE_CURRENT);
+        String message = allNotifChats.size() + " messages from " + uniqueChats.size() + " chats";
+//        String title = "Cu Associates";
+////        String title1 = "Title 1";
+////        String message1 = "Message 1";
+//        String title2 = "Title 2";
+//        String message2 = "Message 2";
+//
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+//
+        Intent activityIntent = new Intent(this, MainActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this,
+                0, activityIntent, 0);
 
-        Intent intent = new Intent(this, ChatActivity.class);
-        intent.putExtra("title", dataTitle);
-        intent.putExtra("message", dataMessage);
-        intent.putExtra("myFriend", dataTitle);
-        intent.putExtra("friendUID", senderUID);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        Intent broadcastIntent = new Intent(this, NotificationReceiver.class);
+        broadcastIntent.putExtra("toastMessage", allNotifChats.get(0).getTheMessage());
+        PendingIntent actionIntent = PendingIntent.getBroadcast(this,
+                0, broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        String NOTIFICATION_CHANNEL_ID = "my_channel_id_01";
 
-        // This is the Notification Channel ID. More about this in the next section
-        final String NOTIFICATION_CHANNEL_ID = "channel_id";
-        //User visible Channel Name
-        final String CHANNEL_NAME = "Notification Channel";
-
-        //Notification channel should only be created for devices running Android 26
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Importance applicable to all the notifications in this Channel
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, CHANNEL_NAME, importance);
-            //Boolean value to set if lights are enabled for Notifications from this Channel
+            NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "My Notifications", NotificationManager.IMPORTANCE_HIGH);
+            // Configure the notification channel.
+            notificationChannel.setDescription("Channel description");
             notificationChannel.enableLights(true);
-            //Boolean value to set if vibration are enabled for Notifications from this Channel
+            notificationChannel.setLightColor(Color.RED);
+            notificationChannel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
             notificationChannel.enableVibration(true);
-            //Sets the color of Notification Light
-            notificationChannel.setLightColor(Color.GREEN);
-            //Set the vibration pattern for notifications. Pattern is in milliseconds with the format {delay,play,sleep,play,sleep...}
-            notificationChannel.setVibrationPattern(new long[]{
-                    500,
-                    500,
-                    500,
-                    500,
-                    500
-            });
-            //Sets whether notifications from these Channel should be visible on Lockscreen or not
-            notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-//            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//            notificationManager.createNotificationChannel(notificationChannel);
-
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(notificationChannel);
         }
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+        Notification notification1 = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_account)
-                .setContentTitle(dataTitle)
-                .setContentText(dataMessage)
-                .setContentIntent(pendingIntent)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentTitle(allNotifChats.get(allNotifChats.size() - 1).getSenderName())
+                .setContentText(allNotifChats.get(allNotifChats.size() - 1).getTheMessage())
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setColor(Color.BLUE)
+                .setContentIntent(contentIntent)
                 .setAutoCancel(true)
-                .addAction(R.drawable.ic_account, "Later", pendingIntent2)
-                .addAction(R.drawable.ic_send, "Reply", pendingIntent2);
+                .setOnlyAlertOnce(true)
+                .addAction(R.drawable.ic_reply, "CLEAR", actionIntent)
+                .addAction(R.drawable.ic_reply, "MARK AS READ", actionIntent)
+                .addAction(R.drawable.ic_reply, "REPLY", actionIntent)
+                .setGroup("example_group")
+                .build();
 
-        // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(101, builder.build());
+        Notification alertNotification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_account)
+                .setTicker("Message from " + allNotifChats.get(allNotifChats.size() - 1).getSenderName())
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setColor(Color.BLUE)
+                .build();
+
+//        for (int i = 0; i < allNotifChats.size(); i++) {
+//        }
+//        if (allNotifChats.size() > 3) {
+
+//        Notification summaryNotification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+//                .setSmallIcon(R.drawable.ic_account)
+//                .setColor(Color.BLUE)
+//                .setStyle(new NotificationCompat.InboxStyle()
+//                        .addLine(allNotifChats.get(allNotifChats.size() - 1).getSenderName()
+//                                + " " + allNotifChats.get(allNotifChats.size() - 1).getTheMessage())
+//                        .setBigContentTitle("Cu Associates")
+//                        .setSummaryText(message))
+//                .setPriority(NotificationCompat.PRIORITY_HIGH)
+//                .setGroup("example_group")
+//                .setContentIntent(contentIntent)
+//                .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
+//                .setGroupSummary(true)
+//                .build();
+//
+//        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+////        // Sets a title for the Inbox in expanded layout
+//        inboxStyle.setBigContentTitle(allNotifChats.size() + " new messages");
+//        inboxStyle.setSummaryText(message);
+////        // Moves events into the expanded layout
+//        inboxStyle.addLine(allNotifChats.get(allNotifChats.size() - 1).getSenderName()
+//                + " " + allNotifChats.get(allNotifChats.size() - 1).getTheMessage());
+
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_account)
+                .setColor(Color.BLUE)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setGroup("example_group")
+                .setContentIntent(contentIntent)
+                .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
+                .setGroupSummary(true);
+
+        NotificationCompat.InboxStyle inboxStyle =
+                new NotificationCompat.InboxStyle();
+
+        // Sets a title for the Inbox in expanded layout
+        inboxStyle.setBigContentTitle("Cu Associates");
+        inboxStyle.setSummaryText(message);
+        // Moves events into the expanded layout
+        int k = allNotifChats.size();
+        if (allNotifChats.size() > 10) {
+            for (int i = allNotifChats.size() - 1; i > allNotifChats.size() - 10; i--) {
+                inboxStyle.addLine(allNotifChats.get(i).getSenderName() + ": " + allNotifChats.get(i).getTheMessage());
+            }
+        } else {
+            for (int i = allNotifChats.size() - 1; i >= 0; i--) {
+                inboxStyle.addLine(allNotifChats.get(i).getSenderName() + ": " + allNotifChats.get(i).getTheMessage());
+            }
+        }
+        // Moves the expanded layout object into the notification object.
+        mBuilder.setStyle(inboxStyle);
+        notificationManager.notify(NOTIFICATION_ID, notification1);
+        notificationManager.notify(NOTIFICATION_ID + 123489, alertNotification);
+        notificationManager.cancel(NOTIFICATION_ID + 123489);
+        notificationManager.notify(4, mBuilder.build());
+//        }
     }
+
+
+//
+//    /**
+//     * //     * Create and show a simple notification containing the received FCM message.
+//     * //
+//     */
+//    private void sendNotification(String dataTitle, String dataMessage, String senderUID) {
+//
+//        Intent intentAction = new Intent(this, NotificationReceiver.class);
+//        intentAction.putExtra("action", "action1");
+//        PendingIntent pendingIntent2 = PendingIntent.getBroadcast(this, 1,
+//                intentAction, PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//        Intent intent = new Intent(this, ChatActivity.class);
+//        intent.putExtra("title", dataTitle);
+//        intent.putExtra("message", dataMessage);
+//        intent.putExtra("myFriend", dataTitle);
+//        intent.putExtra("friendUID", senderUID);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+//
+//        // This is the Notification Channel ID. More about this in the next section
+//        final String NOTIFICATION_CHANNEL_ID = "channel_id";
+//        //User visible Channel Name
+//        final String CHANNEL_NAME = "Notification Channel";
+//
+//        //Notification channel should only be created for devices running Android 26
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            // Importance applicable to all the notifications in this Channel
+//            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+//            NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, CHANNEL_NAME, importance);
+//            //Boolean value to set if lights are enabled for Notifications from this Channel
+//            notificationChannel.enableLights(true);
+//            //Boolean value to set if vibration are enabled for Notifications from this Channel
+//            notificationChannel.enableVibration(true);
+//            //Sets the color of Notification Light
+//            notificationChannel.setLightColor(Color.GREEN);
+//            //Set the vibration pattern for notifications. Pattern is in milliseconds with the format {delay,play,sleep,play,sleep...}
+//            notificationChannel.setVibrationPattern(new long[]{
+//                    500,
+//                    500,
+//                    500,
+//                    500,
+//                    500
+//            });
+//            //Sets whether notifications from these Channel should be visible on Lockscreen or not
+//            notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+////            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+////            notificationManager.createNotificationChannel(notificationChannel);
+//
+//            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+//            notificationManager.createNotificationChannel(notificationChannel);
+//        }
+//
+//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+//
+//        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+//                .setSmallIcon(R.drawable.ic_account)
+//                .setContentTitle(dataTitle)
+//                .setContentText(dataMessage)
+//                .setContentIntent(pendingIntent)
+//                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//                .setAutoCancel(true)
+//                .addAction(R.drawable.ic_account, "Later", pendingIntent2)
+//                .addAction(R.drawable.ic_send, "Reply", pendingIntent2);
+//
+//        // notificationId is a unique int for each notification that you must define
+//        notificationManager.notify(101, builder.build());
+//    }
 }

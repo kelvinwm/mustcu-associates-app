@@ -14,7 +14,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.beyondthehorizon.associates.R;
 import com.beyondthehorizon.associates.adapters.AllUsersAdapter;
@@ -22,6 +21,7 @@ import com.beyondthehorizon.associates.contacts.FindFriendActivity;
 import com.beyondthehorizon.associates.database.RecentChatModel;
 import com.beyondthehorizon.associates.database.UserProfile;
 import com.beyondthehorizon.associates.users.UserProfileActivity;
+import com.beyondthehorizon.associates.notifications.MessageChat;
 import com.beyondthehorizon.associates.viewmodels.ChatsViewModel;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -53,6 +53,8 @@ public class ChatsFragment extends Fragment {
     private List<UserProfile> userChat;
     private ChatsViewModel chatsViewModel;
 
+   public static List<MessageChat> MESSAGES = new ArrayList<>();
+
     public ChatsFragment() {
         // Required empty public constructor
     }
@@ -76,6 +78,9 @@ public class ChatsFragment extends Fragment {
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
         recyclerView.showShimmerAdapter();
 
+        MESSAGES.add(new MessageChat("Good morning!", "Jim"));
+        MESSAGES.add(new MessageChat("Hello", null));
+        MESSAGES.add(new MessageChat("Hi!", "Jenny"));
 
         final FirebaseUser currentUser = mAuth.getCurrentUser();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
